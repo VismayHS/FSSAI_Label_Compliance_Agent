@@ -10,6 +10,7 @@
 2. Your own `contexts/<Name>.md`
 3. `contracts/fssai_contracts/`: `schemas.py`, `interfaces.py`, `context.py`, `fakes.py`, `pipeline.py`, `registry.py`
 4. [`CONTRIBUTING.md`](../CONTRIBUTING.md) before your first commit: one branch per person, PRs into `main`
+5. [`skills/project/fssai-workflow/SKILL.md`](../skills/project/fssai-workflow/SKILL.md) before writing code: how every change is built, tested and reviewed ([`skills/README.md`](../skills/README.md) lists all skills)
 
 The original course documents are in `docs/`:
 - `MiniProject_10_Food_Label_Compliance.pdf`: the spec
@@ -240,6 +241,7 @@ spending limit on the account.
 | `.env.example` | everyone, **own section only** | Pre-split into one section per owner |
 | `README.md`, `Makefile`, `.github/` | Vismay | |
 | `CONTRIBUTING.md`, `.githooks/`, `scripts/setup_dev.py` | Vismay | Branch workflow, the git hooks that enforce it, one-time clone setup |
+| `skills/`, `scripts/sync_skills.py` | Vismay (propose changes in a PR) | Shared AI-assistant skills: our `project/` skills plus pinned `vendor/` copies of taste-skill, Emil's skills, impeccable, React Bits, ponytail, ECC, ruflo. Read by everyone; see `skills/README.md` |
 | `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` | Vismay | Instructions every AI coding assistant loads (`CLAUDE.md` imports `AGENTS.md` + this file); shared Claude Code settings (attribution off) |
 
 Each `libs/*` and `services/*` folder is its own Python package with its **own `pyproject.toml`**,

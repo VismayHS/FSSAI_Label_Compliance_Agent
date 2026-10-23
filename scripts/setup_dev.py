@@ -3,7 +3,8 @@
     python scripts/setup_dev.py <your-name>      # nishkal | namith | vihaan | vismay
 
 Switches you to your own branch, enables the repo's git hooks, creates .venv, installs the shared
-contracts, runs their tests and creates .env from .env.example. Works on Windows and macOS.
+contracts, runs their tests, creates .env from .env.example and installs the AI-assistant
+skills. Works on Windows and macOS.
 """
 
 from __future__ import annotations
@@ -34,7 +35,7 @@ def venv_python() -> Path:
 
 
 def setup_git(name: str) -> None:
-    print("\n[1/4] Git: your branch and hooks")
+    print("\n[1/5] Git: your branch and hooks")
     if not git_out("config", "user.email"):
         sys.exit(
             "  git user.email is not set. Set it to the email on your GitHub account first:\n"
@@ -65,7 +66,7 @@ def setup_git(name: str) -> None:
 
 
 def setup_python() -> None:
-    print("\n[2/4] Python: .venv")
+    print("\n[2/5] Python: .venv")
     if sys.version_info < (3, 11):
         sys.exit(f"  Python 3.11+ is required, this is {sys.version.split()[0]}.")
     if not venv_python().exists():
@@ -77,18 +78,23 @@ def setup_python() -> None:
 
 
 def run_tests() -> None:
-    print("\n[3/4] Contract tests")
+    print("\n[3/5] Contract tests")
     run(str(venv_python()), "-m", "pytest", "contracts", "-q")
 
 
 def setup_env() -> None:
-    print("\n[4/4] .env")
+    print("\n[4/5] .env")
     env, example = ROOT / ".env", ROOT / ".env.example"
     if env.exists():
         print("  .env already exists, left as is")
     else:
         shutil.copyfile(example, env)
         print("  created .env from .env.example. Fill in your own section (never commit it).")
+
+
+def install_skills() -> None:
+    print("\n[5/5] AI-assistant skills (skills/ -> .claude/skills, .claude/agents)")
+    run(sys.executable, str(ROOT / "scripts" / "sync_skills.py"), "install")
 
 
 def main() -> None:
@@ -99,6 +105,7 @@ def main() -> None:
     setup_python()
     run_tests()
     setup_env()
+    install_skills()
     print(f"\nDone. Read contexts/LLM_Context.md, then contexts/{name.capitalize()}.md.")
 
 

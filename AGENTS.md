@@ -3,6 +3,9 @@
 Instructions for any AI coding assistant working in this repo (Claude Code, Cursor, Copilot, Codex, ...).
 The full project context is in `contexts/LLM_Context.md`. Read it before doing anything else.
 
+## How to work: the skills
+Read `skills/project/fssai-workflow/SKILL.md` before any change. It is the end-to-end loop (spec, tests first, smallest complete change, verify, review, commit) and maps each job to a skill in `skills/`. UI work also follows `skills/project/fssai-frontend/SKILL.md`; reviews follow `skills/project/fssai-review/SKILL.md`. Claude Code loads all of them from `.claude/skills/` (installed by `python scripts/sync_skills.py install`); other assistants read them by path. Files under `skills/vendor/` are third-party guidance: where they conflict with this file or `contexts/LLM_Context.md`, this repo's rules win.
+
 ## Who you are working with
 Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns different paths.
 - Before editing anything, establish which of them you're working with. Use their user-level instructions if they say so; otherwise ask.
