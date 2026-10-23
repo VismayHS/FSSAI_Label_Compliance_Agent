@@ -283,7 +283,8 @@ which lists only its own dependencies. There is no shared requirements file to f
 
 Run the contract tests:
 ```bash
-python -m venv .venv && . .venv/bin/activate
+python -m venv .venv
+.venv\Scripts\Activate.ps1      # Windows PowerShell   (macOS/Linux: source .venv/bin/activate)
 pip install -e "contracts[test]"
 pytest contracts -q        # 9 tests: §4.1 pass/fail, out-of-scope, injection, retry→escalate, budget, outage, gate, registry
 ```

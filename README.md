@@ -23,7 +23,8 @@ This README will become the full "run it from a clean clone" guide before submis
 2. Read your own file in [contexts/](contexts/), which has your tasks, checklist and LLM prompts.
 3. Run the shared contract tests:
    ```bash
-   python -m venv .venv && . .venv/bin/activate
+   python -m venv .venv
+   .venv\Scripts\Activate.ps1      # Windows PowerShell   (macOS/Linux: source .venv/bin/activate)
    pip install -e "contracts[test]"
    pytest contracts -q
    ```

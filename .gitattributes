@@ -1,0 +1,8 @@
+# Everything runs inside Linux containers, so keep LF line endings even when cloned on Windows.
+# CRLF breaks shell scripts, entrypoints and some config files inside the containers.
+* text=auto eol=lf
+
+*.pdf binary
+*.png binary
+*.jpg binary
+*.faiss binary
