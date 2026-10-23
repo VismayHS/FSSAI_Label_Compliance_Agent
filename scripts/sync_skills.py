@@ -55,6 +55,7 @@ def checkout(src: dict, workdir: Path) -> Path:
     if "catalog" in src:
         patterns.append(f"/{src['catalog']['registry']}/*-{src['catalog']['flavor']}.json")
     git("init", "-q", cwd=workdir)
+    git("config", "core.autocrlf", "false", cwd=workdir)  # copy upstream bytes as they are
     git("remote", "add", "origin", src["repo"], cwd=workdir)
     git("sparse-checkout", "set", "--no-cone", *patterns, cwd=workdir)
     git("fetch", "-q", "--depth", "1", "--filter=blob:none", "origin", src["commit"], cwd=workdir)
@@ -94,7 +95,7 @@ def write_catalog(src: dict, repo: Path, dest: Path) -> None:
             "install": f"npx shadcn@latest add @react-bits/{data['name']}",
             "files": [f["path"] for f in data.get("files", [])],
         })
-    (dest / "catalog.json").write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")
+    (dest / "catalog.json").write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8", newline="\n")
     lines = [
         "# React Bits catalog",
         "",
@@ -109,7 +110,7 @@ def write_catalog(src: dict, repo: Path, dest: Path) -> None:
             deps = ", ".join(f"`{d}`" for d in r["dependencies"]) or "none"
             lines.append(f"| `{r['name']}` | {r['description'].replace('|', '/')} | {deps} |")
         lines.append("")
-    (dest / "CATALOG.md").write_text("\n".join(lines), encoding="utf-8")
+    (dest / "CATALOG.md").write_text("\n".join(lines), encoding="utf-8", newline="\n")
 
 
 def write_sources(manifest: dict) -> None:
@@ -125,7 +126,7 @@ def write_sources(manifest: dict) -> None:
     for name, src in manifest["sources"].items():
         url = f"{src['repo']}/tree/{src['commit']}"
         lines.append(f"| `vendor/{name}/` | {src['repo']} | [`{src['commit'][:7]}`]({url}) | {src['license']} |")
-    (SKILLS / "SOURCES.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    (SKILLS / "SOURCES.md").write_text("\n".join(lines) + "\n", encoding="utf-8", newline="\n")
 
 
 def vendor(manifest: dict, name: str | None) -> None:
@@ -148,7 +149,7 @@ def update(manifest: dict, name: str | None) -> None:
         head = git("ls-remote", src["repo"], "HEAD", cwd=ROOT).split()[0]
         print(f"{source_name}: {src['commit'][:7]} -> {head[:7]}")
         src["commit"] = head
-    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    MANIFEST.write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8", newline="\n")
     vendor(manifest, name)
 
 
@@ -157,7 +158,7 @@ def install_skill(source: Path, target: Path, rename: str | None) -> None:
     if rename:
         skill_md = target / "SKILL.md"
         text = skill_md.read_text(encoding="utf-8")
-        skill_md.write_text(re.sub(r"(?m)^name:.*$", f"name: {rename}", text, count=1), encoding="utf-8")
+        skill_md.write_text(re.sub(r"(?m)^name:.*$", f"name: {rename}", text, count=1), encoding="utf-8", newline="")
 
 
 def install(manifest: dict) -> None:
@@ -192,7 +193,7 @@ def install(manifest: dict) -> None:
     for agent in agents:
         shutil.copy2(agent, agents_dir / agent.name)
 
-    INSTALLED_LOG.write_text(json.dumps({"skills": names, "agents": [a.name for a in agents]}, indent=2), encoding="utf-8")
+    INSTALLED_LOG.write_text(json.dumps({"skills": names, "agents": [a.name for a in agents]}, indent=2), encoding="utf-8", newline="\n")
     print(f"installed {len(plan)} skills into .claude/skills and {len(agents)} agents into .claude/agents")
 
 
