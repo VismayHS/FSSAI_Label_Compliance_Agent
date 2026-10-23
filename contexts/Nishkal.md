@@ -229,6 +229,10 @@ SLO, including bottleneck analysis under horizontal scaling."*
 - Chunks that cut a schedule table in half are the most common reason the §4.1 case fails.
 - Declaring the SLO after measuring scores zero for D6.
 - The fake regulation text in `contracts/fakes.py` is placeholder text. Don't copy its numbers anywhere.
+- **Mixed Windows/macOS team** (LLM_Context §8.8):
+  - Your observability images and Python wheels must have `arm64` builds for teammates on Apple Silicon Macs.
+  - cAdvisor under Docker Desktop sees less than it does on native Linux. Check that per-container CPU and memory actually show up on both OSs, and fall back to `docker stats`-based metrics if they don't.
+  - Load-test results depend on the machine, so record the OS, CPU and Docker memory limit with every Locust run.
 
 ## Notes / log
 (your notes here)

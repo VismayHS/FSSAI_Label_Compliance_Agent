@@ -210,7 +210,7 @@ the web client."*
 - Breaker state kept in process memory doesn't work with `--scale worker=3`.
 - Free-tier limits: keep `RUN_MAX_*` tight, use the stub for anything repetitive, and check the spending limit.
 - `include:` in Compose needs Compose v2.20+. Note the version in the README prerequisites.
-- **Windows** (you develop on it, and the examiner may run the README on it too):
+- **Windows + macOS** (you develop on Windows, teammates on macOS, and the examiner may run the README on either; see LLM_Context §8.8):
   - `make` isn't installed by default. Keep every `make` target a thin wrapper over a plain `docker compose ...` command, and print those commands in the README too.
   - Write helper scripts in Python, or run them inside a container, rather than relying on bash.
   - `.gitattributes` forces LF line endings. Don't override it, or shell scripts and entrypoints break inside the Linux containers.

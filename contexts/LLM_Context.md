@@ -369,6 +369,25 @@ Whenever something really breaks during development, write `docs/incidents/YYYY-
 covering what happened, how you noticed, the cause, the fix and the lesson. Each person aims for
 **at least one** genuine entry. They're also good material for the viva.
 
+### 8.8 Mixed team: Windows + macOS
+We develop on both. Everything runs in Linux containers, so most differences disappear, but not all:
+
+- **Docker Desktop** on both (WSL 2 backend on Windows). Give it **at least 6–8 GB RAM**, because local embeddings plus the full stack are heavy. Compose v2.20+ is needed for `include:`.
+- **Python 3.11+** locally:
+  - macOS: install from python.org or `brew install python@3.11`. Don't use the system Python.
+  - Windows: install from python.org, then use `py -3.11`.
+- **venv activation:**
+  - macOS: `source .venv/bin/activate`
+  - Windows PowerShell: `.venv\Scripts\Activate.ps1`
+- **Line endings:** `.gitattributes` forces LF. Never commit CRLF, and don't turn on `core.autocrlf` overrides.
+- **Apple Silicon (ARM) Macs:**
+  - Only use images and wheels that ship `arm64` builds. Python slim, Redis, Postgres, Prometheus, Grafana and Jaeger all do, and so do `faiss-cpu`, `torch` and `sentence-transformers`.
+  - **Never pin `platform: linux/amd64`** in Compose. If something only ships for amd64, raise it in the chat before using it.
+  - A teammate on each OS runs `make smoke`, or the plain `docker compose` equivalent, at least once a week.
+- **Scripts:** write helpers in Python, not bash, so they work on Windows. `make` exists on macOS but not on Windows, so every `make` target must be a thin wrapper over a command that also works when typed by hand.
+- **File names:** macOS and Windows treat file names as case-insensitive. Never create two files whose names differ only by case, and keep imports matching file names exactly, because the Linux containers are case-sensitive.
+- **Paths:** in Python, always use `pathlib`. Never hard-code `/` or `\` separators or absolute paths.
+
 ---
 
 ## 9. Phases and milestones
