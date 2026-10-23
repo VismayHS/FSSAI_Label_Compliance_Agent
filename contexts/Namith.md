@@ -67,6 +67,9 @@ Rules for this session:
   INCLUDING the full passages returned. LLM clients record their own llm steps.
 - Every system prompt starts with "[prompt:<name>@<version>]".
 - Every behaviour gets a pytest test (use a fake LLM in unit tests; real-LLM tests are marked slow).
+- Git: I work only on my own branch `namith` (check `git branch --show-current`). Never commit or
+  push to main or a teammate's branch, never force-push, never --no-verify, merge origin/main
+  (never rebase). No Co-Authored-By/"Generated with" lines. Commit or push only when I ask.
 Summarise my current task in 3 lines, then wait for my go.
 ```
 
@@ -74,12 +77,12 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 0: setup (days 1–2)
 
-- [ ] **M0.1 Set up and create package skeletons.** Run `pip install -e "contracts[test]"` and `pytest contracts -q`. Create packages:
+- [ ] **M0.1 Set up and create package skeletons.** Clone the repo and run `python scripts/setup_dev.py namith`. It puts you on your own branch `namith`, turns on the git hooks, creates `.venv`, runs the 9 contract tests and creates `.env` (CONTRIBUTING.md §2). Then create packages:
   - `libs/agents` → `fssai_agents`
   - `libs/prompts` → `fssai_prompts`
   - `libs/guardrails` → `fssai_guardrails`
 
-  Each needs its own `pyproject.toml` and a smoke test. Open your first PR.
+  Each needs its own `pyproject.toml` and a smoke test. Commit on `namith`, push, and open your first PR (`main` ← `namith`).
 - [ ] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
 
 ## Phase 1: Evaluation 1 (week 1)

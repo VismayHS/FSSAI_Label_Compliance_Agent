@@ -9,6 +9,7 @@
 1. This file
 2. Your own `contexts/<Name>.md`
 3. `contracts/fssai_contracts/`: `schemas.py`, `interfaces.py`, `context.py`, `fakes.py`, `pipeline.py`, `registry.py`
+4. [`CONTRIBUTING.md`](../CONTRIBUTING.md) before your first commit: one branch per person, PRs into `main`
 
 The original course documents are in `docs/`:
 - `MiniProject_10_Food_Label_Compliance.pdf`: the spec
@@ -19,12 +20,14 @@ The original course documents are in `docs/`:
 
 ## 1. Team
 
-| Person | Workstream | Units touched | One line |
-|---|---|---|---|
-| **Nishkal** | Knowledge & Performance | 1, 2, 3 | Corpus, index, retrieval, caching, observability stack, SLO + load test |
-| **Namith** | Agent Reasoning | 3, 4 | Classifier + research agent, LangGraph graph, prompts, guardrails, agent metrics |
-| **Vihaan** | Trust & Evaluation | 1, 3, 4 | Data contract + gate, verifier agent + routing, eval set + metrics, feedback |
-| **Vismay** | Platform & Integration (+ frontend) | 1, 2, 4 | API, queue, worker, LLM gateway + reliability, cost, Compose, tracing, web client |
+| Person | Git branch | Workstream | Units touched | One line |
+|---|---|---|---|---|
+| **Nishkal** | `nishkal` | Knowledge & Performance | 1, 2, 3 | Corpus, index, retrieval, caching, observability stack, SLO + load test |
+| **Namith** | `namith` | Agent Reasoning | 3, 4 | Classifier + research agent, LangGraph graph, prompts, guardrails, agent metrics |
+| **Vihaan** | `vihaan` | Trust & Evaluation | 1, 3, 4 | Data contract + gate, verifier agent + routing, eval set + metrics, feedback |
+| **Vismay** | `vismay` | Platform & Integration (+ frontend) | 1, 2, 4 | API, queue, worker, LLM gateway + reliability, cost, Compose, tracing, web client |
+
+Each person commits and pushes **only to their own branch**. Nobody works on `main` (§8.2).
 
 - **Repo:** https://github.com/VismayHS/FSSAI_Label_Compliance_Agent (owner: Vismay, GitHub `VismayHS`)
 - **Course:** UE24AM342AA5, ML System Design & AgentOps, Dept of CSE (AI & ML), PESU. Mini Project 10, Jackfruit (Level 3).
@@ -236,7 +239,8 @@ spending limit on the account.
 | `deploy/postgres/init/NN-<name>-<table>.sql` | author | Your own tables |
 | `.env.example` | everyone, **own section only** | Pre-split into one section per owner |
 | `README.md`, `Makefile`, `.github/` | Vismay | |
-| `AGENTS.md`, `CLAUDE.md` | Vismay | Instructions every AI coding assistant loads (`CLAUDE.md` imports `AGENTS.md` + this file) |
+| `CONTRIBUTING.md`, `.githooks/`, `scripts/setup_dev.py` | Vismay | Branch workflow, the git hooks that enforce it, one-time clone setup |
+| `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` | Vismay | Instructions every AI coding assistant loads (`CLAUDE.md` imports `AGENTS.md` + this file); shared Claude Code settings (attribution off) |
 
 Each `libs/*` and `services/*` folder is its own Python package with its **own `pyproject.toml`**,
 which lists only its own dependencies. There is no shared requirements file to fight over.
@@ -278,7 +282,7 @@ which lists only its own dependencies. There is no shared requirements file to f
    LLM picks its canned reply by this tag, and it makes traces easy to read.
 6. **Changing a contract.**
    - Only **additive** changes: new *optional* fields, new enum members, new fakes. Anyone may make one.
-   - Each change is a separate PR titled `contracts: ...`, approved by one affected owner and announced in the group chat.
+   - Make each change its own commit titled `contracts: ...` on your own branch, and open the PR to `main` right after it (before piling other work on top), so the reviewer sees just that change. It needs one affected owner's approval and an announcement in the group chat.
    - Renames and removals need everyone affected to agree.
    - `pytest contracts` must still pass.
 
@@ -319,26 +323,36 @@ Vihaan's routes appear without anyone editing `main.py`.
    or open a GitHub issue. Keep working around it with a fake in the meantime.
 2. **You are never blocked.** Every task in every personal file can be built and tested with the
    fakes. If a fake isn't good enough, improve it with a `contracts:` PR. Don't wait.
-3. **Merge to `main` at most once per person per day.** Commit and push to *your own branch* as
-   often as you like, since that affects nobody. Batch the day's work into one PR.
+3. **Your branch is yours; `main` belongs to nobody.** Commit and push to *your own branch*
+   (`nishkal`, `namith`, `vihaan`, `vismay`) as often as you like, since that affects nobody. Work
+   reaches `main` only through a PR, at most once per person per day.
 4. **`main` always boots.** Once Compose exists, `make smoke` must pass before you merge.
 5. **Write it down.** Decisions go in `docs/decisions/`, failures in `docs/incidents/`, and
    progress in your own `contexts/<Name>.md` checklist.
 
-### 8.2 Git workflow
+### 8.2 Git workflow: one branch per person
+The full guide is [`CONTRIBUTING.md`](../CONTRIBUTING.md). In short:
+
+| Branch | Who pushes | What |
+|---|---|---|
+| `nishkal` · `namith` · `vihaan` · `vismay` | only that person | Your own long-lived branch and your complete commit history, from day 1 to submission |
+| `main` | **nobody**; it changes only when a PR is merged | The integrated system; always boots; what we demo and submit |
+
 ```bash
-git switch main && git pull --rebase                 # start of a session
-git switch -c <name>/<topic>                         # e.g. nishkal/faiss-retriever
+python scripts/setup_dev.py <name>                   # once per clone: own branch, hooks, .venv, tests, .env
+git switch <name> && git pull                        # start of a session
+git fetch origin && git merge origin/main            # bring in teammates' merged work (merge, never rebase)
 # ... work, commit often ...
-git fetch origin && git rebase origin/main           # before opening the PR
 pytest contracts -q && pytest <your-package> -q      # (+ make smoke once compose exists)
-git push -u origin <name>/<topic>                    # open PR → squash-merge
+git push                                             # always to origin/<name>, never anywhere else
+# open a PR on GitHub: base main ← <name>, merged with "Create a merge commit"
 ```
-- `main` is protected: changes go in through PRs only, and nobody force-pushes.
-- If your PR touches only your own paths and the tests pass, you can merge it yourself.
-- PRs that touch `contracts/`, `docker-compose.yml` or `.env.example` structure need one approval.
-- Whoever merges second on a given day rebases first. Because owned paths don't overlap, the rebase is clean.
-- Use clear commit messages, e.g. `retrieval: add clause lookup by id`, `contracts: add Passage.page`.
+- **Never** push to `main`, push to a teammate's branch, force-push, rewrite pushed history, delete a branch, or bypass the hooks with `--no-verify`. The hooks in `.githooks/` block these.
+- PRs are merged with a **merge commit** (squash and rebase are off), so every commit keeps its author and `git log --author=<you>` shows your work. Keep using the same branch after the merge.
+- If your PR touches only your own paths and the checks pass, you can merge it yourself. PRs touching `contracts/`, `docker-compose.yml`, `.env.example` structure or `.github/` need one approval.
+- Need a teammate's unmerged work? Use the fake. Don't merge their branch into yours; read it with `git diff main...origin/<their-branch>`.
+- **Commits are yours alone:** no `Co-Authored-By:` trailers for AI tools and no "Generated with ..." lines. The `commit-msg` hook strips them.
+- Commit messages: `<area>: <what changed>`, e.g. `retrieval: add clause lookup by id`, `contracts: add Passage.page`.
 
 ### 8.3 Files everyone touches, made conflict-free
 - **`.env.example`:** already split into one section per owner. Edit only your own section.
@@ -398,7 +412,7 @@ Vismay fills in the dates once they're announced. **Evaluation 1:** `____`. **Re
 
 | Phase | When | Team milestone (everyone's personal file breaks this down) |
 |---|---|---|
-| **0. Setup** | Days 1–2 | Everyone has cloned the repo, run `pytest contracts`, and merged an empty package skeleton. Product category chosen (decision record 001). |
+| **0. Setup** | Days 1–2 | Everyone has cloned the repo, run `scripts/setup_dev.py <name>` (own branch, hooks, `pytest contracts`), and merged an empty package skeleton from their own branch into `main`. Product category chosen (decision record 001). |
 | **1. Evaluation 1** | Week 1 | Corpus confirmed; §4.1 passages and test values written up; data contract v1; **SLO declared and committed**; walking skeleton (`compose up` → submit → fake pipeline → result); project plan. |
 | **2. Real end-to-end** | End of week 2 | Real index, retriever, LangGraph researcher, verifier, router and LLM gateway switched in with `IMPL_*`. The §4.1 case runs on the real stack, even if rough. The course requires this by week 2. |
 | **3. All 22 requirements** | Weeks 3–4 | Guardrails, eval + before/after, prompt comparison, caching, rate limits, breaker, cost, observability, Locust + scaling, feedback, runbook. |
@@ -468,6 +482,7 @@ These start only after that owner's required work for Phase 3 is done. Each pers
 7. **Everything runs in containers.** One `docker compose up` from a clean clone. `main` always boots.
 8. **Labels are text only.** Never read images.
 9. **Only edit your own paths.** Code against `contracts/`; additive contract changes only.
+10. **Only commit and push on your own branch.** Never on `main` or a teammate's branch, never force-push, and no AI attribution in commits or PRs.
 
 ---
 

@@ -67,6 +67,9 @@ Rules for this session:
 - No credentials, endpoints or model ids anywhere in the repo: env only, documented in .env.example.
 - Every service: /healthz, /readyz, /metrics, JSON logs with correlation_id. Python 3.11.
 - Every behaviour gets a test; Compose changes must keep `make smoke` green.
+- Git: I work only on my own branch `vismay` (check `git branch --show-current`). Never commit or
+  push to main or a teammate's branch, never force-push, never --no-verify, merge origin/main
+  (never rebase). No Co-Authored-By/"Generated with" lines. Commit or push only when I ask.
 Summarise my current task in 3 lines, then wait for my go.
 ```
 
@@ -76,7 +79,8 @@ Summarise my current task in 3 lines, then wait for my go.
 
 - [ ] **S0.1 Set up the GitHub repo.**
   - Add Nishkal, Namith and Vihaan as collaborators, and write their GitHub usernames into the table in `LLM_Context.md` §1.
-  - Protect `main`: require a PR, block force-pushes.
+  - The four personal branches (`nishkal`, `namith`, `vihaan`, `vismay`) already exist on GitHub, along with `CONTRIBUTING.md`, `.githooks/` and `scripts/setup_dev.py`. Run `python scripts/setup_dev.py vismay` yourself, and from now on work only on `vismay` like everyone else.
+  - Apply the GitHub settings in CONTRIBUTING.md §8: merge commits only (no squash or rebase), don't auto-delete head branches, a ruleset on `main` (require a PR, block force-pushes and deletion), and a ruleset on the four personal branches (block force-pushes and deletion).
   - Add `.github/CODEOWNERS` from the ownership table in LLM_Context §5, so the right person is auto-requested.
   - Fill in the dates in LLM_Context §9.
   - Check with the instructor that a team of 4 is OK (the spec says 2–3).
@@ -215,7 +219,7 @@ the web client."*
   - Write helper scripts in Python, or run them inside a container, rather than relying on bash.
   - `.gitattributes` forces LF line endings. Don't override it, or shell scripts and entrypoints break inside the Linux containers.
   - Run Docker Desktop with the WSL 2 backend.
-- Your ownership of `main`'s health matters more than any single feature.
+- Your ownership of `main`'s health matters more than any single feature. Being the repo owner doesn't exempt you from the branch rules: your work also goes `vismay` → PR → `main`.
 
 ## Notes / log
 (your notes here)

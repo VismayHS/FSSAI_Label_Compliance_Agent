@@ -1,0 +1,13 @@
+#!/bin/sh
+# Strips AI attribution lines from the commit message, so every commit is credited to its author
+# alone (CONTRIBUTING.md §7). Enabled by `git config core.hooksPath .githooks`.
+
+msg_file="$1"
+pattern='^[[:space:]]*(co-authored-by:.*(claude|anthropic|copilot|openai|chatgpt|gpt-|cursor|codex|gemini|devin|aider|windsurf|codeium)|.*generated (with|by) .*(claude|copilot|chatgpt|cursor|codex|gemini|devin|aider|windsurf|codeium))'
+
+if grep -qiE "$pattern" "$msg_file"; then
+  grep -viE "$pattern" "$msg_file" | git stripspace > "$msg_file.tmp"
+  mv "$msg_file.tmp" "$msg_file"
+  echo "commit-msg: removed AI attribution line(s) from the commit message." >&2
+fi
+exit 0

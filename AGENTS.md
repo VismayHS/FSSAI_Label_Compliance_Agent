@@ -7,6 +7,7 @@ The full project context is in `contexts/LLM_Context.md`. Read it before doing a
 Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns different paths.
 - Before editing anything, establish which of them you're working with. Use their user-level instructions if they say so; otherwise ask.
 - Then read `contexts/<Name>.md`. It lists their tasks, their status and **the only paths they may edit**.
+- `git config fssai.branch` (set by `scripts/setup_dev.py`) also names the person whose clone this is.
 
 ## Hard rules
 1. **Edit only the current person's paths** (`contexts/LLM_Context.md` §5 and their own file).
@@ -19,11 +20,13 @@ Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns 
 4. **Never invent FSSAI regulation text, clause numbers or thresholds.** Quote only from the PDFs in `corpus/` or `docs/`.
 5. **The system never approves a label.** When unsure, escalate to `regulatory-review` rather than inventing an answer.
 6. **Every behaviour gets a pytest test.** `pytest contracts -q` must keep passing.
-7. **Git:**
-   - Work on a branch named `<name>/<topic>`.
-   - Never commit to `main` directly and never force-push.
-   - Merge through a PR, at most once per person per day.
+7. **Git: everyone has their own branch** (full workflow in `CONTRIBUTING.md`):
+   - Each person works only on their own long-lived branch: `nishkal`, `namith`, `vihaan` or `vismay`. Check with `git branch --show-current` before any commit; if it isn't the current person's branch, stop and say so.
+   - Never commit or push to `main`, never push to a teammate's branch, never force-push, never rewrite pushed history, never delete a branch, never use `--no-verify`.
+   - Bring in teammates' work with `git fetch origin && git merge origin/main` (merge, never rebase). Never merge a teammate's branch directly.
+   - Work reaches `main` only through a PR from the person's branch, merged with a merge commit, at most once per person per day.
    - Don't commit or push unless the person asks.
+   - **No AI attribution:** never add `Co-Authored-By:` trailers for AI tools or "Generated with ..." lines to commits or PRs. Commits are the person's own.
 8. **Progress notes** and checklist ticks go only in the current person's `contexts/<Name>.md`.
 
 ## Cross-platform (team uses Windows and macOS; everything runs in Linux containers)
@@ -36,7 +39,7 @@ Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns 
     | PowerShell | `.venv\Scripts\Activate.ps1` |
     | Git Bash | `source .venv/Scripts/activate` |
     | macOS | `source .venv/bin/activate` |
-- **Helper scripts:** write them in Python, not bash.
+- **Helper scripts:** write them in Python, not bash. (The only exception is `.githooks/`: git runs hooks with its own `sh` on both OSs.)
 - **`make`:** it isn't available on Windows, so every target must also be runnable as a plain `docker compose ...` command.
 - **Line endings:** `.gitattributes` forces LF. Don't introduce CRLF.
 - **Paths:** use `pathlib`.
@@ -45,7 +48,8 @@ Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns 
 
 ## Commands
 ```bash
-python -m venv .venv                      # Python 3.11+
+python scripts/setup_dev.py <name>        # one-time per clone: own branch, hooks, .venv, tests, .env
+python -m venv .venv                      # Python 3.11+ (setup_dev.py already does this)
 <venv-python> -m pip install -e "contracts[test]"
 <venv-python> -m pytest contracts -q      # shared contract tests (must pass)
 <venv-python> -m pytest libs/<package> -q # a package's own tests

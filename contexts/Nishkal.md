@@ -64,6 +64,9 @@ Rules for this session:
 - No credentials, endpoints or model ids in code: read env vars and add them to my .env.example section.
 - Every behaviour gets a pytest test. Record tool steps with ctx.record() and events with ctx.event().
 - Python 3.11, each package has its own pyproject.toml.
+- Git: I work only on my own branch `nishkal` (check `git branch --show-current`). Never commit or
+  push to main or a teammate's branch, never force-push, never --no-verify, merge origin/main
+  (never rebase). No Co-Authored-By/"Generated with" lines. Commit or push only when I ask.
 Summarise my current task in 3 lines, then wait for my go.
 ```
 
@@ -71,12 +74,12 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 0: setup (days 1–2)
 
-- [ ] **N0.1 Set up and create package skeletons.** Clone the repo, create a venv, run `pip install -e "contracts[test]"` and `pytest contracts -q` (9 tests should pass). Create installable packages:
+- [ ] **N0.1 Set up and create package skeletons.** Clone the repo and run `python scripts/setup_dev.py nishkal`. It puts you on your own branch `nishkal`, turns on the git hooks, creates `.venv`, runs the 9 contract tests and creates `.env` (CONTRIBUTING.md §2). Then create installable packages:
   - `libs/ingest` → `fssai_ingest`
   - `libs/retrieval` → `fssai_retrieval`
   - `libs/observability` → `fssai_observability`
 
-  Each needs a `pyproject.toml`, an `__init__.py` and one trivial test. Open your first PR.
+  Each needs a `pyproject.toml`, an `__init__.py` and one trivial test. Commit on `nishkal`, push, and open your first PR (`main` ← `nishkal`).
   ```
   (after Prompt 0) Create three installable Python packages: libs/ingest (fssai_ingest),
   libs/retrieval (fssai_retrieval) and libs/observability (fssai_observability). Each gets its own
@@ -119,7 +122,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - the justification against spec §1: an analyst's pre-print check, not a real-time path,
   - how it will be measured.
 
-  **Merge it now.** The git timestamp proves the target came before the results.
+  **Commit and push it to `nishkal` now, and get it into `main` the same day.** The commit timestamp proves the target came before the results.
   ```
   (after Prompt 0) Draft loadtest/SLO.md. Context: runs are multi-step agent runs (several LLM calls,
   tens of seconds); users are regulatory analysts checking labels before print (spec §1), not a

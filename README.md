@@ -19,16 +19,26 @@ Mini Project 10 for UE24AM342AA5, ML System Design & AgentOps (Dept of CSE (AI &
 This README will become the full "run it from a clean clone" guide before submission.
 
 ## Start here (team)
-1. Read [contexts/LLM_Context.md](contexts/LLM_Context.md): the project, architecture, ownership and working rules.
-2. Read your own file in [contexts/](contexts/), which has your tasks, checklist and LLM prompts.
-   AI coding assistants pick up [AGENTS.md](AGENTS.md) (and Claude Code also loads [CLAUDE.md](CLAUDE.md)) automatically.
-3. Run the shared contract tests:
+Everyone works on **their own branch** (`nishkal`, `namith`, `vihaan`, `vismay`) and keeps their own
+commit history. Nobody commits or pushes to `main`; work reaches it only through PRs. Read
+[CONTRIBUTING.md](CONTRIBUTING.md) before your first commit.
+
+1. Set your git identity to your GitHub account, then clone and run the setup script with your name:
    ```bash
-   python -m venv .venv
-   .venv\Scripts\Activate.ps1      # Windows PowerShell   (macOS/Linux: source .venv/bin/activate)
-   pip install -e "contracts[test]"
-   pytest contracts -q
+   git config --global user.name  "Your Name"
+   git config --global user.email "you@example.com"     # the email on your GitHub account
+   git clone https://github.com/VismayHS/FSSAI_Label_Compliance_Agent.git
+   cd FSSAI_Label_Compliance_Agent
+   python scripts/setup_dev.py <your-name>             # nishkal | namith | vihaan | vismay
    ```
+   It switches you to your branch, turns on the git hooks, creates `.venv`, installs the shared
+   contracts, runs their tests and creates `.env`.
+2. Read [contexts/LLM_Context.md](contexts/LLM_Context.md): the project, architecture, ownership and working rules.
+3. Read your own file in [contexts/](contexts/), which has your tasks, checklist and LLM prompts.
+   AI coding assistants pick up [AGENTS.md](AGENTS.md) (and Claude Code also loads [CLAUDE.md](CLAUDE.md)) automatically.
+
+Re-run the contract tests any time with `.venv/Scripts/python -m pytest contracts -q` (Windows)
+or `.venv/bin/python -m pytest contracts -q` (macOS/Linux).
 
 ## Repository map
 | Path | What |
@@ -36,6 +46,7 @@ This README will become the full "run it from a clean clone" guide before submis
 | `contexts/` | Team and LLM context files |
 | `docs/` | Course documents (spec, glossary, index) and project docs |
 | `contracts/` | Shared schemas, interfaces, fakes, reference pipeline |
+| `scripts/`, `.githooks/` | One-time clone setup; git hooks that keep everyone on their own branch |
 | `libs/`, `services/` | Components (each one is its own package) |
 | `eval/`, `loadtest/`, `observability/`, `deploy/` | Evaluation, load tests, monitoring, deployment |
 

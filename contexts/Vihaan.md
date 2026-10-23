@@ -69,6 +69,9 @@ Rules for this session:
 - No credentials, endpoints or model ids in code: env only, documented in my .env.example section.
 - Never invent regulation text or thresholds; quote only from the PDFs in corpus/ or docs/eval1/.
 - Record verification/routing steps with ctx.record(); every behaviour gets a pytest test.
+- Git: I work only on my own branch `vihaan` (check `git branch --show-current`). Never commit or
+  push to main or a teammate's branch, never force-push, never --no-verify, merge origin/main
+  (never rebase). No Co-Authored-By/"Generated with" lines. Commit or push only when I ask.
 Summarise my current task in 3 lines, then wait for my go.
 ```
 
@@ -76,12 +79,12 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 0: setup (days 1–2)
 
-- [ ] **V0.1 Set up and create package skeletons.** Run `pip install -e "contracts[test]"` and `pytest contracts -q`. Create packages:
+- [ ] **V0.1 Set up and create package skeletons.** Clone the repo and run `python scripts/setup_dev.py vihaan`. It puts you on your own branch `vihaan`, turns on the git hooks, creates `.venv`, runs the 9 contract tests and creates `.env` (CONTRIBUTING.md §2). Then create packages:
   - `libs/gate` → `fssai_gate`
   - `libs/verification` → `fssai_verification`
   - `eval/` → `fssai_eval`
 
-  Each needs its own `pyproject.toml` and a smoke test. Open your first PR.
+  Each needs its own `pyproject.toml` and a smoke test. Commit on `vihaan`, push, and open your first PR (`main` ← `vihaan`).
 
 ## Phase 1: Evaluation 1 (week 1)
 

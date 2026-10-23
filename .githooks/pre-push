@@ -1,0 +1,63 @@
+#!/bin/sh
+# Keeps everyone on their own branch (CONTRIBUTING.md §1, §6). Refuses:
+#   - pushes to main, or to any branch other than your own (git config fssai.branch <name>)
+#   - force-pushes and branch deletions
+#   - commits that carry AI attribution
+# Enabled by `git config core.hooksPath .githooks`.
+
+owner=$(git config --get fssai.branch)
+zero=0000000000000000000000000000000000000000
+attribution='^[[:space:]]*(co-authored-by:.*(claude|anthropic|copilot|openai|chatgpt|gpt-|cursor|codex|gemini|devin|aider|windsurf|codeium)|.*generated (with|by) .*(claude|copilot|chatgpt|cursor|codex|gemini|devin|aider|windsurf|codeium))'
+bot_identity='noreply@anthropic\.com|copilot|cursoragent|openai\.com'
+status=0
+
+fail() {
+  echo "pre-push: $1" >&2
+  status=1
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  case "$remote_ref" in
+    refs/tags/*) continue ;;
+    refs/heads/*) branch=${remote_ref#refs/heads/} ;;
+    *) fail "unexpected ref $remote_ref"; continue ;;
+  esac
+
+  if [ "$branch" = "main" ]; then
+    fail "never push to main. Push your own branch and open a PR (CONTRIBUTING.md §4)."
+    continue
+  fi
+  if [ -z "$owner" ]; then
+    fail "your branch isn't set. Run: python scripts/setup_dev.py <your-name>"
+    continue
+  fi
+  if [ "$branch" != "$owner" ]; then
+    fail "you may push only to '$owner', not '$branch'."
+    continue
+  fi
+  if [ "$local_sha" = "$zero" ]; then
+    fail "deleting '$branch' is not allowed."
+    continue
+  fi
+
+  if [ "$remote_sha" = "$zero" ]; then
+    commits=$(git rev-list "$local_sha" --not --remotes)
+  else
+    if ! git merge-base --is-ancestor "$remote_sha" "$local_sha" 2>/dev/null; then
+      fail "this would rewrite pushed history on '$branch'. Run 'git pull' and push again; never force-push."
+      continue
+    fi
+    commits=$(git rev-list "$remote_sha..$local_sha")
+  fi
+
+  for c in $commits; do
+    if git log -1 --format=%B "$c" | grep -qiE "$attribution"; then
+      fail "commit $(git log -1 --format='%h %s' "$c") has an AI attribution line. Remove it from that unpushed commit (e.g. 'git commit --amend' for the latest one) and push again."
+    fi
+    if git log -1 --format='%ae %ce' "$c" | grep -qiE "$bot_identity"; then
+      fail "commit $(git log -1 --format='%h %s' "$c") is authored by a bot identity. Set your own git user.name/user.email and recommit."
+    fi
+  done
+done
+
+exit $status
