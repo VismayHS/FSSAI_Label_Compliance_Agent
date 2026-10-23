@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
+
+import type { LabelCheckRequest } from "./api/types";
 
 import { Header } from "./components/Header";
 import { RecentRuns } from "./components/RecentRuns";
@@ -9,6 +11,11 @@ import { useHashRoute } from "./lib/useHashRoute";
 export default function App() {
   const [view, go] = useHashRoute();
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [prefill, setPrefill] = useState<{ runId: string; request: LabelCheckRequest } | null>(null);
+  const onRequest = useCallback((runId: string, request: LabelCheckRequest) => {
+    setPrefill((p) => (p?.runId === runId ? p : { runId, request }));
+  }, []);
+  const formRun = view.name === "check" && view.runId && prefill?.runId === view.runId ? prefill : null;
   const open = (runId: string) => {
     setSubmitted(runId);
     go({ name: "check", runId });
@@ -22,8 +29,8 @@ export default function App() {
           <RecentRuns />
         ) : (
           <>
-            <RequestPanel onAccepted={open} />
-            <RunPanel runId={view.runId} focus={submitted === view.runId} onAccepted={open} />
+            <RequestPanel key={formRun?.runId ?? "new"} initial={formRun?.request} onAccepted={open} />
+            <RunPanel runId={view.runId} focus={submitted === view.runId} onAccepted={open} initialTab={view.tab} onRequest={onRequest} />
           </>
         )}
       </main>

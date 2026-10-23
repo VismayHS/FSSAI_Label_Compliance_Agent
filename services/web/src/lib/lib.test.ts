@@ -34,6 +34,8 @@ describe("routes", () => {
     expect(parse("#/runs")).toEqual({ name: "runs" });
     expect(parse("#/runs/not-an-id")).toEqual({ name: "check", runId: null });
     expect(hrefFor({ name: "check", runId: id })).toBe(`#/runs/${id}`);
+    expect(parse(`#/runs/${id}/trace`)).toEqual({ name: "check", runId: id, tab: "trace" });
+    expect(hrefFor({ name: "check", runId: id, tab: "trace" })).toBe(`#/runs/${id}/trace`);
   });
 });
 

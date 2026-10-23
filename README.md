@@ -51,4 +51,12 @@ or `.venv/bin/python -m pytest contracts -q` (macOS/Linux).
 | `eval/`, `loadtest/`, `observability/`, `deploy/` | Evaluation, load tests, monitoring, deployment |
 
 ## Running the system
-*Coming soon:* `cp .env.example .env && docker compose up`.
+Full stack (coming with Compose): `cp .env.example .env && docker compose up`.
+
+Today, locally, on the shared fakes (no Docker, no LLM key needed):
+```bash
+.venv/Scripts/python -m pip install -e contracts -e services/worker -e libs/llm_gateway -e "services/api[test]"
+.venv/Scripts/python -m uvicorn app.main:create_app --factory --env-file .env --port 8000   # API docs: http://localhost:8000/docs
+npm --prefix services/web ci && npm --prefix services/web run dev                          # web client: http://localhost:5173
+```
+(macOS: `.venv/bin/python`.) Click **Check the §4.1 example** to see a full run, then open its trace.

@@ -82,11 +82,12 @@ function toRequest(values: Values, base: LabelCheckRequest): LabelCheckRequest {
   return out as unknown as LabelCheckRequest;
 }
 
-export function RequestPanel({ onAccepted }: { onAccepted: (runId: string) => void }) {
+/** Mount with `key` = the open run, so its request fills the form: fix the fields and check again. */
+export function RequestPanel({ onAccepted, initial }: { onAccepted: (runId: string) => void; initial?: LabelCheckRequest | null }) {
   const formId = useId();
   const [mode, setMode] = useState<"form" | "json">("form");
-  const [base, setBase] = useState<LabelCheckRequest>(SECTION_41_EXAMPLE);
-  const [values, setValues] = useState<Values>(() => fromRequest(SECTION_41_EXAMPLE));
+  const [base, setBase] = useState<LabelCheckRequest>(initial ?? SECTION_41_EXAMPLE);
+  const [values, setValues] = useState<Values>(() => fromRequest(initial ?? SECTION_41_EXAMPLE));
   const [json, setJson] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);

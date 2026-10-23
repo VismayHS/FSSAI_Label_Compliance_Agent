@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -154,6 +154,26 @@ describe("the analyst workspace", () => {
     await user.keyboard("{ArrowRight}");
     expect(screen.getByRole("tab", { name: /Trace/ })).toHaveAttribute("aria-selected", "true");
     expect(screen.getByRole("tab", { name: /Trace/ })).toHaveFocus();
+  });
+
+  it("fills the form with the open run's request, so it can be fixed and checked again", async () => {
+    const run = completedRun();
+    run.request!.label.product_name = "Mahua spirit";
+    run.request!.nutrition.protein_g = 4.5;
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await waitFor(() => expect(screen.getByLabelText("Product name")).toHaveValue("Mahua spirit"));
+    expect(screen.getByLabelText(/Protein/)).toHaveValue("4.5");
+  });
+
+  it("lists findings most severe first", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await screen.findByText("CLM-PROTEIN-SOURCE");
+    const ids = [...document.querySelectorAll(".finding__id")].map((e) => e.textContent);
+    expect(ids).toEqual(["CLM-PROTEIN-SOURCE", "LBL-ALLERGEN"]);
   });
 
   it("renders label text as text, never as markup", async () => {

@@ -179,7 +179,7 @@ class FakeResearcher:
                 explanation="Allergen statement present." if status == FindingStatus.MET
                 else "No allergen statement on the label.",
                 citations=[Citation(regulation=p.regulation, clause_id=p.clause_id,
-                                    passage_id=p.passage_id, quote=p.text[-60:])]))
+                                    passage_id=p.passage_id, quote=p.text.split("] ", 1)[-1])]))  # whole sentence, verbatim
         for claim in classification.claims:
             if claim.nutrient != "protein":
                 continue

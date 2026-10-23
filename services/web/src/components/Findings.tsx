@@ -2,6 +2,9 @@ import type { Finding, Verdict } from "../api/types";
 import { STATUS_WORD } from "../lib/format";
 import { Mark } from "./Mark";
 
+/** Most severe first, so what must change is read before what passed. */
+const SEVERITY = { unmet: 0, cannot_determine: 1, met: 2, not_applicable: 3 } as const;
+
 /** One row per requirement on a shared grid: mark, id, what was checked + the quoted clause, status. */
 export function Findings({ findings, verdict }: { findings: Finding[]; verdict: Verdict | null }) {
   if (findings.length === 0) {
@@ -27,7 +30,7 @@ export function Findings({ findings, verdict }: { findings: Finding[]; verdict: 
       </span>
     </p>
     <ol className="findings">
-      {findings.map((f) => {
+      {[...findings].sort((a, b) => SEVERITY[a.status] - SEVERITY[b.status]).map((f) => {
         const check = checks.get(f.requirement_id);
         return (
           <li key={f.requirement_id} className="finding" data-status={f.status}>

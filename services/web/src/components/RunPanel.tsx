@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { submitRun } from "../api/client";
 
-import type { RunStatus } from "../api/types";
+import type { LabelCheckRequest, RunStatus } from "../api/types";
 import { clientId } from "../lib/clientId";
 import { SECTION_41_EXAMPLE } from "../lib/example";
 import { ms, shortId, time } from "../lib/format";
@@ -15,9 +15,12 @@ import { Trace } from "./Trace";
 
 type Tab = "findings" | "trace" | "request";
 
-export function RunPanel({ runId, focus, onAccepted }: { runId: string | null; focus: boolean; onAccepted: (runId: string) => void }) {
+export function RunPanel({ runId, focus, onAccepted, initialTab, onRequest }: {
+  runId: string | null; focus: boolean; onAccepted: (runId: string) => void; initialTab?: "trace";
+  onRequest: (runId: string, request: LabelCheckRequest) => void;
+}) {
   if (!runId) return <EmptyRun onAccepted={onAccepted} />;
-  return <RunView key={runId} runId={runId} focus={focus} />;
+  return <RunView key={runId} runId={runId} focus={focus} initialTab={initialTab ?? "findings"} onRequest={onRequest} />;
 }
 
 function EmptyRun({ onAccepted }: { onAccepted: (runId: string) => void }) {
@@ -56,9 +59,20 @@ function EmptyRun({ onAccepted }: { onAccepted: (runId: string) => void }) {
   );
 }
 
-function RunView({ runId, focus }: { runId: string; focus: boolean }) {
+function RunView({ runId, focus, initialTab, onRequest }: {
+  runId: string; focus: boolean; initialTab: Tab; onRequest: (runId: string, request: LabelCheckRequest) => void;
+}) {
   const { status, error, reconnecting } = useRun(runId);
-  const [tab, setTab] = useState<Tab>("findings");
+  const request = status?.request ?? null;
+  useEffect(() => {
+    if (request) onRequest(runId, request);
+  }, [runId, request, onRequest]);
+  const [tab, setTabState] = useState<Tab>(initialTab);
+  const setTab = (next: Tab) => {
+    setTabState(next);
+    // Keep the address shareable without a navigation: #/runs/<id>/trace opens straight on the trace.
+    history.replaceState(null, "", `#/runs/${runId}${next === "trace" ? "/trace" : ""}`);
+  };
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (!focus) return;

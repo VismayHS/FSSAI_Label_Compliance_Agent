@@ -128,7 +128,7 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 2: real end-to-end (by end of week 2)
 
-- [ ] **S2.1 Build the LLM gateway (A5, L5).** `fssai_llm_gateway.client:GatewayLLMClient` implements `LLMClient`:
+- [x] **S2.1 Build the LLM gateway (A5, L5).** `fssai_llm_gateway.client:GatewayLLMClient` implements `LLMClient`:
   - **Provider adapter:** OpenAI-compatible, configured by `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL`, with an optional fallback `LLM_FALLBACK_*`.
   - **Timeout on every call,** capped by `ctx.remaining_s()`.
   - **Bounded retry:** exponential backoff with jitter, only on retryable errors (429, 5xx, timeouts).
@@ -145,7 +145,7 @@ Summarise my current task in 3 lines, then wait for my go.
   then success; retries exhausted → ProviderUnavailable; breaker opens after N failures and fails fast
   without HTTP calls; half-open recovery; cost calculation; fallback model used when configured.
   ```
-- [ ] **S2.2 Make every run reconstructible (D5).** `GET /v1/runs/{id}/trace` returns every step in order:
+- [x] **S2.2 Make every run reconstructible (D5).** `GET /v1/runs/{id}/trace` returns every step in order:
   - agent, kind and name,
   - input and output (queries, **full passages**, tool args),
   - prompt name and version,
@@ -154,7 +154,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - the correlation id and a Jaeger trace link.
 
   Call Nishkal's `setup_logging` and `setup_tracing` in the API and worker so the spans join up across the queue: carry the trace context inside the job payload.
-- [ ] **S2.3 Build web client v1 (A8, your extra).** `services/web` is a simple single page that:
+- [x] **S2.3 Build web client v1 (A8, your extra).** `services/web` is a simple single page that:
   - shows a form, or a JSON paste box with a "load §4.1 example" button,
   - submits the request and polls,
   - shows the **route + reason**, each finding with its status, citations (regulation, clause, quote) and the **escalation path** (why it went to human review),
@@ -222,4 +222,13 @@ the web client."*
 - Your ownership of `main`'s health matters more than any single feature. Being the repo owner doesn't exempt you from the branch rules: your work also goes `vismay` → PR → `main`.
 
 ## Notes / log
-(your notes here)
+**2026-10-24 (branch `vismay`)**
+- Repo: one branch per person (CONTRIBUTING.md, `.githooks/`, `scripts/setup_dev.py`); shared AI skills in `skills/` (`python scripts/sync_skills.py install`).
+- S0.2 partly: packages `services/api` (`app`), `services/worker` (`fssai_worker`), `libs/llm_gateway` exist with tests. Makefile waits for Compose.
+- S1.1 done except the Postgres `RunStore` (`libs/run_store`): API on fakes, gate before enqueue, 400/413/422/429/503, correlation ids, JSON logs, `/healthz` `/readyz` `/metrics`, RQ queue + `python -m fssai_worker`, inline mode for local dev. `RunStatus` now carries `request` + `correlation_id` (additive contract change).
+- S2.1 done: gateway with deadline-capped timeouts, full-jitter retry + Retry-After, per-provider breaker (Redis or memory), fallback marked degraded, cost per call. 15 tests.
+- S2.2 done: `/v1/runs/{id}/trace` with request, every step, per-agent rollups, queue wait. Jaeger link waits for Nishkal's tracing.
+- S2.3 done (v1): web client in `services/web` (decision 303, `PRODUCT.md`, impeccable direction "Pack Mark System"). Feedback buttons wait for Vihaan's endpoint (S3.6).
+- S3.3: decisions 301 (polling) and 302 (RQ) written; deployment boundaries record still to do with Compose.
+- Next: Compose + Dockerfiles + Postgres run store + `scripts/smoke.py` (S1.2), then the breaker demo (S3.1) and `docs/architecture.md` (S1.3).
+- Run locally: `uvicorn app.main:create_app --factory --env-file .env --port 8000`, then `npm --prefix services/web run dev` and open http://localhost:5173.
