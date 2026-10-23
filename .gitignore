@@ -1,0 +1,21 @@
+.env
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
+dist/
+
+# built artefacts: the indexer container rebuilds these
+data/
+*.faiss
+*.pkl
+
+node_modules/
+.DS_Store
+.idea/
+.vscode/
