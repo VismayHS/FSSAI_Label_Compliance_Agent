@@ -21,6 +21,7 @@ This README will become the full "run it from a clean clone" guide before submis
 ## Start here (team)
 1. Read [contexts/LLM_Context.md](contexts/LLM_Context.md): the project, architecture, ownership and working rules.
 2. Read your own file in [contexts/](contexts/), which has your tasks, checklist and LLM prompts.
+   AI coding assistants pick up [AGENTS.md](AGENTS.md) (and Claude Code also loads [CLAUDE.md](CLAUDE.md)) automatically.
 3. Run the shared contract tests:
    ```bash
    python -m venv .venv

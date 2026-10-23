@@ -236,6 +236,7 @@ spending limit on the account.
 | `deploy/postgres/init/NN-<name>-<table>.sql` | author | Your own tables |
 | `.env.example` | everyone, **own section only** | Pre-split into one section per owner |
 | `README.md`, `Makefile`, `.github/` | Vismay | |
+| `AGENTS.md`, `CLAUDE.md` | Vismay | Instructions every AI coding assistant loads (`CLAUDE.md` imports `AGENTS.md` + this file) |
 
 Each `libs/*` and `services/*` folder is its own Python package with its **own `pyproject.toml`**,
 which lists only its own dependencies. There is no shared requirements file to fight over.
