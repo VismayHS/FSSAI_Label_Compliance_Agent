@@ -203,7 +203,8 @@ Summarise my current task in 3 lines, then wait for my go.
   (after Prompt 0) Write loadtest/locustfile.py: each user POSTs a request from loadtest/payloads/*.json
   to /v1/runs with X-Client-Id per user (so rate limits don't skew results unless intended), then polls
   GET /v1/runs/{id} with backoff until state in {completed, failed}; fire a custom request event named
-  "full_run" with the end-to-end latency and success flag. Add a loadtest/run_matrix.sh that runs headless
+  "full_run" with the end-to-end latency and success flag. Add a loadtest/run_matrix.py (Python, so it
+  runs on Windows and macOS alike) that runs Locust headless
   at concurrency 1,2,5,10,20 for N minutes each, with --scale worker=1 and 3, saving CSVs to
   loadtest/results/<timestamp>/. Add a small script that turns the CSVs into a table of RPS/p50/p95 per
   setting against the SLO in loadtest/SLO.md.

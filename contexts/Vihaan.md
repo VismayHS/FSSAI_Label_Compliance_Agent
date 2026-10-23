@@ -158,7 +158,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - any `cannot_determine` or possible exemption → `regulatory-review`,
   - all `met` → `clear-for-print`, with the reason and the not-an-approval notice.
 
-  Every route gets a human-readable reason. Write the rules in `docs/decisions/0xx-vihaan-routing-rules.md`.
+  Every route gets a human-readable reason. Write the rules in `docs/decisions/2xx-vihaan-routing-rules.md`.
 - [ ] **V2.3 Switch them on.** Add `IMPL_GATE`, `IMPL_VERIFIER` and `IMPL_ROUTER` examples to your `.env.example` section, and tell Vismay to flip them.
 
 ## Phase 3: all requirements (weeks 3–4)

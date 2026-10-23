@@ -289,6 +289,9 @@ class RunStatus(BaseModel):
     submitted_at: datetime
     updated_at: datetime
     client_id: str | None = None
+    correlation_id: str | None = None
+    # The accepted request, so a run can be reconstructed from its id alone (D5) and re-scored (L6).
+    request: LabelCheckRequest | None = None
     result: RunResult | None = None
     error: str | None = None
 

@@ -187,7 +187,7 @@ Summarise my current task in 3 lines, then wait for my go.
   ```
 - [ ] **M3.2 Compare two prompt variants (L2).** Create two researcher variants, e.g. `v1` (plain) and `v2` (with an explicit "look for modifying provisions in the other regulation" checklist).
   - Run both on Vihaan's eval set (`PROMPT_RESEARCHER_VERSION=...`, same scenarios).
-  - Report which was better, on which metric, and by how much, in `docs/decisions/0xx-namith-prompt-comparison.md`.
+  - Report which was better, on which metric, and by how much, in `docs/decisions/1xx-namith-prompt-comparison.md`.
   - If the runner isn't ready yet, compare route accuracy on the scenarios with your own script, then redo it with the full metrics later.
 - [ ] **M3.3 Add per-agent metrics (A6)** using `prometheus_client`, labelled by `agent`:
   - runs and successes (task success rate),

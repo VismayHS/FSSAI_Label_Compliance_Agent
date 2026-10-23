@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fssai-llm-gateway"
+version = "0.1.0"
+description = "LLM gateway: OpenAI-compatible provider adapter with timeouts, bounded retry, circuit breaker, fallback and per-call cost"
+requires-python = ">=3.11"
+dependencies = [
+    "fssai-contracts",
+    "httpx>=0.28,<1",
+    "prometheus-client>=0.26,<1",
+    "redis>=8.1,<9",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=9", "respx>=0.23,<1", "fakeredis>=2.40,<3"]
+
+[tool.setuptools.packages.find]
+include = ["fssai_llm_gateway*"]

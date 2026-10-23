@@ -182,7 +182,8 @@ what happens if any of them fails mid-run.
 | Agents | LangGraph |
 | Retrieval | LangChain + FAISS, `sentence-transformers` run locally (small model, e.g. MiniLM-class) |
 | API + validation | FastAPI, Pydantic v2 |
-| Queue | Redis + RQ or arq (Vismay decides and justifies) |
+| Queue | Redis + RQ, in-process `SimpleWorker`s (decision 302) |
+| Web client | React + Vite + TypeScript, CSS tokens, React Bits for run-state motion (decision 303) |
 | Storage | Postgres |
 | Evaluation | TruLens |
 | Observability | OpenTelemetry → Jaeger, Prometheus, Grafana, cAdvisor |
@@ -208,7 +209,7 @@ spending limit on the account.
 | `contexts/<Name>.md` | that person | Your plan, checklist, prompts, notes |
 | `docs/*.pdf` | none | Course documents. Never edit. |
 | `docs/eval1/` | Nishkal (`*-passages.md`), Vihaan (`*-test-values.md`), Vismay (`project-plan.md`) | Evaluation 1 deliverables |
-| `docs/decisions/` | author of each file | Decision records (ADRs), one file each: `NNN-<name>-<slug>.md` |
+| `docs/decisions/` | author of each file | Decision records (ADRs), one file each: `NNN-<name>-<slug>.md`. Number blocks so parallel branches never clash: Nishkal `001–099`, Namith `100–199`, Vihaan `200–299`, Vismay `300–399`; take the next free number in your block. Index: `docs/decisions/README.md` |
 | `docs/incidents/` | author of each file | Incident log (D8), one file each: `YYYY-MM-DD-<name>-<slug>.md` |
 | `docs/runbook.md` | Namith | D8 runbook |
 | `docs/data-contract.md` | Vihaan | D1/F1 published contract |
@@ -305,16 +306,35 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
 
 | Method + path | Body / headers | Returns |
 |---|---|---|
-| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id` (optional) | `202 {run_id, status_url}` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` |
-| `GET /v1/runs/{run_id}` | | `RunStatus` (result included when done) |
-| `GET /v1/runs/{run_id}/trace` | | Full reconstruction: every step, query, passage, prompt version, latency, cost, verdict (D5) |
+| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id` (optional) | `202 {run_id, status_url, trace_url, correlation_id}` + `Location` · `400` bad/missing client id · `413` body over `API_MAX_REQUEST_BYTES` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` + `Retry-After` · `503` queue down |
+| `GET /v1/runs?limit=` | | Recent runs, newest first: id, state, product name, route |
+| `GET /v1/runs/{run_id}` | | `RunStatus`: state, the accepted `request`, `correlation_id`, and the `result` when done |
+| `GET /v1/runs/{run_id}/trace` | | Full reconstruction (D5): the request, every step in order with inputs and outputs (queries, full passages, LLM messages and text), prompt versions, per-step and per-agent latency, tokens and cost, queue wait, verdict, route |
 | `POST /v1/runs/{run_id}/feedback` | `{satisfactory, reason}` | `201` (Vihaan) |
 | `GET /v1/feedback/summary` | | Aggregates (Vihaan) |
 | `GET /v1/quarantine?limit=` | | Rejected records with field-level errors (Vihaan) |
 | `GET /healthz` · `GET /readyz` · `GET /metrics` | | On **every** HTTP service: liveness, dependency readiness, Prometheus metrics |
 
-The API mounts every `router` it finds in `services/api/app/routers/*.py` automatically, so
-Vihaan's routes appear without anyone editing `main.py`.
+- Run ids are 32-character hex. Every response carries `X-Correlation-Id` (the caller's, if it is a
+  safe 1–128 character id, otherwise a new one); the same id is on the run, its job, every step and
+  every log line.
+- Submission order: client id → size limit → gate (rate limit, validate, quarantine) → save `queued`
+  → enqueue. A reject never creates a run or a job (D1, demo #4). Non-JSON bodies are quarantined too.
+- Runs are executed per `RUN_DISPATCH` (decision 302): `queue` (RQ on Redis, `python -m fssai_worker`)
+  in Compose, `inline` (a thread pool in the API) for local development.
+
+**Adding routes.** The API mounts every `router` it finds in `services/api/app/routers/*.py`
+automatically, so Vihaan's routes appear without anyone editing `main.py`. A router reaches the
+shared services through `request.app.state`: `gate` (the `RequestGate`, e.g. its quarantine),
+`run_store` (the `RunStore`), `dispatcher` and `settings`. Call blocking code with
+`fastapi.concurrency.run_in_threadpool`.
+
+Run the API locally (inline mode, fakes by default):
+
+```bash
+<venv-python> -m pip install -e contracts -e services/worker -e services/api
+<venv-python> -m uvicorn app.main:create_app --factory --env-file .env --port 8000   # docs at /docs
+```
 
 ---
 

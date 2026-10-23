@@ -121,8 +121,8 @@ Summarise my current task in 3 lines, then wait for my go.
   the needed libs/* packages) and compose fragments per Vismay.md V1.2, plus the root docker-compose.yml
   using `include:`. Healthchecks for api (curl /healthz), redis (redis-cli ping), postgres (pg_isready);
   worker exposes metrics on a port without host mapping. Add Makefile targets up/down/logs/smoke where
-  smoke = scripts/smoke.sh (bash + curl + jq) that submits contracts-style fake request, polls, and
-  asserts route. Verify it works from a clean clone with only `cp .env.example .env`.
+  smoke = scripts/smoke.py (Python standard library only, so it runs on Windows and macOS) that submits
+  the §4.1-style fake request, polls, and asserts the route. Verify it works from a clean clone with only `cp .env.example .env`.
   ```
 - [ ] **S1.3 Assemble the Evaluation 1 project plan** in `docs/eval1/project-plan.md`. Build it from LLM_Context §§2–4, 9 and 10, Nishkal's passages, Vihaan's test values and Namith's topology draft. Add a first `docs/architecture.md` diagram **with deployment boundaries marked**.
 
@@ -186,7 +186,7 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **S4.1 Test from a clean clone (demo #1).** Write `scripts/clean_clone_test.sh`: clone into a temp dir, `cp .env.example .env` (plus the provider key), `docker compose up -d`, wait for healthy, `make smoke`. Run it before every demo rehearsal.
+- [ ] **S4.1 Test from a clean clone (demo #1).** Write `scripts/clean_clone_test.py`: clone into a temp dir, `cp .env.example .env` (plus the provider key), `docker compose up -d`, wait for healthy, `make smoke`. Run it before every demo rehearsal.
 - [ ] **S4.2 Write the README** so a stranger can run the system without help (the course will test this). Include:
   - prerequisites, then setup in three commands,
   - how to submit a request (curl and the web client),
