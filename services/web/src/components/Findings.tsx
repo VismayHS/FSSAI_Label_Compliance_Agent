@@ -1,4 +1,6 @@
-import type { Finding, Verdict } from "../api/types";
+import { useState } from "react";
+
+import type { Finding, FindingStatus, Verdict } from "../api/types";
 import { STATUS_WORD } from "../lib/format";
 import { Mark } from "./Mark";
 
@@ -7,6 +9,11 @@ const SEVERITY = { unmet: 0, cannot_determine: 1, met: 2, not_applicable: 3 } as
 
 /** One row per requirement on a shared grid: mark, id, what was checked + the quoted clause, status. */
 export function Findings({ findings, verdict }: { findings: Finding[]; verdict: Verdict | null }) {
+  const checks = new Map(verdict?.checks.map((c) => [c.requirement_id, c]) ?? []);
+  const [hidden, setHidden] = useState<ReadonlySet<FindingStatus>>(new Set());
+  const toggle = (s: FindingStatus) =>
+    setHidden((h) => { const next = new Set(h); if (next.has(s)) next.delete(s); else next.add(s); return next; });
+  const shown = [...findings].filter((f) => !hidden.has(f.status)).sort((a, b) => SEVERITY[a.status] - SEVERITY[b.status]);
   if (findings.length === 0) {
     return (
       <p className="empty">
@@ -15,22 +22,27 @@ export function Findings({ findings, verdict }: { findings: Finding[]; verdict: 
       </p>
     );
   }
-  const checks = new Map(verdict?.checks.map((c) => [c.requirement_id, c]) ?? []);
   const counts = (["unmet", "cannot_determine", "met", "not_applicable"] as const)
     .map((s) => [s, findings.filter((f) => f.status === s).length] as const)
     .filter(([, n]) => n > 0);
   return (
     <>
-    <p className="findings__summary">
-      {counts.map(([s, n]) => (
-        <span key={s} className="findings__count"><Mark kind={s} /> {n} {STATUS_WORD[s]!.toLowerCase()}</span>
-      ))}
+    <div className="findings__summary">
+      <span className="visually-hidden" id="findings-filter-label">Show findings that are</span>
+      <span role="group" aria-labelledby="findings-filter-label" className="findings__filters">
+        {counts.map(([s, n]) => (
+          <button key={s} type="button" className="findings__count" aria-pressed={!hidden.has(s)} onClick={() => toggle(s)}>
+            <Mark kind={s} /> {n} {STATUS_WORD[s]!.toLowerCase()}
+          </button>
+        ))}
+      </span>
       <span className="findings__verdict">
         Verifier: {verdict?.action === "accept" ? "every citation resolves to retrieved text" : verdict?.escalation_reason ?? verdict?.action ?? "not run"}
       </span>
-    </p>
+    </div>
+    {shown.length === 0 && <p className="empty">Every finding is filtered out. Turn a status back on above.</p>}
     <ol className="findings">
-      {[...findings].sort((a, b) => SEVERITY[a.status] - SEVERITY[b.status]).map((f) => {
+      {shown.map((f) => {
         const check = checks.get(f.requirement_id);
         return (
           <li key={f.requirement_id} className="finding" data-status={f.status}>

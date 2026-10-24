@@ -139,8 +139,8 @@ describe("the analyst workspace", () => {
     render(<App />);
     await user.click(await screen.findByRole("tab", { name: /Trace/ }));
     expect(await screen.findByRole("table", { name: "By agent" })).toBeInTheDocument();
-    const steps = screen.getByRole("heading", { name: "Steps in order" }).nextElementSibling!;
-    expect(steps.children).toHaveLength(7);
+    expect(document.querySelectorAll(".steps > li")).toHaveLength(7);
+    expect(document.querySelectorAll(".steps .mark[data-kind='done']")).toHaveLength(7);
     expect(screen.getAllByText(/PLACEHOLDER, NOT REAL REGULATION TEXT/).length).toBeGreaterThan(0);
   });
 
@@ -174,6 +174,21 @@ describe("the analyst workspace", () => {
     await screen.findByText("CLM-PROTEIN-SOURCE");
     const ids = [...document.querySelectorAll(".finding__id")].map((e) => e.textContent);
     expect(ids).toEqual(["CLM-PROTEIN-SOURCE", "LBL-ALLERGEN"]);
+  });
+
+  it("filters findings by status with toggle buttons", async () => {
+    const user = userEvent.setup();
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    const met = await screen.findByRole("button", { name: /1 met/ });
+    expect(met).toHaveAttribute("aria-pressed", "true");
+    await user.click(met);
+    expect(met).toHaveAttribute("aria-pressed", "false");
+    expect(screen.queryByText("LBL-ALLERGEN")).toBeNull();
+    expect(screen.getByText("CLM-PROTEIN-SOURCE")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /1 unmet/ }));
+    expect(screen.getByText(/Every finding is filtered out/)).toBeInTheDocument();
   });
 
   it("renders label text as text, never as markup", async () => {

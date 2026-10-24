@@ -201,15 +201,17 @@ fieldset {
   margin: 0;
   min-width: 0;
 }
-fieldset + fieldset {
+fieldset {
   margin-top: var(--s-5);
 }
 legend {
-  font-size: var(--t-sm);
-  font-weight: 700;
-  font-stretch: var(--stretch-label);
-  padding: 0;
+  width: 100%;
+  padding: var(--s-3) 0 0;
+  border-top: var(--line-ink);
   margin-bottom: var(--s-1);
+  font-size: var(--t-md);
+  font-weight: 800;
+  font-stretch: 80%;
 }
 .field {
   margin-top: var(--s-3);
@@ -363,11 +365,17 @@ legend {
   border: 2px solid var(--unmet);
 }
 .request__actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--s-2) var(--s-5);
-  margin-top: var(--s-5);
+  margin: var(--s-5) calc(-1 * var(--s-5)) 0;
+  padding: var(--s-3) var(--s-5);
+  background: var(--panel);
+  border-top: var(--line-ink);
 }
 .request__client {
   margin-top: var(--s-3);
@@ -690,10 +698,36 @@ legend {
   font-size: var(--t-md);
   font-weight: 700;
 }
+.findings__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+}
 .findings__count {
   display: inline-flex;
   align-items: center;
   gap: var(--s-2);
+  min-height: 40px;
+  padding: 0 var(--s-3);
+  border: var(--line-ink);
+  background: var(--panel);
+  font-size: var(--t-md);
+  font-weight: 700;
+  transition: background-color var(--dur-1) ease, color var(--dur-1) ease, transform var(--dur-1) var(--ease-out);
+}
+.findings__count:hover {
+  background: var(--panel-2);
+}
+.findings__count:active {
+  transform: scale(0.97);
+}
+.findings__count[aria-pressed="false"] {
+  color: var(--ink-2);
+  border-style: dashed;
+  border-color: var(--rule);
+}
+.findings__count[aria-pressed="false"] .mark {
+  opacity: 0.35;
 }
 .findings__verdict {
   margin-left: auto;
@@ -764,7 +798,7 @@ legend {
 }
 .totals {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   border-top: 4px solid var(--ink);
   margin-top: var(--s-4);
 }
@@ -780,8 +814,9 @@ legend {
 }
 .totals dd {
   margin: 0;
+  font-family: var(--font-mono); /* taste-skill-ignore: trace numbers are data */
   font-size: var(--t-lg);
-  font-weight: 700;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .table-wrap {
@@ -819,19 +854,42 @@ tbody th {
 .trace__heading {
   font-size: var(--t-md);
 }
-.steps {
-  list-style: none;
-  padding: 0;
-  margin-top: var(--s-2) !important;
+.steps-wrap {
+  overflow-x: auto;
 }
-.step {
-  border-bottom: var(--line);
-}
+.steps__head,
 .step summary {
   display: grid;
-  grid-template-columns: 2rem minmax(12rem, auto) 7rem 5.5rem 8rem 6.5rem minmax(0, 1fr);
+  grid-template-columns: var(--mark) 2rem minmax(13rem, 1.6fr) 7.5rem 5.5rem 7.5rem 6.5rem minmax(7rem, 1fr);
   align-items: center;
   gap: var(--s-3);
+  min-width: 52rem;
+}
+.steps__head {
+  padding-bottom: var(--s-2);
+  border-bottom: 2px solid var(--ink);
+  font-size: var(--t-xs);
+  font-weight: 700;
+  font-stretch: var(--stretch-label);
+  color: var(--ink-2);
+}
+.steps {
+  position: relative;
+  list-style: none;
+  padding: 0;
+  margin-top: 0 !important;
+}
+.steps::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--mark) / 2 - 1.5px);
+  top: var(--s-4);
+  bottom: var(--s-4);
+  width: 3px;
+  background: var(--path);
+}
+.step summary {
+  position: relative;
   padding: var(--s-2) 0;
   cursor: pointer;
   list-style: none;
@@ -843,22 +901,39 @@ tbody th {
 .step summary:hover {
   background: var(--panel-2);
 }
-.step[data-error] .step__kind {
-  color: var(--unmet);
+.step .mark {
+  background: var(--panel);
+  outline: 3px solid var(--panel); /* knocks the spine out behind the mark */
 }
-.step__index,
-.step__kind,
-.step__metric {
+.step summary:hover .mark {
+  background: var(--panel-2);
+  outline-color: var(--panel-2);
+}
+.step__name code {
+  font-size: var(--t-xs);
+  font-weight: 600;
+}
+.step__agent {
+  margin-left: var(--s-2);
+  font-weight: 700;
+  font-stretch: var(--stretch-label);
   color: var(--ink-2);
 }
+.step__index,
+.step__kind {
+  color: var(--ink-2);
+}
+.step[data-error] .step__kind {
+  color: var(--unmet);
+  font-weight: 700;
+}
 .step__metric {
+  font-family: var(--font-mono); /* taste-skill-ignore: trace numbers are data */
+  font-size: var(--t-xs);
   text-align: right;
 }
-.step__prompt {
-  justify-self: start;
-}
 .step__detail {
-  padding: var(--s-2) 0 var(--s-4) 2.75rem;
+  padding: var(--s-2) 0 var(--s-4) calc(var(--mark) + var(--s-5));
   font-size: var(--t-sm);
 }
 .step__detail > * + * {
@@ -908,16 +983,18 @@ tbody th {
   .layout > .run {
     order: -1;
   }
-  .step summary {
-    grid-template-columns: 2rem minmax(0, 1fr) 5.5rem;
-  }
-  .step__kind,
-  .step__metric:not(:first-of-type),
-  .step__prompt {
-    display: none;
+  .totals {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 @media (max-width: 720px) {
+  .totals {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .request__actions {
+    margin-inline: calc(-1 * var(--s-4));
+    padding-inline: var(--s-4);
+  }
   .shell {
     flex-wrap: wrap;
     gap: var(--s-1) var(--s-5);

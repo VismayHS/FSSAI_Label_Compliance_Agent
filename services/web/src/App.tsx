@@ -29,7 +29,7 @@ export default function App() {
           <RecentRuns />
         ) : (
           <>
-            <RequestPanel key={formRun?.runId ?? "new"} initial={formRun?.request} onAccepted={open} />
+            <RequestPanel initialKey={formRun?.runId ?? "new"} initial={formRun?.request} onAccepted={open} />
             <RunPanel runId={view.runId} focus={submitted === view.runId} onAccepted={open} initialTab={view.tab} onRequest={onRequest} />
           </>
         )}

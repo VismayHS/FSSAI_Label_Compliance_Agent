@@ -3,28 +3,8 @@ import { useEffect, useState } from "react";
 import { getTrace } from "../api/client";
 import type { Passage, RunTrace, StepRecord } from "../api/types";
 import { ms, tokens, usd } from "../lib/format";
-import CallChip, { type CallChipIcon } from "./reactbits/CallChip/CallChip";
 import Counter from "./reactbits/Counter/Counter";
-
-const ICON: Record<StepRecord["kind"], CallChipIcon> = {
-  tool: "search",
-  llm: "terminal",
-  guardrail: "file",
-  classification: "edit",
-  verification: "file",
-  routing: "edit",
-};
-
-const chipColors = {
-  surfaceColor: "var(--panel-2)",
-  color: "var(--ink)",
-  doneColor: "var(--met)",
-  errorColor: "var(--unmet)",
-  progressColor: "var(--path)",
-  radius: 2,
-  size: 30,
-  showTimer: false,
-};
+import { Mark } from "./Mark";
 
 /** D5: the whole run, reconstructed from its id. Every step in order with its inputs and outputs. */
 export function Trace({ runId }: { runId: string }) {
@@ -88,24 +68,30 @@ export function Trace({ runId }: { runId: string }) {
       {trace.steps.length === 0 ? (
         <p className="empty">{trace.state === "failed" ? "The run failed before any step was recorded." : "No steps recorded yet."}</p>
       ) : (
-        <ol className="steps">
-          {trace.steps.map((s) => (
-            <li key={s.step_index} className="step" data-error={s.error ? true : undefined}>
-              <details>
-                <summary>
-                  <span className="step__index num">{s.step_index}</span>
-                  <CallChip {...chipColors} icon={ICON[s.kind]} name={s.name} argument={s.agent} status={s.error ? "error" : "done"} />
-                  <span className="step__kind">{s.kind}</span>
-                  <span className="step__metric num">{ms(s.latency_ms)}</span>
-                  <span className="step__metric num">{tokens(s.prompt_tokens, s.completion_tokens)}</span>
-                  <span className="step__metric num">{usd(s.cost_usd)}</span>
-                  {s.prompt_name && <code className="step__prompt">{s.prompt_name}@{s.prompt_version}</code>}
-                </summary>
-                <StepDetail step={s} />
-              </details>
-            </li>
-          ))}
-        </ol>
+        <div className="steps-wrap">
+          <div className="steps__head" aria-hidden="true">
+            <span /><span>#</span><span>Step · agent</span><span>Kind</span><span>Latency</span><span>Tokens</span><span>Cost</span><span>Prompt</span>
+          </div>
+          <ol className="steps">
+            {trace.steps.map((s) => (
+              <li key={s.step_index} className="step" data-error={s.error ? true : undefined}>
+                <details>
+                  <summary>
+                    <Mark kind={s.error ? "error" : "done"} />
+                    <span className="step__index num">{s.step_index}</span>
+                    <span className="step__name"><code>{s.name}</code> <span className="step__agent">{s.agent}</span></span>
+                    <span className="step__kind">{s.kind}{s.error ? ", failed" : ""}</span>
+                    <span className="step__metric">{ms(s.latency_ms)}</span>
+                    <span className="step__metric">{tokens(s.prompt_tokens, s.completion_tokens)}</span>
+                    <span className="step__metric">{usd(s.cost_usd)}</span>
+                    <span className="step__prompt">{s.prompt_name ? <code>{s.prompt_name}@{s.prompt_version}</code> : null}</span>
+                  </summary>
+                  <StepDetail step={s} />
+                </details>
+              </li>
+            ))}
+          </ol>
+        </div>
       )}
     </div>
   );

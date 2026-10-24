@@ -23,12 +23,16 @@ text glitches) are out.
 | Component | Use it for |
 |---|---|
 | `StatusMark` | Per-step status glyph in the run timeline: idle ring → progress arc → check / failure |
-| `CallChip` | A tool call or LLM call in the trace, with its live timer, ending green or red |
+| ~~`CallChip`~~ | Tried for trace steps and removed: its chip-and-glyph status fought the square pack marks (finish review). Use `Mark` on the spine instead. |
 | `ThoughtLine` | The run header while the agents work; folds the steps into one line when done |
 | `LatticeLoader` | The "queued / running" row with a live stopwatch |
 | `Counter` | Totals that change: cost, tokens, latency (odometer roll) |
 | `WarmTooltip` | Tooltip groups on dense rows (instant after the first one opens) |
 | `RubberSegment` | A segmented control, e.g. form ↔ JSON input |
+
+In use in `services/web`: `Counter` (trace totals), `LatticeLoader` (queued / running), `RubberSegment`
+(Form | JSON). A component must speak the screen's own status grammar; if it brings a second one
+(its own glyphs, pills, colours for state), map it or leave it out.
 
 Anything else: propose it in the PR with the state it conveys, then add it here.
 

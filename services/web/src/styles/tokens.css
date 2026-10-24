@@ -19,7 +19,7 @@
   --met-field: #dcefe2;
   --unmet-field: #f7dfdc;
   --undet-field: #f5e6c8;
-  --review-field: #dde3ec;
+  --review-field: #e4e6e8;     /* neutral from --na/ink: blue stays reserved for the active path */
 
   /* Reserved: the active run and its path through the trace, nothing else. */
   --path: #1d4f91;

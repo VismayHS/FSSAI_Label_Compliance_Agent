@@ -82,8 +82,10 @@ function toRequest(values: Values, base: LabelCheckRequest): LabelCheckRequest {
   return out as unknown as LabelCheckRequest;
 }
 
-/** Mount with `key` = the open run, so its request fills the form: fix the fields and check again. */
-export function RequestPanel({ onAccepted, initial }: { onAccepted: (runId: string) => void; initial?: LabelCheckRequest | null }) {
+/** When a run is opened its request fills the form (`initial` + `initialKey`), so it can be fixed and checked again. */
+export function RequestPanel({ onAccepted, initial, initialKey }: {
+  onAccepted: (runId: string) => void; initial?: LabelCheckRequest | null; initialKey: string;
+}) {
   const formId = useId();
   const [mode, setMode] = useState<"form" | "json">("form");
   const [base, setBase] = useState<LabelCheckRequest>(initial ?? SECTION_41_EXAMPLE);
@@ -95,6 +97,16 @@ export function RequestPanel({ onAccepted, initial }: { onAccepted: (runId: stri
   const [now, setNow] = useState(() => Date.now());
   const noticeRef = useRef<HTMLDivElement>(null);
   const [me] = useState(clientId);
+  const [loadedKey, setLoadedKey] = useState(initialKey);
+  if (loadedKey !== initialKey) {
+    setLoadedKey(initialKey);
+    const next = initial ?? base;
+    setBase(next);
+    setValues(fromRequest(next));
+    setJson(JSON.stringify(next, null, 2));
+    setJsonError(null);
+    setNotice(null);
+  }
 
   const limitedUntil = notice && "until" in notice ? notice.until : 0;
   useEffect(() => {
