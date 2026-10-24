@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fssai-ingest"
+version = "0.1.0"
+description = "Idempotent CLI index builder: parse, clause-aware chunk, embed locally, FAISS"
+requires-python = ">=3.11"
+# Add each real dependency with bounds as a task needs it, e.g. "faiss-cpu>=1.8,<2".
+dependencies = ["fssai-contracts"]
+
+[project.optional-dependencies]
+test = ["pytest>=9"]
+
+[tool.setuptools.packages.find]
+include = ["fssai_ingest*"]
