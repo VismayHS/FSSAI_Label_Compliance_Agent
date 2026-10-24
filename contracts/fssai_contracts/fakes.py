@@ -113,8 +113,9 @@ class FakeLLM:
 
 class FakePromptStore:
     def get(self, name, version=None):
-        return PromptTemplate(name=name, version=version or "fake-v0",
-                              system="You are a placeholder prompt.", user_template="{input}")
+        version = version or "fake-v0"
+        return PromptTemplate(name=name, version=version, user_template="{input}",
+                              system=f"[prompt:{name}@{version}] You are a placeholder prompt.")  # §6.5 tag
 
 
 class FakeGuardrails:
