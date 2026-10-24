@@ -229,6 +229,7 @@ the web client."*
 - S2.1 done: gateway with deadline-capped timeouts, full-jitter retry + Retry-After, per-provider breaker (Redis or memory), fallback marked degraded, cost per call. 15 tests.
 - S2.2 done: `/v1/runs/{id}/trace` with request, every step, per-agent rollups, queue wait. Jaeger link waits for Nishkal's tracing.
 - S2.3 done (v1): web client in `services/web` (decision 303, `PRODUCT.md`, impeccable direction "Pack Mark System"). Feedback buttons wait for Vihaan's endpoint (S3.6).
+  - Impeccable finish review: two fix rounds, every scored item resolved; a last trace-layout regression (cost clipped below ~1400px) fixed after it, checked at 1280px. `services/web/DESIGN.md` + `.impeccable/design.json` record the shipped system. Review captures: `node services/web/scripts/capture.mjs services/web/.impeccable/review name=url[|selector]`.
 - S3.3: decisions 301 (polling) and 302 (RQ) written; deployment boundaries record still to do with Compose.
 - Next: Compose + Dockerfiles + Postgres run store + `scripts/smoke.py` (S1.2), then the breaker demo (S3.1) and `docs/architecture.md` (S1.3).
 - Run locally: `uvicorn app.main:create_app --factory --env-file .env --port 8000`, then `npm --prefix services/web run dev` and open http://localhost:5173.

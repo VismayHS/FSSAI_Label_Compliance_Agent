@@ -395,7 +395,7 @@ legend {
   transition: background-color var(--dur-1) ease, transform var(--dur-1) var(--ease-out);
 }
 .button:hover {
-  background: #2b3138;
+  background: var(--ink-hover);
 }
 .button:active {
   transform: scale(0.97);

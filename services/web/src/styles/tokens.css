@@ -3,6 +3,7 @@
   /* Ground, panels, ink */
   --ink: #14181c;
   --ink-2: #4a535c;          /* secondary text, 7.7:1 on white */
+  --ink-hover: #2b3138;      /* primary button hover */
   --ground: #eef1ee;
   --panel: #ffffff;
   --panel-2: #f4f6f4;        /* one tone step: quotes, code, hover */
@@ -17,7 +18,6 @@
   --na: #5b6470;             /* 5.9:1 */
   /* Whole fields of state colour, behind ink text (ink on each: > 12:1) */
   --met-field: #dcefe2;
-  --unmet-field: #f7dfdc;
   --undet-field: #f5e6c8;
   --review-field: #e4e6e8;     /* neutral from --na/ink: blue stays reserved for the active path */
 
