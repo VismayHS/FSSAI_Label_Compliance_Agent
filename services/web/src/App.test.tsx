@@ -48,7 +48,8 @@ describe("the analyst workspace", () => {
     const protein = screen.getByText("CLM-PROTEIN-SOURCE").closest("li")!;
     expect(within(protein).getByText("Unmet")).toBeInTheDocument();
     expect(within(protein).getByText("FSS-AC-2018")).toBeInTheDocument();
-    expect(within(protein).getByText("at least 10 g protein")).toBeInTheDocument();
+    // Fake regulation text must say so wherever it is shown, threshold included.
+    expect(within(protein).getByText(/^\[PLACEHOLDER, NOT REAL REGULATION TEXT\].*at least 10 g protein/)).toBeInTheDocument();
 
     const strip = screen.getByRole("list", { name: "Agents in this run" });
     expect(within(strip).getAllByRole("listitem")).toHaveLength(6);

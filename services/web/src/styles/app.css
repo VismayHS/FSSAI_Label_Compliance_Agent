@@ -725,6 +725,7 @@ legend {
   color: var(--ink-2);
   border-style: dashed;
   border-color: var(--rule);
+  text-decoration: line-through; /* "off" reads without colour */
 }
 .findings__count[aria-pressed="false"] .mark {
   opacity: 0.35;
@@ -860,7 +861,8 @@ tbody th {
 .steps__head,
 .step summary {
   display: grid;
-  grid-template-columns: var(--mark) 2rem minmax(13rem, 1.6fr) 7.5rem 5.5rem 7.5rem 6.5rem minmax(7rem, 1fr);
+  /* minmax(0, …): tracks size from the container, never from a row's content, so every row and the head line up */
+  grid-template-columns: var(--mark) 2rem minmax(0, 1.6fr) 7.5rem 5.5rem 7.5rem 6.5rem minmax(0, 1fr);
   align-items: center;
   gap: var(--s-3);
   min-width: 52rem;
@@ -908,6 +910,14 @@ tbody th {
 .step summary:hover .mark {
   background: var(--panel-2);
   outline-color: var(--panel-2);
+}
+.step__name,
+.step__prompt {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.steps__head .num-head {
+  text-align: right;
 }
 .step__name code {
   font-size: var(--t-xs);

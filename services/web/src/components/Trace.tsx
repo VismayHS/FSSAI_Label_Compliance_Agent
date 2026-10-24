@@ -70,7 +70,7 @@ export function Trace({ runId }: { runId: string }) {
       ) : (
         <div className="steps-wrap">
           <div className="steps__head" aria-hidden="true">
-            <span /><span>#</span><span>Step · agent</span><span>Kind</span><span>Latency</span><span>Tokens</span><span>Cost</span><span>Prompt</span>
+            <span /><span>#</span><span>Step · agent</span><span>Kind</span><span className="num-head">Latency</span><span className="num-head">Tokens</span><span className="num-head">Cost</span><span>Prompt</span>
           </div>
           <ol className="steps">
             {trace.steps.map((s) => (
