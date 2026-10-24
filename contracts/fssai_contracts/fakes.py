@@ -195,7 +195,7 @@ class FakeResearcher:
                 explanation=f"Declared protein {request.nutrition.protein_g} g vs condition "
                             f"{FAKE_PROTEIN_THRESHOLD_G:g} g per 100 g.",
                 citations=[Citation(regulation=p.regulation, clause_id=p.clause_id,
-                                    passage_id=p.passage_id, quote=f"at least {FAKE_PROTEIN_THRESHOLD_G:g} g protein")]))
+                                    passage_id=p.passage_id, quote=p.text)]))  # verbatim, PLACEHOLDER marker included
         return dossier
 
 
