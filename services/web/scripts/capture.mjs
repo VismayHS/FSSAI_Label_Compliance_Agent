@@ -1,4 +1,4 @@
-// Capture review screenshots of the running web client: a fold and a full page at desktop, tablet and phone.
+// Capture review screenshots of the running web client: a fold and a full page at desktop, laptop, tablet and phone.
 //   node services/web/scripts/capture.mjs <outDir> <name>=<url>[|<css selector to click>...] [...]
 // Writes <outDir>/<name>-desktop.png, -desktop-full.png, -tablet*, -mobile* (plus desktop.png / mobile.png for
 // the first name, the files impeccable's finish review expects). Uses taste-skill's Chrome driver (Node 22+).
@@ -13,7 +13,7 @@ if (!outDir || targets.length === 0) {
   process.exit(1);
 }
 mkdirSync(outDir, { recursive: true });
-const VIEWPORTS = [["desktop", 1440, 900], ["tablet", 768, 1024], ["mobile", 390, 844]];
+const VIEWPORTS = [["desktop", 1440, 900], ["laptop", 1280, 800], ["tablet", 768, 1024], ["mobile", 390, 844]];
 
 const browser = await Browser.launch();
 try {

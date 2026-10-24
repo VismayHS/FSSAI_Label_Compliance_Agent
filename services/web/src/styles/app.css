@@ -861,11 +861,33 @@ tbody th {
 .steps__head,
 .step summary {
   display: grid;
-  /* minmax(0, …): tracks size from the container, never from a row's content, so every row and the head line up */
-  grid-template-columns: var(--mark) 2rem minmax(0, 1.6fr) 7.5rem 5.5rem 7.5rem 6.5rem minmax(0, 1fr);
+  /* minmax(0, …): tracks size from the container, never from a row's content, so every row and the head line up.
+     Kind and prompt sit on a second line under the name, so cost stays on screen at laptop widths without a scroll. */
+  grid-template-columns: var(--mark) 2rem minmax(0, 1fr) 4.5rem 6.5rem 5.5rem;
+  grid-template-areas: "mark idx name lat tok cost";
   align-items: center;
-  gap: var(--s-3);
-  min-width: 52rem;
+  column-gap: var(--s-3);
+}
+.step summary {
+  grid-template-areas:
+    "mark idx name lat tok cost"
+    ".    .   meta meta meta meta";
+  row-gap: 2px;
+}
+.step summary > .mark { grid-area: mark; }
+.step__index { grid-area: idx; }
+.step__name { grid-area: name; }
+.step__latency { grid-area: lat; }
+.step__tokens { grid-area: tok; }
+.step__cost { grid-area: cost; }
+.step__meta {
+  grid-area: meta;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--t-xs);
+}
+.step__meta code {
+  font-size: var(--t-xs);
 }
 .steps__head {
   padding-bottom: var(--s-2);
@@ -911,8 +933,7 @@ tbody th {
   background: var(--panel-2);
   outline-color: var(--panel-2);
 }
-.step__name,
-.step__prompt {
+.step__name {
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -1064,6 +1085,18 @@ tbody th {
   }
   .step__detail {
     padding-left: 0;
+  }
+  /* Phone: no column heads; the numbers move to their own line, units make them self-describing. */
+  .steps__head,
+  .step__index {
+    display: none;
+  }
+  .step summary {
+    grid-template-columns: var(--mark) minmax(0, 1fr) auto auto auto;
+    grid-template-areas:
+      "mark name name name name"
+      ".    meta meta meta meta"
+      ".    .    lat  tok  cost";
   }
 }
 @media (prefers-reduced-motion: reduce) {

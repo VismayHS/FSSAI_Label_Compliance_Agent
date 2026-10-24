@@ -70,7 +70,7 @@ export function Trace({ runId }: { runId: string }) {
       ) : (
         <div className="steps-wrap">
           <div className="steps__head" aria-hidden="true">
-            <span /><span>#</span><span>Step · agent</span><span>Kind</span><span className="num-head">Latency</span><span className="num-head">Tokens</span><span className="num-head">Cost</span><span>Prompt</span>
+            <span /><span>#</span><span>Step · agent, kind · prompt</span><span className="num-head">Latency</span><span className="num-head">Tokens</span><span className="num-head">Cost</span>
           </div>
           <ol className="steps">
             {trace.steps.map((s) => (
@@ -80,11 +80,13 @@ export function Trace({ runId }: { runId: string }) {
                     <Mark kind={s.error ? "error" : "done"} />
                     <span className="step__index num">{s.step_index}</span>
                     <span className="step__name"><code>{s.name}</code> <span className="step__agent">{s.agent}</span></span>
-                    <span className="step__kind">{s.kind}{s.error ? ", failed" : ""}</span>
-                    <span className="step__metric">{ms(s.latency_ms)}</span>
-                    <span className="step__metric">{tokens(s.prompt_tokens, s.completion_tokens)}</span>
-                    <span className="step__metric">{usd(s.cost_usd)}</span>
-                    <span className="step__prompt">{s.prompt_name ? <code>{s.prompt_name}@{s.prompt_version}</code> : null}</span>
+                    <span className="step__metric step__latency">{ms(s.latency_ms)}</span>
+                    <span className="step__metric step__tokens">{tokens(s.prompt_tokens, s.completion_tokens)}</span>
+                    <span className="step__metric step__cost">{usd(s.cost_usd)}</span>
+                    <span className="step__meta">
+                      <span className="step__kind">{s.kind}{s.error ? ", failed" : ""}</span>
+                      {s.prompt_name && <> · <code>{s.prompt_name}@{s.prompt_version}</code></>}
+                    </span>
                   </summary>
                   <StepDetail step={s} />
                 </details>
