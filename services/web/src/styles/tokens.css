@@ -1,0 +1,59 @@
+/* Design tokens: the only place colours, type, space and motion are defined (DESIGN.md). */
+:root {
+  /* Ground, panels, ink */
+  --ink: #14181c;
+  --ink-2: #4a535c;          /* secondary text, 7.7:1 on white */
+  --ink-hover: #2b3138;      /* primary button hover */
+  --ground: #eef1ee;
+  --panel: #ffffff;
+  --panel-2: #f4f6f4;        /* one tone step: quotes, code, hover */
+  --rule: #c9cfc9;
+  --on-ink: #ffffff;
+  --on-ink-2: #c8cdd2;
+
+  /* State: pack marks. Always paired with words, never colour alone. */
+  --met: #1a7f3c;            /* 5.1:1 */
+  --unmet: #b3261e;          /* 6.0:1 */
+  --undet: #8a5a00;          /* 5.3:1 */
+  --na: #5b6470;             /* 5.9:1 */
+  /* Whole fields of state colour, behind ink text (ink on each: > 12:1) */
+  --met-field: #dcefe2;
+  --undet-field: #f5e6c8;
+  --review-field: #e4e6e8;     /* neutral from --na/ink: blue stays reserved for the active path */
+
+  /* Reserved: the active run and its path through the trace, nothing else. */
+  --path: #1d4f91;
+  --path-wash: #e3ebf6;
+
+  /* Type: one family, condensed widths for labels; mono only for data. Fixed rem scale, ratio ~1.2. */
+  --font-sans: "Archivo Variable", "Archivo", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, monospace; /* taste-skill-ignore: data only (ids, clause refs, JSON, trace numbers) */
+  --t-xs: 0.8125rem;   /* 13 */
+  --t-sm: 0.875rem;    /* 14 */
+  --t-md: 1rem;        /* 16 */
+  --t-lg: 1.25rem;     /* 20 */
+  --t-xl: 1.5rem;      /* 24 */
+  --stretch-label: 82%;
+
+  /* Space: 4px base, 8px grid */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  /* Lines and marks */
+  --line: 1px solid var(--rule);
+  --line-ink: 1px solid var(--ink);
+  --frame: 2px solid var(--ink);
+  --mark: 20px;
+
+  /* Motion: state only, 120-250 ms, strong ease-out (Emil Kowalski) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --dur-1: 120ms;
+  --dur-2: 200ms;
+  --dur-3: 250ms;
+}

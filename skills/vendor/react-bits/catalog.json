@@ -1,0 +1,2822 @@
+[
+  {
+    "name": "AccordionGallery",
+    "category": "Components",
+    "description": "Panels expand on hover or focus, revealing parallax imagery and captions.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "AccordionGallery-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/AccordionGallery-TS-CSS",
+    "files": [
+      "AccordionGallery.css",
+      "AccordionGallery.tsx"
+    ]
+  },
+  {
+    "name": "AcidSquares",
+    "category": "Backgrounds",
+    "description": "A rolling field of glossy squares that ripples under two drifting colored lights.",
+    "dependencies": [],
+    "registry_item": "AcidSquares-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/AcidSquares-TS-CSS",
+    "files": [
+      "AcidSquares.css",
+      "AcidSquares.tsx"
+    ]
+  },
+  {
+    "name": "AeroShards",
+    "category": "Backgrounds",
+    "description": "Silk ribbons of thick glass shards streaming on layered depths among survey markers, catching light along their edges.",
+    "dependencies": [
+      "vgpu@^0.3.1"
+    ],
+    "registry_item": "AeroShards-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/AeroShards-TS-CSS",
+    "files": [
+      "AeroShards.css",
+      "AeroShards.tsx"
+    ]
+  },
+  {
+    "name": "AnimatedContent",
+    "category": "Animations",
+    "description": "Wrapper that reveals its content on scroll with slides, blur, 3D tilts, soft wipes and staggered children.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "AnimatedContent-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/AnimatedContent-TS-CSS",
+    "files": [
+      "AnimatedContent/AnimatedContent.tsx"
+    ]
+  },
+  {
+    "name": "AnimatedList",
+    "category": "Components",
+    "description": "A scrolling list whose rows spring into view, with a gliding selection and arrow keys.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "AnimatedList-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/AnimatedList-TS-CSS",
+    "files": [
+      "AnimatedList.css",
+      "AnimatedList.tsx"
+    ]
+  },
+  {
+    "name": "Antigravity",
+    "category": "Backgrounds",
+    "description": "A field of particles that lifts into a glowing ring around the cursor and bursts outward on click.",
+    "dependencies": [],
+    "registry_item": "Antigravity-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Antigravity-TS-CSS",
+    "files": [
+      "Antigravity.css",
+      "Antigravity.tsx"
+    ]
+  },
+  {
+    "name": "ASCIIText",
+    "category": "TextAnimations",
+    "description": "Waving ASCII text that tilts toward the pointer, scrambles on hover and ripples on click.",
+    "dependencies": [],
+    "registry_item": "ASCIIText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ASCIIText-TS-CSS",
+    "files": [
+      "ASCIIText/ASCIIText.tsx"
+    ]
+  },
+  {
+    "name": "Aurora",
+    "category": "Backgrounds",
+    "description": "A soft, calm aurora that flows across the top of the page and drifts toward the cursor.",
+    "dependencies": [],
+    "registry_item": "Aurora-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Aurora-TS-CSS",
+    "files": [
+      "Aurora.css",
+      "Aurora.tsx"
+    ]
+  },
+  {
+    "name": "Balatro",
+    "category": "Backgrounds",
+    "description": "The swirling Balatro paint shader, with crisp pixels, a cursor that stirs the paint and click whirlpools.",
+    "dependencies": [],
+    "registry_item": "Balatro-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Balatro-TS-CSS",
+    "files": [
+      "Balatro.css",
+      "Balatro.tsx"
+    ]
+  },
+  {
+    "name": "Ballpit",
+    "category": "Backgrounds",
+    "description": "A soft-lit pit of physics balls you can shove with the cursor, grab, throw and blast apart.",
+    "dependencies": [],
+    "registry_item": "Ballpit-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Ballpit-TS-CSS",
+    "files": [
+      "Ballpit/Ballpit.tsx"
+    ]
+  },
+  {
+    "name": "Beams",
+    "category": "Backgrounds",
+    "description": "Glossy ribbons that ripple in the dark and catch the light, which follows your cursor.",
+    "dependencies": [],
+    "registry_item": "Beams-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Beams-TS-CSS",
+    "files": [
+      "Beams.css",
+      "Beams.tsx"
+    ]
+  },
+  {
+    "name": "BellToggle",
+    "category": "Micro",
+    "description": "Pill toggle where a press rings the bell, crossfades the label and unfurls the pill.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "BellToggle-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BellToggle-TS-CSS",
+    "files": [
+      "BellToggle.css",
+      "BellToggle.tsx"
+    ]
+  },
+  {
+    "name": "BlobCursor",
+    "category": "Animations",
+    "description": "Liquid metal blob cursor that stretches, sloshes and bursts into droplets, in chrome, jelly, pearl or ink.",
+    "dependencies": [
+      "three@^0.180.0"
+    ],
+    "registry_item": "BlobCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BlobCursor-TS-CSS",
+    "files": [
+      "BlobCursor.css",
+      "BlobCursor.tsx"
+    ]
+  },
+  {
+    "name": "BlurText",
+    "category": "TextAnimations",
+    "description": "Text starts blurred then crisply resolves for a soft-focus reveal effect.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "BlurText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BlurText-TS-CSS",
+    "files": [
+      "BlurText/BlurText.tsx"
+    ]
+  },
+  {
+    "name": "BorderGlow",
+    "category": "Components",
+    "description": "Glowing mesh-gradient border that follows cursor direction and intensifies near edges.",
+    "dependencies": [],
+    "registry_item": "BorderGlow-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BorderGlow-TS-CSS",
+    "files": [
+      "BorderGlow.css",
+      "BorderGlow.tsx"
+    ]
+  },
+  {
+    "name": "BounceCards",
+    "category": "Components",
+    "description": "A fan of photo cards that bounce in, then spread apart and straighten the one you hover.",
+    "dependencies": [],
+    "registry_item": "BounceCards-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BounceCards-TS-CSS",
+    "files": [
+      "BounceCards.css",
+      "BounceCards.tsx"
+    ]
+  },
+  {
+    "name": "BranchedMenu",
+    "category": "Micro",
+    "description": "Collapsible menu that branches each section from a trunk and traces a line to your pick.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "BranchedMenu-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BranchedMenu-TS-CSS",
+    "files": [
+      "BranchedMenu.css",
+      "BranchedMenu.tsx"
+    ]
+  },
+  {
+    "name": "BubbleMenu",
+    "category": "Components",
+    "description": "Floating circular expanding menu with staggered item reveal.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "BubbleMenu-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/BubbleMenu-TS-CSS",
+    "files": [
+      "BubbleMenu.css",
+      "BubbleMenu.tsx"
+    ]
+  },
+  {
+    "name": "CallChip",
+    "category": "Micro",
+    "description": "Tool-call chip whose fill wipes across as a live timer ticks, ending green or shaking red.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "CallChip-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CallChip-TS-CSS",
+    "files": [
+      "CallChip.css",
+      "CallChip.tsx"
+    ]
+  },
+  {
+    "name": "CardNav",
+    "category": "Components",
+    "description": "A navigation bar that springs open into a row of cards, each with its own links.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "CardNav-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CardNav-TS-CSS",
+    "files": [
+      "CardNav.css",
+      "CardNav.tsx"
+    ]
+  },
+  {
+    "name": "CardSwap",
+    "category": "Components",
+    "description": "A 3D stack of cards that sends the front card to the back on a timer, or when you fling it.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "CardSwap-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CardSwap-TS-CSS",
+    "files": [
+      "CardSwap.css",
+      "CardSwap.tsx"
+    ]
+  },
+  {
+    "name": "Carousel",
+    "category": "Components",
+    "description": "Swipeable cards for feature tours, stories and galleries, with five transitions and an autoplay timer.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "Carousel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Carousel-TS-CSS",
+    "files": [
+      "Carousel.css",
+      "Carousel.tsx"
+    ]
+  },
+  {
+    "name": "ChromaGrid",
+    "category": "Components",
+    "description": "A grid of grayscale photo cards where a spotlight follows the cursor and brings back color.",
+    "dependencies": [],
+    "registry_item": "ChromaGrid-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ChromaGrid-TS-CSS",
+    "files": [
+      "ChromaGrid.css",
+      "ChromaGrid.tsx"
+    ]
+  },
+  {
+    "name": "CircularCarousel",
+    "category": "Components",
+    "description": "A 3D ring of images with bendable cards, momentum drag, snapping and click to focus.",
+    "dependencies": [],
+    "registry_item": "CircularCarousel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CircularCarousel-TS-CSS",
+    "files": [
+      "CircularCarousel.css",
+      "CircularCarousel.tsx"
+    ]
+  },
+  {
+    "name": "CircularGallery",
+    "category": "Components",
+    "description": "A curved image gallery you can drag, scroll or tab through, with cards that open to the full image.",
+    "dependencies": [],
+    "registry_item": "CircularGallery-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CircularGallery-TS-CSS",
+    "files": [
+      "CircularGallery.css",
+      "CircularGallery.tsx"
+    ]
+  },
+  {
+    "name": "CircularText",
+    "category": "TextAnimations",
+    "description": "Layouts characters around a circle with optional rotation animation.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "CircularText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CircularText-TS-CSS",
+    "files": [
+      "CircularText.css",
+      "CircularText.tsx"
+    ]
+  },
+  {
+    "name": "ClickSpark",
+    "category": "Animations",
+    "description": "Bursts of sparks at every click, as dashes, comets, dots or stars, that can spill around buttons.",
+    "dependencies": [],
+    "registry_item": "ClickSpark-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ClickSpark-TS-CSS",
+    "files": [
+      "ClickSpark/ClickSpark.tsx"
+    ]
+  },
+  {
+    "name": "CodeSlots",
+    "category": "Micro",
+    "description": "One-time code input whose digits spring into their slots, with paste and SMS autofill.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "CodeSlots-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CodeSlots-TS-CSS",
+    "files": [
+      "CodeSlots.css",
+      "CodeSlots.tsx"
+    ]
+  },
+  {
+    "name": "ColorBends",
+    "category": "Backgrounds",
+    "description": "Vibrant color bends with smooth flowing animation.",
+    "dependencies": [
+      "three@^0.180.0"
+    ],
+    "registry_item": "ColorBends-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ColorBends-TS-CSS",
+    "files": [
+      "ColorBends.css",
+      "ColorBends.tsx"
+    ]
+  },
+  {
+    "name": "CometDial",
+    "category": "Micro",
+    "description": "Tick-ring dial you flick by angle, with a comet that streaks behind the lit head.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "CometDial-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CometDial-TS-CSS",
+    "files": [
+      "CometDial.css",
+      "CometDial.tsx"
+    ]
+  },
+  {
+    "name": "Counter",
+    "category": "Components",
+    "description": "An odometer-style number whose digits roll to every new value, with currency, separators and locales.",
+    "dependencies": [],
+    "registry_item": "Counter-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Counter-TS-CSS",
+    "files": [
+      "Counter.css",
+      "Counter.tsx"
+    ]
+  },
+  {
+    "name": "CountUp",
+    "category": "TextAnimations",
+    "description": "Animated number counter supporting formatting and decimals.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "CountUp-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CountUp-TS-CSS",
+    "files": [
+      "CountUp/CountUp.tsx"
+    ]
+  },
+  {
+    "name": "Crosshair",
+    "category": "Animations",
+    "description": "Crosshair cursor with live coordinates that locks onto links and buttons and measures them.",
+    "dependencies": [],
+    "registry_item": "Crosshair-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Crosshair-TS-CSS",
+    "files": [
+      "Crosshair/Crosshair.tsx"
+    ]
+  },
+  {
+    "name": "CRTWarp",
+    "category": "Backgrounds",
+    "description": "A blocky plasma glowing on a curved CRT, with real scanlines, a phosphor mask, afterglow and a power-on intro.",
+    "dependencies": [],
+    "registry_item": "CRTWarp-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CRTWarp-TS-CSS",
+    "files": [
+      "CRTWarp.css",
+      "CRTWarp.tsx"
+    ]
+  },
+  {
+    "name": "CrystalizedBall",
+    "category": "Animations",
+    "description": "A glass ball with a crackling electric rim and glowing dust that swirls with the cursor.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "CrystalizedBall-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CrystalizedBall-TS-CSS",
+    "files": [
+      "CrystalizedBall.css",
+      "CrystalizedBall.tsx"
+    ]
+  },
+  {
+    "name": "Cubes",
+    "category": "Animations",
+    "description": "A grid of outlined 3D cubes that turn to face the cursor, spin when swept and ripple on click.",
+    "dependencies": [],
+    "registry_item": "Cubes-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Cubes-TS-CSS",
+    "files": [
+      "Cubes.css",
+      "Cubes.tsx"
+    ]
+  },
+  {
+    "name": "CursorGrid",
+    "category": "Animations",
+    "description": "A crisp grid whose cells light up and fade behind the cursor, with grid styles, tiles and click pulses.",
+    "dependencies": [],
+    "registry_item": "CursorGrid-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CursorGrid-TS-CSS",
+    "files": [
+      "CursorGrid.css",
+      "CursorGrid.tsx"
+    ]
+  },
+  {
+    "name": "CurvedInput",
+    "category": "Components",
+    "description": "Arc-bent input bar with text, caret and submit button all following the curve.",
+    "dependencies": [],
+    "registry_item": "CurvedInput-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CurvedInput-TS-CSS",
+    "files": [
+      "CurvedInput.css",
+      "CurvedInput.tsx"
+    ]
+  },
+  {
+    "name": "CurvedLoop",
+    "category": "TextAnimations",
+    "description": "Flowing looping text path along a customizable curve with drag interaction.",
+    "dependencies": [],
+    "registry_item": "CurvedLoop-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/CurvedLoop-TS-CSS",
+    "files": [
+      "CurvedLoop.css",
+      "CurvedLoop.tsx"
+    ]
+  },
+  {
+    "name": "DarkVeil",
+    "category": "Backgrounds",
+    "description": "A silky veil of light that drifts in the dark and bends around the cursor.",
+    "dependencies": [],
+    "registry_item": "DarkVeil-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DarkVeil-TS-CSS",
+    "files": [
+      "DarkVeil.css",
+      "DarkVeil.tsx"
+    ]
+  },
+  {
+    "name": "DecayCard",
+    "category": "Components",
+    "description": "An image card that tears and melts as the pointer moves, then pulls itself back together.",
+    "dependencies": [],
+    "registry_item": "DecayCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DecayCard-TS-CSS",
+    "files": [
+      "DecayCard.css",
+      "DecayCard.tsx"
+    ]
+  },
+  {
+    "name": "DecryptedText",
+    "category": "TextAnimations",
+    "description": "Hacker-style decryption cycling random glyphs until resolving to real text.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "DecryptedText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DecryptedText-TS-CSS",
+    "files": [
+      "DecryptedText/DecryptedText.tsx"
+    ]
+  },
+  {
+    "name": "DepthCarousel",
+    "category": "Components",
+    "description": "Cards recede into depth on a 3D rail, with drag, keyboard and auto-advance.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "DepthCarousel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DepthCarousel-TS-CSS",
+    "files": [
+      "DepthCarousel.css",
+      "DepthCarousel.tsx"
+    ]
+  },
+  {
+    "name": "DepthText",
+    "category": "TextAnimations",
+    "description": "Layered extruded type with parallax that shifts against the pointer.",
+    "dependencies": [],
+    "registry_item": "DepthText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DepthText-TS-CSS",
+    "files": [
+      "DepthText.css",
+      "DepthText.tsx"
+    ]
+  },
+  {
+    "name": "Dither",
+    "category": "Backgrounds",
+    "description": "Retro dithered waves with Bayer, halftone, line and noise patterns, palettes and cursor trails.",
+    "dependencies": [],
+    "registry_item": "Dither-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Dither-TS-CSS",
+    "files": [
+      "Dither.css",
+      "Dither.tsx"
+    ]
+  },
+  {
+    "name": "DitherVeil",
+    "category": "Animations",
+    "description": "A 1-bit dithered photo the cursor burns through to full colour, knitting back cell by cell.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "DitherVeil-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DitherVeil-TS-CSS",
+    "files": [
+      "DitherVeil.css",
+      "DitherVeil.tsx"
+    ]
+  },
+  {
+    "name": "Dock",
+    "category": "Components",
+    "description": "macOS style dock with smooth magnification, launch bounce, badges and context menus.",
+    "dependencies": [
+      "react-dom@^19.0.0"
+    ],
+    "registry_item": "Dock-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Dock-TS-CSS",
+    "files": [
+      "Dock.css",
+      "Dock.tsx"
+    ]
+  },
+  {
+    "name": "DodgeField",
+    "category": "Micro",
+    "description": "Wrapper that makes any child dodge the pointer until it relents and glides home.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "DodgeField-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DodgeField-TS-CSS",
+    "files": [
+      "DodgeField.css",
+      "DodgeField.tsx"
+    ]
+  },
+  {
+    "name": "DomeGallery",
+    "category": "Components",
+    "description": "Immersive 3D dome gallery projecting images on a hemispheric surface.",
+    "dependencies": [
+      "@use-gesture/react@^10.2.27"
+    ],
+    "registry_item": "DomeGallery-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DomeGallery-TS-CSS",
+    "files": [
+      "DomeGallery.css",
+      "DomeGallery.tsx"
+    ]
+  },
+  {
+    "name": "DotField",
+    "category": "Backgrounds",
+    "description": "A gradient dot field seen through a lens that follows the cursor, magnifying, pinching or swirling the dots.",
+    "dependencies": [],
+    "registry_item": "DotField-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DotField-TS-CSS",
+    "files": [
+      "DotField.css",
+      "DotField.tsx"
+    ]
+  },
+  {
+    "name": "DotGrid",
+    "category": "Backgrounds",
+    "description": "A springy dot grid that the cursor flicks and drags through like jelly, with click shockwaves.",
+    "dependencies": [],
+    "registry_item": "DotGrid-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DotGrid-TS-CSS",
+    "files": [
+      "DotGrid.css",
+      "DotGrid.tsx"
+    ]
+  },
+  {
+    "name": "DriftWall",
+    "category": "Components",
+    "description": "An endless perspective wall of tiles drifting past, lifting on hover.",
+    "dependencies": [],
+    "registry_item": "DriftWall-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/DriftWall-TS-CSS",
+    "files": [
+      "DriftWall.css",
+      "DriftWall.tsx"
+    ]
+  },
+  {
+    "name": "EchoText",
+    "category": "TextAnimations",
+    "description": "Ghosted copies trail behind the text and settle into a single word.",
+    "dependencies": [],
+    "registry_item": "EchoText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/EchoText-TS-CSS",
+    "files": [
+      "EchoText.css",
+      "EchoText.tsx"
+    ]
+  },
+  {
+    "name": "ElasticMesh",
+    "category": "Animations",
+    "description": "Turns text or any logo into a puffy inflated shape you can press, poke and stretch like jelly.",
+    "dependencies": [],
+    "registry_item": "ElasticMesh-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ElasticMesh-TS-CSS",
+    "files": [
+      "ElasticMesh.css",
+      "ElasticMesh.tsx"
+    ]
+  },
+  {
+    "name": "ElasticSlider",
+    "category": "Components",
+    "description": "A slider that grows under your cursor and stretches like rubber when pulled past either end, then springs back.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "ElasticSlider-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ElasticSlider-TS-CSS",
+    "files": [
+      "ElasticSlider.css",
+      "ElasticSlider.tsx"
+    ]
+  },
+  {
+    "name": "ElectricBorder",
+    "category": "Animations",
+    "description": "Wraps any element in crackling strands of current that surge near the cursor and leap off in sparks.",
+    "dependencies": [],
+    "registry_item": "ElectricBorder-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ElectricBorder-TS-CSS",
+    "files": [
+      "ElectricBorder.css",
+      "ElectricBorder.tsx"
+    ]
+  },
+  {
+    "name": "ElectricLogo",
+    "category": "Animations",
+    "description": "Turns any logo into a living lightning outline, with arcs that leap off its edges.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "ElectricLogo-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ElectricLogo-TS-CSS",
+    "files": [
+      "ElectricLogo.css",
+      "ElectricLogo.tsx"
+    ]
+  },
+  {
+    "name": "EvilEye",
+    "category": "Backgrounds",
+    "description": "Procedural evil eye shader with animated iris, slit pupil, and fiery outer glow.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "EvilEye-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/EvilEye-TS-CSS",
+    "files": [
+      "EvilEye.css",
+      "EvilEye.tsx"
+    ]
+  },
+  {
+    "name": "FadeContent",
+    "category": "Animations",
+    "description": "Wrapper that fades content in on scroll, plain or out of focus, from washed-out gray, or through grain, mist and pixel blocks.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "FadeContent-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FadeContent-TS-CSS",
+    "files": [
+      "FadeContent/FadeContent.tsx"
+    ]
+  },
+  {
+    "name": "FallingText",
+    "category": "TextAnimations",
+    "description": "Text that breaks apart and tumbles into a pile you can drag, throw and swipe, then flies back into place.",
+    "dependencies": [
+      "matter-js@^0.20.0"
+    ],
+    "registry_item": "FallingText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FallingText-TS-CSS",
+    "files": [
+      "FallingText.css",
+      "FallingText.tsx"
+    ]
+  },
+  {
+    "name": "FaultyTerminal",
+    "category": "Backgrounds",
+    "description": "A flickering CRT terminal of glowing glyphs, with phosphor trails under the cursor and glitches on click.",
+    "dependencies": [],
+    "registry_item": "FaultyTerminal-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FaultyTerminal-TS-CSS",
+    "files": [
+      "FaultyTerminal.css",
+      "FaultyTerminal.tsx"
+    ]
+  },
+  {
+    "name": "Ferrofluid",
+    "category": "Backgrounds",
+    "description": "A glossy sea of magnetic fluid where swells of spikes roll in and the cursor raises a crown.",
+    "dependencies": [],
+    "registry_item": "Ferrofluid-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Ferrofluid-TS-CSS",
+    "files": [
+      "Ferrofluid.css",
+      "Ferrofluid.tsx"
+    ]
+  },
+  {
+    "name": "FlexCarousel",
+    "category": "Components",
+    "description": "An infinite image row that flows through invisible liquid glass at its edges.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "FlexCarousel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FlexCarousel-TS-CSS",
+    "files": [
+      "FlexCarousel.css",
+      "FlexCarousel.tsx"
+    ]
+  },
+  {
+    "name": "FlipCard",
+    "category": "Micro",
+    "description": "Two-faced card that flips in 3D on a click, drag or flick and settles on a spring.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "FlipCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FlipCard-TS-CSS",
+    "files": [
+      "FlipCard.css",
+      "FlipCard.tsx"
+    ]
+  },
+  {
+    "name": "FloatingLines",
+    "category": "Backgrounds",
+    "description": "Ribbons of fine glowing lines that drift in waves, part around the cursor and curl when clicked.",
+    "dependencies": [],
+    "registry_item": "FloatingLines-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FloatingLines-TS-CSS",
+    "files": [
+      "FloatingLines.css",
+      "FloatingLines.tsx"
+    ]
+  },
+  {
+    "name": "FlowingMenu",
+    "category": "Components",
+    "description": "A full-height menu with a liquid band that glides between rows and reveals a scrolling marquee of each item.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "FlowingMenu-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FlowingMenu-TS-CSS",
+    "files": [
+      "FlowingMenu.css",
+      "FlowingMenu.tsx"
+    ]
+  },
+  {
+    "name": "FluidGlass",
+    "category": "Components",
+    "description": "A 3D glass object that refracts your headline, image or video, follows the cursor and melts between shapes.",
+    "dependencies": [],
+    "registry_item": "FluidGlass-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FluidGlass-TS-CSS",
+    "files": [
+      "FluidGlass.css",
+      "FluidGlass.tsx"
+    ]
+  },
+  {
+    "name": "FluxLines",
+    "category": "Backgrounds",
+    "description": "Glowing flux lines tracing a churning magnetic fluid. The cursor magnet reveals and curls them.",
+    "dependencies": [],
+    "registry_item": "FluxLines-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FluxLines-TS-CSS",
+    "files": [
+      "FluxLines.css",
+      "FluxLines.tsx"
+    ]
+  },
+  {
+    "name": "FlyingButton",
+    "category": "Micro",
+    "description": "Button that fires its thrusters on hover, lifts off on a WebGL smoke plume and lands back in its own cloud.",
+    "dependencies": [],
+    "registry_item": "FlyingButton-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FlyingButton-TS-CSS",
+    "files": [
+      "FlyingButton.css",
+      "FlyingButton.tsx"
+    ]
+  },
+  {
+    "name": "FlyingPosters",
+    "category": "Components",
+    "description": "3D posters that twist and flip as you scroll or drag through an endless column.",
+    "dependencies": [],
+    "registry_item": "FlyingPosters-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FlyingPosters-TS-CSS",
+    "files": [
+      "FlyingPosters.css",
+      "FlyingPosters.tsx"
+    ]
+  },
+  {
+    "name": "Folder",
+    "category": "Components",
+    "description": "Folder that drops its flap open or swings open like a book, with pages you can pick.",
+    "dependencies": [],
+    "registry_item": "Folder-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Folder-TS-CSS",
+    "files": [
+      "Folder.css",
+      "Folder.tsx"
+    ]
+  },
+  {
+    "name": "FolderFloat",
+    "category": "Micro",
+    "description": "Folder whose notes spring out into a floating cloud when it opens on hover or press.",
+    "dependencies": [
+      "matter-js@^0.20.0"
+    ],
+    "registry_item": "FolderFloat-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FolderFloat-TS-CSS",
+    "files": [
+      "FolderFloat.css",
+      "FolderFloat.tsx"
+    ]
+  },
+  {
+    "name": "FoldText",
+    "category": "TextAnimations",
+    "description": "Lines unfold into place like creased paper opening flat.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "FoldText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FoldText-TS-CSS",
+    "files": [
+      "FoldText.css",
+      "FoldText.tsx"
+    ]
+  },
+  {
+    "name": "FuseButton",
+    "category": "Micro",
+    "description": "Action button whose done state carries an undo on a burning fuse.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "FuseButton-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FuseButton-TS-CSS",
+    "files": [
+      "FuseButton.css",
+      "FuseButton.tsx"
+    ]
+  },
+  {
+    "name": "FuzzyText",
+    "category": "TextAnimations",
+    "description": "Vibrating fuzzy text with controllable hover intensity.",
+    "dependencies": [],
+    "registry_item": "FuzzyText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/FuzzyText-TS-CSS",
+    "files": [
+      "FuzzyText/FuzzyText.tsx"
+    ]
+  },
+  {
+    "name": "Galaxy",
+    "category": "Backgrounds",
+    "description": "Endless flight through a twinkling starfield with warp jumps, cursor repulsion and star palettes.",
+    "dependencies": [],
+    "registry_item": "Galaxy-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Galaxy-TS-CSS",
+    "files": [
+      "Galaxy.css",
+      "Galaxy.tsx"
+    ]
+  },
+  {
+    "name": "GhostCursor",
+    "category": "Animations",
+    "description": "A ghost of glowing smoke that floats after the cursor and curls away as it rises.",
+    "dependencies": [],
+    "registry_item": "GhostCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GhostCursor-TS-CSS",
+    "files": [
+      "GhostCursor.css",
+      "GhostCursor.tsx"
+    ]
+  },
+  {
+    "name": "GhostFibers",
+    "category": "Backgrounds",
+    "description": "Layered ribbons of fine glowing fibers that twist, fold and drift through soft depth of field.",
+    "dependencies": [],
+    "registry_item": "GhostFibers-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GhostFibers-TS-CSS",
+    "files": [
+      "GhostFibers.css",
+      "GhostFibers.tsx"
+    ]
+  },
+  {
+    "name": "GlareHover",
+    "category": "Animations",
+    "description": "A glossy light streak that sweeps across any element in the direction the cursor moves.",
+    "dependencies": [],
+    "registry_item": "GlareHover-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GlareHover-TS-CSS",
+    "files": [
+      "GlareHover.css",
+      "GlareHover.tsx"
+    ]
+  },
+  {
+    "name": "GlassIcons",
+    "category": "Components",
+    "description": "Liquid glass icons that bend the color behind them, for app grids, docks and social links.",
+    "dependencies": [],
+    "registry_item": "GlassIcons-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GlassIcons-TS-CSS",
+    "files": [
+      "GlassIcons.css",
+      "GlassIcons.tsx"
+    ]
+  },
+  {
+    "name": "GlassSurface",
+    "category": "Components",
+    "description": "Apple-style liquid glass that bends what is behind it, in a rounded panel or any logo shape.",
+    "dependencies": [],
+    "registry_item": "GlassSurface-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GlassSurface-TS-CSS",
+    "files": [
+      "GlassSurface.css",
+      "GlassSurface.tsx"
+    ]
+  },
+  {
+    "name": "GlideSelect",
+    "category": "Micro",
+    "description": "Select chip whose menu pops from its corner and whose highlight glides between rows.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "GlideSelect-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GlideSelect-TS-CSS",
+    "files": [
+      "GlideSelect.css",
+      "GlideSelect.tsx"
+    ]
+  },
+  {
+    "name": "GlitchText",
+    "category": "TextAnimations",
+    "description": "RGB split and distortion glitch effect with jitter effects.",
+    "dependencies": [],
+    "registry_item": "GlitchText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GlitchText-TS-CSS",
+    "files": [
+      "GlitchText.css",
+      "GlitchText.tsx"
+    ]
+  },
+  {
+    "name": "GlowCursor",
+    "category": "Animations",
+    "description": "Light that pours from the cursor, drifts softly through the air and cools as it fades.",
+    "dependencies": [],
+    "registry_item": "GlowCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GlowCursor-TS-CSS",
+    "files": [
+      "GlowCursor.css",
+      "GlowCursor.tsx"
+    ]
+  },
+  {
+    "name": "GooeyNav",
+    "category": "Components",
+    "description": "A navigation bar whose active pill breaks into goo that flows over to the item you pick.",
+    "dependencies": [],
+    "registry_item": "GooeyNav-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GooeyNav-TS-CSS",
+    "files": [
+      "GooeyNav.css",
+      "GooeyNav.tsx"
+    ]
+  },
+  {
+    "name": "GradientASCII",
+    "category": "Backgrounds",
+    "description": "Soft gradient glows drawn in ASCII characters that scramble under the cursor.",
+    "dependencies": [],
+    "registry_item": "GradientASCII-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GradientASCII-TS-CSS",
+    "files": [
+      "GradientASCII.css",
+      "GradientASCII.tsx"
+    ]
+  },
+  {
+    "name": "GradientBlinds",
+    "category": "Backgrounds",
+    "description": "Satin gradient blinds lit by a spotlight that follows the cursor, swaying and turning toward the light.",
+    "dependencies": [],
+    "registry_item": "GradientBlinds-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GradientBlinds-TS-CSS",
+    "files": [
+      "GradientBlinds.css",
+      "GradientBlinds.tsx"
+    ]
+  },
+  {
+    "name": "GradientText",
+    "category": "TextAnimations",
+    "description": "Living gradients inside your text: a sliding sweep, a drifting mesh or a swinging conic fan.",
+    "dependencies": [],
+    "registry_item": "GradientText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GradientText-TS-CSS",
+    "files": [
+      "GradientText.css",
+      "GradientText.tsx"
+    ]
+  },
+  {
+    "name": "GradientWaves",
+    "category": "Backgrounds",
+    "description": "Lit satin waves rolling in from a hazy horizon, with a light that follows the cursor and swells on click.",
+    "dependencies": [],
+    "registry_item": "GradientWaves-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GradientWaves-TS-CSS",
+    "files": [
+      "GradientWaves.css",
+      "GradientWaves.tsx"
+    ]
+  },
+  {
+    "name": "GradualBlur",
+    "category": "Animations",
+    "description": "Progressive edge blur for headers, footers, captions and carousels, with an optional fade to color that hides at the ends of a scroll.",
+    "dependencies": [],
+    "registry_item": "GradualBlur-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GradualBlur-TS-CSS",
+    "files": [
+      "GradualBlur.css",
+      "GradualBlur.tsx"
+    ]
+  },
+  {
+    "name": "Grainient",
+    "category": "Backgrounds",
+    "description": "Flowing grainy gradients you can stir with the cursor.",
+    "dependencies": [],
+    "registry_item": "Grainient-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Grainient-TS-CSS",
+    "files": [
+      "Grainient.css",
+      "Grainient.tsx"
+    ]
+  },
+  {
+    "name": "GridDistortion",
+    "category": "Backgrounds",
+    "description": "Image background that breaks into a grid of blocks under the cursor and settles back into place.",
+    "dependencies": [],
+    "registry_item": "GridDistortion-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GridDistortion-TS-CSS",
+    "files": [
+      "GridDistortion.css",
+      "GridDistortion.tsx"
+    ]
+  },
+  {
+    "name": "GridMotion",
+    "category": "Backgrounds",
+    "description": "A tilted wall of drifting tiles that slides with the pointer and lights up where it rests.",
+    "dependencies": [],
+    "registry_item": "GridMotion-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GridMotion-TS-CSS",
+    "files": [
+      "GridMotion.css",
+      "GridMotion.tsx"
+    ]
+  },
+  {
+    "name": "GridScan",
+    "category": "Backgrounds",
+    "description": "A 3D grid room swept by a scanning light that follows your view.",
+    "dependencies": [],
+    "registry_item": "GridScan-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/GridScan-TS-CSS",
+    "files": [
+      "GridScan.css",
+      "GridScan.tsx"
+    ]
+  },
+  {
+    "name": "HalftoneReveal",
+    "category": "Animations",
+    "description": "A halftone print of an image whose dots swell into the real photo under the cursor.",
+    "dependencies": [],
+    "registry_item": "HalftoneReveal-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/HalftoneReveal-TS-CSS",
+    "files": [
+      "HalftoneReveal.css",
+      "HalftoneReveal.tsx"
+    ]
+  },
+  {
+    "name": "HoldButton",
+    "category": "Micro",
+    "description": "Hold-to-confirm button whose liquid fill rises while pressed and snaps back if you let go.",
+    "dependencies": [],
+    "registry_item": "HoldButton-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/HoldButton-TS-CSS",
+    "files": [
+      "HoldButton.css",
+      "HoldButton.tsx"
+    ]
+  },
+  {
+    "name": "HoloCard",
+    "category": "Components",
+    "description": "Collectible trading card with a real holographic foil and glitter that sparkles as it tilts.",
+    "dependencies": [],
+    "registry_item": "HoloCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/HoloCard-TS-CSS",
+    "files": [
+      "HoloCard.css",
+      "HoloCard.tsx"
+    ]
+  },
+  {
+    "name": "Hyperspeed",
+    "category": "Backgrounds",
+    "description": "Night highway of glowing light trails on a winding road that warps into hyperspace while you hold.",
+    "dependencies": [
+      "three@^0.180.0"
+    ],
+    "registry_item": "Hyperspeed-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Hyperspeed-TS-CSS",
+    "files": [
+      "Hyperspeed.css",
+      "Hyperspeed.tsx"
+    ]
+  },
+  {
+    "name": "ImageTrail",
+    "category": "Animations",
+    "description": "Cursor-based image trail with several built-in variants.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "ImageTrail-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ImageTrail-TS-CSS",
+    "files": [
+      "ImageTrail.css",
+      "ImageTrail.tsx"
+    ]
+  },
+  {
+    "name": "InfiniteMenu",
+    "category": "Components",
+    "description": "A draggable sphere of image tiles that snaps the nearest one forward and shows its title.",
+    "dependencies": [],
+    "registry_item": "InfiniteMenu-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/InfiniteMenu-TS-CSS",
+    "files": [
+      "InfiniteMenu.css",
+      "InfiniteMenu.tsx"
+    ]
+  },
+  {
+    "name": "InfiniteSpiral",
+    "category": "Components",
+    "description": "An endlessly looping 3D helix of images with adjustable motion, depth and spacing.",
+    "dependencies": [],
+    "registry_item": "InfiniteSpiral-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/InfiniteSpiral-TS-CSS",
+    "files": [
+      "InfiniteSpiral.css",
+      "InfiniteSpiral.tsx"
+    ]
+  },
+  {
+    "name": "Iridescence",
+    "category": "Backgrounds",
+    "description": "Liquid iridescent surface with shifting folds that you can stir with the cursor.",
+    "dependencies": [],
+    "registry_item": "Iridescence-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Iridescence-TS-CSS",
+    "files": [
+      "Iridescence.css",
+      "Iridescence.tsx"
+    ]
+  },
+  {
+    "name": "JellyRadio",
+    "category": "Micro",
+    "description": "Radio group of chips where the chosen one swells and barges its neighbours outward.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "JellyRadio-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/JellyRadio-TS-CSS",
+    "files": [
+      "JellyRadio.css",
+      "JellyRadio.tsx"
+    ]
+  },
+  {
+    "name": "Lanyard",
+    "category": "Components",
+    "description": "Swinging 3D badge on a stretchy woven band that you can drag, throw or click to flip.",
+    "dependencies": [
+      "three@^0.180.0"
+    ],
+    "registry_item": "Lanyard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Lanyard-TS-CSS",
+    "files": [
+      "Lanyard.css",
+      "Lanyard.tsx"
+    ]
+  },
+  {
+    "name": "LaserFlow",
+    "category": "Animations",
+    "description": "A beam of light that splashes onto your content and pours over its corners.",
+    "dependencies": [],
+    "registry_item": "LaserFlow-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LaserFlow-TS-CSS",
+    "files": [
+      "LaserFlow.css",
+      "LaserFlow.tsx"
+    ]
+  },
+  {
+    "name": "LatticeLoader",
+    "category": "Micro",
+    "description": "Agent status row with a lattice of cells that brighten in a wave beside a live stopwatch.",
+    "dependencies": [],
+    "registry_item": "LatticeLoader-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LatticeLoader-TS-CSS",
+    "files": [
+      "LatticeLoader.css",
+      "LatticeLoader.tsx"
+    ]
+  },
+  {
+    "name": "LetterGlitch",
+    "category": "Backgrounds",
+    "description": "A calm field of letters that flicker, scramble and glitch in color, stirred by the cursor and torn by clicks.",
+    "dependencies": [],
+    "registry_item": "LetterGlitch-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LetterGlitch-TS-CSS",
+    "files": [
+      "LetterGlitch.css",
+      "LetterGlitch.tsx"
+    ]
+  },
+  {
+    "name": "Lightfall",
+    "category": "Backgrounds",
+    "description": "Streaks of light falling down a curved tunnel, bending around the cursor and stretching into warp trails on hold.",
+    "dependencies": [],
+    "registry_item": "Lightfall-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Lightfall-TS-CSS",
+    "files": [
+      "Lightfall.css",
+      "Lightfall.tsx"
+    ]
+  },
+  {
+    "name": "Lightning",
+    "category": "Backgrounds",
+    "description": "Crackling, branching lightning that bends toward the cursor and strikes wherever you click.",
+    "dependencies": [],
+    "registry_item": "Lightning-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Lightning-TS-CSS",
+    "files": [
+      "Lightning.css",
+      "Lightning.tsx"
+    ]
+  },
+  {
+    "name": "LightPillar",
+    "category": "Backgrounds",
+    "description": "A swirling pillar of light that ignites on load, leans toward the cursor and surges on click.",
+    "dependencies": [],
+    "registry_item": "LightPillar-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LightPillar-TS-CSS",
+    "files": [
+      "LightPillar.css",
+      "LightPillar.tsx"
+    ]
+  },
+  {
+    "name": "LightRays",
+    "category": "Backgrounds",
+    "description": "Volumetric light rays from any edge, with source glow and haze. The cursor steers the beam and casts a shadow.",
+    "dependencies": [],
+    "registry_item": "LightRays-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LightRays-TS-CSS",
+    "files": [
+      "LightRays.css",
+      "LightRays.tsx"
+    ]
+  },
+  {
+    "name": "LightTunnel",
+    "category": "Backgrounds",
+    "description": "A swirling fibre-optic tunnel where comets of light race into depth, steered by the cursor.",
+    "dependencies": [],
+    "registry_item": "LightTunnel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LightTunnel-TS-CSS",
+    "files": [
+      "LightTunnel.css",
+      "LightTunnel.tsx"
+    ]
+  },
+  {
+    "name": "LineSidebar",
+    "category": "Components",
+    "description": "Static list navigation with a cursor-proximity effect that shifts and highlights nearby items.",
+    "dependencies": [],
+    "registry_item": "LineSidebar-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LineSidebar-TS-CSS",
+    "files": [
+      "LineSidebar.css",
+      "LineSidebar.tsx"
+    ]
+  },
+  {
+    "name": "LineWaves",
+    "category": "Backgrounds",
+    "description": "Fine lines that flow in silky waves while a band of light drifts through them.",
+    "dependencies": [],
+    "registry_item": "LineWaves-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LineWaves-TS-CSS",
+    "files": [
+      "LineWaves.css",
+      "LineWaves.tsx"
+    ]
+  },
+  {
+    "name": "LiquidChrome",
+    "category": "Backgrounds",
+    "description": "Soft ribbons of liquid chrome that swirl through a dark pool, ripple under the cursor and catch the light as it moves.",
+    "dependencies": [],
+    "registry_item": "LiquidChrome-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LiquidChrome-TS-CSS",
+    "files": [
+      "LiquidChrome.css",
+      "LiquidChrome.tsx"
+    ]
+  },
+  {
+    "name": "LiquidEther",
+    "category": "Backgrounds",
+    "description": "A glowing liquid that swirls under the cursor, colored by how fast it flows.",
+    "dependencies": [],
+    "registry_item": "LiquidEther-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LiquidEther-TS-CSS",
+    "files": [
+      "LiquidEther.css",
+      "LiquidEther.tsx"
+    ]
+  },
+  {
+    "name": "LogoLoop",
+    "category": "Animations",
+    "description": "Continuously looping marquee of brand or tech logos with seamless repeat and hover pause.",
+    "dependencies": [],
+    "registry_item": "LogoLoop-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/LogoLoop-TS-CSS",
+    "files": [
+      "LogoLoop.css",
+      "LogoLoop.tsx"
+    ]
+  },
+  {
+    "name": "MagicBento",
+    "category": "Components",
+    "description": "A bento grid of feature cards with live artwork, edge light that follows the cursor and a click wave.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "MagicBento-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MagicBento-TS-CSS",
+    "files": [
+      "MagicBento.css",
+      "MagicBento.tsx"
+    ]
+  },
+  {
+    "name": "MagicRings",
+    "category": "Backgrounds",
+    "description": "Glowing rings that pulse outward in a wave, swell toward the cursor and flare on click.",
+    "dependencies": [],
+    "registry_item": "MagicRings-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MagicRings-TS-CSS",
+    "files": [
+      "MagicRings.css",
+      "MagicRings.tsx"
+    ]
+  },
+  {
+    "name": "Magnet",
+    "category": "Animations",
+    "description": "Elements magnetically ease toward the cursor then settle back with spring physics.",
+    "dependencies": [],
+    "registry_item": "Magnet-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Magnet-TS-CSS",
+    "files": [
+      "Magnet/Magnet.tsx"
+    ]
+  },
+  {
+    "name": "MagnetLines",
+    "category": "Backgrounds",
+    "description": "A field of magnetic lines that swing toward the cursor, ripple outward and spin with every click.",
+    "dependencies": [],
+    "registry_item": "MagnetLines-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MagnetLines-TS-CSS",
+    "files": [
+      "MagnetLines.css",
+      "MagnetLines.tsx"
+    ]
+  },
+  {
+    "name": "MaskedHeading",
+    "category": "TextAnimations",
+    "description": "A headline with a drifting colour mesh or image showing through, revealed word by word.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "MaskedHeading-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MaskedHeading-TS-CSS",
+    "files": [
+      "MaskedHeading.css",
+      "MaskedHeading.tsx"
+    ]
+  },
+  {
+    "name": "Masonry",
+    "category": "Components",
+    "description": "A masonry gallery that springs into place, reflows as it resizes and opens images in a lightbox.",
+    "dependencies": [
+      "react-dom@^19.0.0",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "Masonry-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Masonry-TS-CSS",
+    "files": [
+      "Masonry.css",
+      "Masonry.tsx"
+    ]
+  },
+  {
+    "name": "MetaBalls",
+    "category": "Animations",
+    "description": "Liquid metaballs that merge, stretch and pinch apart, with a cursor blob that pushes through them.",
+    "dependencies": [],
+    "registry_item": "MetaBalls-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MetaBalls-TS-CSS",
+    "files": [
+      "MetaBalls.css",
+      "MetaBalls.tsx"
+    ]
+  },
+  {
+    "name": "MetallicPaint",
+    "category": "Animations",
+    "description": "Liquid chrome that flows over your logo or text, adapted from Paper's Liquid Metal shader.",
+    "dependencies": [],
+    "registry_item": "MetallicPaint-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MetallicPaint-TS-CSS",
+    "files": [
+      "MetallicPaint.css",
+      "MetallicPaint.tsx"
+    ]
+  },
+  {
+    "name": "MicroSlats",
+    "category": "Backgrounds",
+    "description": "A wall of tiny slats that becomes a rolling sea in perspective, with glinting crests.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "MicroSlats-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MicroSlats-TS-CSS",
+    "files": [
+      "MicroSlats.css",
+      "MicroSlats.tsx"
+    ]
+  },
+  {
+    "name": "ModelViewer",
+    "category": "Components",
+    "description": "A product-style 3D model viewer that frames itself and floats over a soft shadow.",
+    "dependencies": [
+      "@react-three/fiber@^9.3.0",
+      "@react-three/drei@^10.7.4",
+      "three@^0.180.0"
+    ],
+    "registry_item": "ModelViewer-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ModelViewer-TS-CSS",
+    "files": [
+      "ModelViewer/ModelViewer.tsx"
+    ]
+  },
+  {
+    "name": "MoltenMetal",
+    "category": "Backgrounds",
+    "description": "Swirling caustic filaments with white-hot cores that heat up under the cursor and flare on click.",
+    "dependencies": [],
+    "registry_item": "MoltenMetal-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MoltenMetal-TS-CSS",
+    "files": [
+      "MoltenMetal.css",
+      "MoltenMetal.tsx"
+    ]
+  },
+  {
+    "name": "MorphSlider",
+    "category": "Components",
+    "description": "WebGL slider that melts between images with a displacement transition.",
+    "dependencies": [
+      "ogl@^1.0.11",
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "MorphSlider-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/MorphSlider-TS-CSS",
+    "files": [
+      "MorphSlider.css",
+      "MorphSlider.tsx"
+    ]
+  },
+  {
+    "name": "Noise",
+    "category": "Animations",
+    "description": "Film grain overlay for photos and pages, from fine 35mm grain to dust, paper and TV static.",
+    "dependencies": [],
+    "registry_item": "Noise-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Noise-TS-CSS",
+    "files": [
+      "Noise.css",
+      "Noise.tsx"
+    ]
+  },
+  {
+    "name": "OptionWheel",
+    "category": "Components",
+    "description": "Curved option picker that spins with scroll, drag or arrow keys, tilting items away.",
+    "dependencies": [],
+    "registry_item": "OptionWheel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/OptionWheel-TS-CSS",
+    "files": [
+      "OptionWheel.css",
+      "OptionWheel.tsx"
+    ]
+  },
+  {
+    "name": "Orb",
+    "category": "Backgrounds",
+    "description": "A glowing ring of swirling color that breathes, trails an orbiting light and reaches toward the cursor.",
+    "dependencies": [],
+    "registry_item": "Orb-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Orb-TS-CSS",
+    "files": [
+      "Orb.css",
+      "Orb.tsx"
+    ]
+  },
+  {
+    "name": "OrbitImages",
+    "category": "Animations",
+    "description": "SVG Path customizable orbiting images effect",
+    "dependencies": [],
+    "registry_item": "OrbitImages-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/OrbitImages-TS-CSS",
+    "files": [
+      "OrbitImages.css",
+      "OrbitImages.tsx"
+    ]
+  },
+  {
+    "name": "PaperCrumple",
+    "category": "Micro",
+    "description": "An image that crumples into a textured 3D sheet while you hold and drag it.",
+    "dependencies": [
+      "three@^0.180.0"
+    ],
+    "registry_item": "PaperCrumple-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PaperCrumple-TS-CSS",
+    "files": [
+      "PaperCrumple.css",
+      "PaperCrumple.tsx"
+    ]
+  },
+  {
+    "name": "Particles",
+    "category": "Backgrounds",
+    "description": "A drifting 3D field of particles with glow, twinkle, constellation lines and cursor interaction.",
+    "dependencies": [],
+    "registry_item": "Particles-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Particles-TS-CSS",
+    "files": [
+      "Particles.css",
+      "Particles.tsx"
+    ]
+  },
+  {
+    "name": "ParticleText",
+    "category": "TextAnimations",
+    "description": "Text assembles from drifting particles that scatter and reform on demand.",
+    "dependencies": [],
+    "registry_item": "ParticleText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ParticleText-TS-CSS",
+    "files": [
+      "ParticleText.css",
+      "ParticleText.tsx"
+    ]
+  },
+  {
+    "name": "PatternWaves",
+    "category": "Backgrounds",
+    "description": "A lit halftone surface of dots, lines or glyphs that moves like draped silk.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "PatternWaves-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PatternWaves-TS-CSS",
+    "files": [
+      "PatternWaves.css",
+      "PatternWaves.tsx"
+    ]
+  },
+  {
+    "name": "PeekRating",
+    "category": "Micro",
+    "description": "Star rating that lifts a wave of stars up to the pointer, then commits with a pop on click.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "PeekRating-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PeekRating-TS-CSS",
+    "files": [
+      "PeekRating.css",
+      "PeekRating.tsx"
+    ]
+  },
+  {
+    "name": "PillNav",
+    "category": "Components",
+    "description": "A pill navigation bar where a fill rises through each link as its label rolls over, with a sliding active dot.",
+    "dependencies": [],
+    "registry_item": "PillNav-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PillNav-TS-CSS",
+    "files": [
+      "PillNav.css",
+      "PillNav.tsx"
+    ]
+  },
+  {
+    "name": "PixelBlast",
+    "category": "Backgrounds",
+    "description": "Dithered pixel clouds that drift, shimmer and light up under the cursor, with ripples, shapes and a perspective floor.",
+    "dependencies": [],
+    "registry_item": "PixelBlast-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PixelBlast-TS-CSS",
+    "files": [
+      "PixelBlast.css",
+      "PixelBlast.tsx"
+    ]
+  },
+  {
+    "name": "PixelCard",
+    "category": "Components",
+    "description": "A card that fills with twinkling pixels on hover, rippling out from the center or the cursor.",
+    "dependencies": [],
+    "registry_item": "PixelCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PixelCard-TS-CSS",
+    "files": [
+      "PixelCard.css",
+      "PixelCard.tsx"
+    ]
+  },
+  {
+    "name": "PixelSnow",
+    "category": "Backgrounds",
+    "description": "Pixel-art snowflakes drifting down in layers of depth, brushed aside by the cursor.",
+    "dependencies": [],
+    "registry_item": "PixelSnow-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PixelSnow-TS-CSS",
+    "files": [
+      "PixelSnow.css",
+      "PixelSnow.tsx"
+    ]
+  },
+  {
+    "name": "PixelSwap",
+    "category": "Animations",
+    "description": "New content builds in pixel by pixel in a springy wave that starts wherever the cursor enters.",
+    "dependencies": [],
+    "registry_item": "PixelSwap-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PixelSwap-TS-CSS",
+    "files": [
+      "PixelSwap.css",
+      "PixelSwap.tsx"
+    ]
+  },
+  {
+    "name": "PixelTrail",
+    "category": "Animations",
+    "description": "Glossy pixels melt into a fluid goo trail behind the cursor, with color shifts and drips.",
+    "dependencies": [],
+    "registry_item": "PixelTrail-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PixelTrail-TS-CSS",
+    "files": [
+      "PixelTrail.css",
+      "PixelTrail.tsx"
+    ]
+  },
+  {
+    "name": "PixelTransition",
+    "category": "Animations",
+    "description": "Retro pixel dissolve that covers a card in solid pixels, swaps the content underneath and clears again.",
+    "dependencies": [],
+    "registry_item": "PixelTransition-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PixelTransition-TS-CSS",
+    "files": [
+      "PixelTransition.css",
+      "PixelTransition.tsx"
+    ]
+  },
+  {
+    "name": "Plasma",
+    "category": "Backgrounds",
+    "description": "Folds of satin light twisting slowly through the dark, turning to follow the cursor.",
+    "dependencies": [],
+    "registry_item": "Plasma-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Plasma-TS-CSS",
+    "files": [
+      "Plasma.css",
+      "Plasma.tsx"
+    ]
+  },
+  {
+    "name": "PlasmaWave",
+    "category": "Backgrounds",
+    "description": "Two ribbons of plasma curling through each other, with soft glow and white-hot cores.",
+    "dependencies": [],
+    "registry_item": "PlasmaWave-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PlasmaWave-TS-CSS",
+    "files": [
+      "PlasmaWave.css",
+      "PlasmaWave.tsx"
+    ]
+  },
+  {
+    "name": "Prism",
+    "category": "Backgrounds",
+    "description": "Rotating prism of glowing spectral light with configurable shape, colors and motion.",
+    "dependencies": [],
+    "registry_item": "Prism-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Prism-TS-CSS",
+    "files": [
+      "Prism.css",
+      "Prism.tsx"
+    ]
+  },
+  {
+    "name": "PrismaticBurst",
+    "category": "Backgrounds",
+    "description": "A burst of prismatic light rays that leans toward the cursor and sends a wave of light outward on click.",
+    "dependencies": [],
+    "registry_item": "PrismaticBurst-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PrismaticBurst-TS-CSS",
+    "files": [
+      "PrismaticBurst.css",
+      "PrismaticBurst.tsx"
+    ]
+  },
+  {
+    "name": "ProfileCard",
+    "category": "Components",
+    "description": "A framed profile card that tilts toward the cursor, with holographic foil shining through a tiled pattern.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "ProfileCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ProfileCard-TS-CSS",
+    "files": [
+      "ProfileCard.css",
+      "ProfileCard.tsx"
+    ]
+  },
+  {
+    "name": "PromptBar",
+    "category": "Micro",
+    "description": "Chat composer with @ sources, / commands, a model picker, dictation and attachments.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "PromptBar-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PromptBar-TS-CSS",
+    "files": [
+      "PromptBar.css",
+      "PromptBar.tsx"
+    ]
+  },
+  {
+    "name": "PulseHeart",
+    "category": "Micro",
+    "description": "Like button that contracts to a dot, flips colour and pulses back as the count ticks over.",
+    "dependencies": [
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "PulseHeart-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/PulseHeart-TS-CSS",
+    "files": [
+      "PulseHeart.css",
+      "PulseHeart.tsx"
+    ]
+  },
+  {
+    "name": "Radar",
+    "category": "Backgrounds",
+    "description": "A radar scope whose sweep leaves a phosphor afterglow and picks up moving contacts.",
+    "dependencies": [],
+    "registry_item": "Radar-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Radar-TS-CSS",
+    "files": [
+      "Radar.css",
+      "Radar.tsx"
+    ]
+  },
+  {
+    "name": "RefineFrame",
+    "category": "Micro",
+    "description": "Media frame that steps an image through generation stages without any layout shift.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "RefineFrame-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/RefineFrame-TS-CSS",
+    "files": [
+      "RefineFrame.css",
+      "RefineFrame.tsx"
+    ]
+  },
+  {
+    "name": "ReflectiveCard",
+    "category": "Components",
+    "description": "A metal ID card that reflects your camera or a looping video and catches the light as it tilts.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "ReflectiveCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ReflectiveCard-TS-CSS",
+    "files": [
+      "ReflectiveCard.css",
+      "ReflectiveCard.tsx"
+    ]
+  },
+  {
+    "name": "Ribbons",
+    "category": "Animations",
+    "description": "Springy ribbons that trail the cursor, in lens, comet or even shapes with an optional wave.",
+    "dependencies": [],
+    "registry_item": "Ribbons-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Ribbons-TS-CSS",
+    "files": [
+      "Ribbons.css",
+      "Ribbons.tsx"
+    ]
+  },
+  {
+    "name": "RippleDistortion",
+    "category": "Animations",
+    "description": "Pointer-driven water displacement that warps content and leaves a decaying wake.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "RippleDistortion-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/RippleDistortion-TS-CSS",
+    "files": [
+      "RippleDistortion.css",
+      "RippleDistortion.tsx"
+    ]
+  },
+  {
+    "name": "RippleGrid",
+    "category": "Backgrounds",
+    "description": "A crisp grid that ripples like water, bending and lighting up as waves pass through it.",
+    "dependencies": [],
+    "registry_item": "RippleGrid-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/RippleGrid-TS-CSS",
+    "files": [
+      "RippleGrid.css",
+      "RippleGrid.tsx"
+    ]
+  },
+  {
+    "name": "RotatingText",
+    "category": "TextAnimations",
+    "description": "Cycles through multiple phrases with 3D rotate / flip transitions.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "RotatingText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/RotatingText-TS-CSS",
+    "files": [
+      "RotatingText.css",
+      "RotatingText.tsx"
+    ]
+  },
+  {
+    "name": "RubberSegment",
+    "category": "Micro",
+    "description": "Segmented control whose rubber thumb stretches across the gap and squashes into place.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "RubberSegment-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/RubberSegment-TS-CSS",
+    "files": [
+      "RubberSegment.css",
+      "RubberSegment.tsx"
+    ]
+  },
+  {
+    "name": "Scanner",
+    "category": "Backgrounds",
+    "description": "Glowing interference lines swept by a scan beam, with a CRT finish, cursor lensing and click pings.",
+    "dependencies": [],
+    "registry_item": "Scanner-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Scanner-TS-CSS",
+    "files": [
+      "Scanner.css",
+      "Scanner.tsx"
+    ]
+  },
+  {
+    "name": "ScrambledText",
+    "category": "TextAnimations",
+    "description": "Detects cursor position and applies a distortion effect to text.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "ScrambledText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrambledText-TS-CSS",
+    "files": [
+      "ScrambledText.css",
+      "ScrambledText.tsx"
+    ]
+  },
+  {
+    "name": "ScrollExpand",
+    "category": "Animations",
+    "description": "A rounded media frame that grows to full bleed as it scrolls through the viewport.",
+    "dependencies": [],
+    "registry_item": "ScrollExpand-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrollExpand-TS-CSS",
+    "files": [
+      "ScrollExpand.css",
+      "ScrollExpand.tsx"
+    ]
+  },
+  {
+    "name": "ScrollFloat",
+    "category": "TextAnimations",
+    "description": "Text gently floats / parallax shifts on scroll.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "ScrollFloat-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrollFloat-TS-CSS",
+    "files": [
+      "ScrollFloat.css",
+      "ScrollFloat.tsx"
+    ]
+  },
+  {
+    "name": "ScrollReveal",
+    "category": "TextAnimations",
+    "description": "Text gently unblurs and reveals on scroll.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "ScrollReveal-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrollReveal-TS-CSS",
+    "files": [
+      "ScrollReveal.css",
+      "ScrollReveal.tsx"
+    ]
+  },
+  {
+    "name": "ScrollStack",
+    "category": "Components",
+    "description": "Cards pin and stack as you scroll, settling back into a dimmed deck with smooth, jitter-free motion.",
+    "dependencies": [],
+    "registry_item": "ScrollStack-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrollStack-TS-CSS",
+    "files": [
+      "ScrollStack.css",
+      "ScrollStack.tsx"
+    ]
+  },
+  {
+    "name": "ScrollVelocity",
+    "category": "TextAnimations",
+    "description": "Text marquee animatio - speed and distortion scale with user's scroll velocity.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "ScrollVelocity-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrollVelocity-TS-CSS",
+    "files": [
+      "ScrollVelocity.css",
+      "ScrollVelocity.tsx"
+    ]
+  },
+  {
+    "name": "ScrubField",
+    "category": "Micro",
+    "description": "Number chip you drag to scrub, with rubber-band limits and click to type.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "ScrubField-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ScrubField-TS-CSS",
+    "files": [
+      "ScrubField.css",
+      "ScrubField.tsx"
+    ]
+  },
+  {
+    "name": "ShapeBlur",
+    "category": "Animations",
+    "description": "A crisp logo or shape that drifts out of focus under the pointer like a camera lens.",
+    "dependencies": [],
+    "registry_item": "ShapeBlur-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ShapeBlur-TS-CSS",
+    "files": [
+      "ShapeBlur.css",
+      "ShapeBlur.tsx"
+    ]
+  },
+  {
+    "name": "ShapeGrid",
+    "category": "Backgrounds",
+    "description": "A drifting grid of shapes that lights up under the cursor, with perspective tilt and rainbow trails.",
+    "dependencies": [],
+    "registry_item": "ShapeGrid-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ShapeGrid-TS-CSS",
+    "files": [
+      "ShapeGrid.css",
+      "ShapeGrid.tsx"
+    ]
+  },
+  {
+    "name": "ShapeWaves",
+    "category": "Backgrounds",
+    "description": "A field of triangles, circles and squares that brighten and grow along rolling waves.",
+    "dependencies": [
+      "vgpu@^0.3.1"
+    ],
+    "registry_item": "ShapeWaves-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ShapeWaves-TS-CSS",
+    "files": [
+      "ShapeWaves.css",
+      "ShapeWaves.tsx"
+    ]
+  },
+  {
+    "name": "ShinyText",
+    "category": "TextAnimations",
+    "description": "A sheen of light that sweeps across text, from soft bands to chrome-like reflections.",
+    "dependencies": [],
+    "registry_item": "ShinyText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ShinyText-TS-CSS",
+    "files": [
+      "ShinyText.css",
+      "ShinyText.tsx"
+    ]
+  },
+  {
+    "name": "Shredder",
+    "category": "Micro",
+    "description": "A list with a paper shredder at the bottom that cuts dragged rows into curling strips.",
+    "dependencies": [
+      "react-dom@^19.0.0"
+    ],
+    "registry_item": "Shredder-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Shredder-TS-CSS",
+    "files": [
+      "Shredder.css",
+      "Shredder.tsx"
+    ]
+  },
+  {
+    "name": "Shuffle",
+    "category": "TextAnimations",
+    "description": "Animated text reveal where characters shuffle before settling.",
+    "dependencies": [
+      "gsap@^3.13.0",
+      "@gsap/react@^2.1.2"
+    ],
+    "registry_item": "Shuffle-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Shuffle-TS-CSS",
+    "files": [
+      "Shuffle.css",
+      "Shuffle.tsx"
+    ]
+  },
+  {
+    "name": "SideRays",
+    "category": "Backgrounds",
+    "description": "Shafts of light that fan in from a corner or side, shimmer slowly and lean toward the cursor.",
+    "dependencies": [],
+    "registry_item": "SideRays-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SideRays-TS-CSS",
+    "files": [
+      "SideRays.css",
+      "SideRays.tsx"
+    ]
+  },
+  {
+    "name": "Silk",
+    "category": "Backgrounds",
+    "description": "Flowing satin folds with glossy highlights that turn toward the cursor and ripple on click.",
+    "dependencies": [],
+    "registry_item": "Silk-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Silk-TS-CSS",
+    "files": [
+      "Silk.css",
+      "Silk.tsx"
+    ]
+  },
+  {
+    "name": "SlicedWaves",
+    "category": "Backgrounds",
+    "description": "Waves of colored light sliced into glowing bars, seen in depth with a focus that follows the cursor.",
+    "dependencies": [],
+    "registry_item": "SlicedWaves-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SlicedWaves-TS-CSS",
+    "files": [
+      "SlicedWaves.css",
+      "SlicedWaves.tsx"
+    ]
+  },
+  {
+    "name": "SlideCommit",
+    "category": "Micro",
+    "description": "Slide-to-confirm handle that spins while your action runs and unfurls into a done pill.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "SlideCommit-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SlideCommit-TS-CSS",
+    "files": [
+      "SlideCommit.css",
+      "SlideCommit.tsx"
+    ]
+  },
+  {
+    "name": "SlingButton",
+    "category": "Micro",
+    "description": "Send button you pull back like a slingshot and release to fire.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "SlingButton-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SlingButton-TS-CSS",
+    "files": [
+      "SlingButton.css",
+      "SlingButton.tsx"
+    ]
+  },
+  {
+    "name": "SloshGauge",
+    "category": "Micro",
+    "description": "Tank gauge whose liquid chases the value, tilts as it moves and splashes when it fills.",
+    "dependencies": [],
+    "registry_item": "SloshGauge-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SloshGauge-TS-CSS",
+    "files": [
+      "SloshGauge.css",
+      "SloshGauge.tsx"
+    ]
+  },
+  {
+    "name": "SoftAurora",
+    "category": "Backgrounds",
+    "description": "Soft aurora borealis shader with 3D Perlin noise and cosine gradient palettes.",
+    "dependencies": [],
+    "registry_item": "SoftAurora-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SoftAurora-TS-CSS",
+    "files": [
+      "SoftAurora.css",
+      "SoftAurora.tsx"
+    ]
+  },
+  {
+    "name": "SpecularButton",
+    "category": "Components",
+    "description": "Glass button whose edge catches the light, with a highlight that glides toward the cursor.",
+    "dependencies": [],
+    "registry_item": "SpecularButton-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SpecularButton-TS-CSS",
+    "files": [
+      "SpecularButton.css",
+      "SpecularButton.tsx"
+    ]
+  },
+  {
+    "name": "SplashCursor",
+    "category": "Animations",
+    "description": "A fluid simulation that trails the cursor in swirling ink and bursts into a splash on click.",
+    "dependencies": [],
+    "registry_item": "SplashCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SplashCursor-TS-CSS",
+    "files": [
+      "SplashCursor.css",
+      "SplashCursor.tsx"
+    ]
+  },
+  {
+    "name": "SplitFlapText",
+    "category": "TextAnimations",
+    "description": "Mechanical split-flap departure board that clacks through to each new phrase.",
+    "dependencies": [],
+    "registry_item": "SplitFlapText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SplitFlapText-TS-CSS",
+    "files": [
+      "SplitFlapText.css",
+      "SplitFlapText.tsx"
+    ]
+  },
+  {
+    "name": "SplitText",
+    "category": "TextAnimations",
+    "description": "Splits text into characters / words for staggered entrance animation.",
+    "dependencies": [
+      "gsap@^3.13.0",
+      "@gsap/react@^2.1.2"
+    ],
+    "registry_item": "SplitText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SplitText-TS-CSS",
+    "files": [
+      "SplitText/SplitText.tsx"
+    ]
+  },
+  {
+    "name": "SpotlightCard",
+    "category": "Components",
+    "description": "Card lit by a soft spotlight that follows the pointer, catches its edge and reaches nearby cards.",
+    "dependencies": [],
+    "registry_item": "SpotlightCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SpotlightCard-TS-CSS",
+    "files": [
+      "SpotlightCard.css",
+      "SpotlightCard.tsx"
+    ]
+  },
+  {
+    "name": "SpringCheck",
+    "category": "Micro",
+    "description": "Checkbox row where one spring fills the box, draws the tick and strikes through the label.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "SpringCheck-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SpringCheck-TS-CSS",
+    "files": [
+      "SpringCheck.css",
+      "SpringCheck.tsx"
+    ]
+  },
+  {
+    "name": "SquishSwitch",
+    "category": "Micro",
+    "description": "Switch whose thumb stretches with speed and squashes against the end when you flick it.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "SquishSwitch-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SquishSwitch-TS-CSS",
+    "files": [
+      "SquishSwitch.css",
+      "SquishSwitch.tsx"
+    ]
+  },
+  {
+    "name": "Stack",
+    "category": "Components",
+    "description": "Pile of cards you can drag, flick or click through, with thrown cards tucking underneath.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "Stack-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Stack-TS-CSS",
+    "files": [
+      "Stack.css",
+      "Stack.tsx"
+    ]
+  },
+  {
+    "name": "StaggeredMenu",
+    "category": "Components",
+    "description": "Menu with staggered item animations and smooth transitions on open/close.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "StaggeredMenu-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/StaggeredMenu-TS-CSS",
+    "files": [
+      "StaggeredMenu.css",
+      "StaggeredMenu.tsx"
+    ]
+  },
+  {
+    "name": "StarBorder",
+    "category": "Animations",
+    "description": "A twinkling star that travels the exact outline of any button, pill or card, trailing light and stardust.",
+    "dependencies": [],
+    "registry_item": "StarBorder-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/StarBorder-TS-CSS",
+    "files": [
+      "StarBorder.css",
+      "StarBorder.tsx"
+    ]
+  },
+  {
+    "name": "StatusMark",
+    "category": "Micro",
+    "description": "Agent task status glyph that morphs from an idle ring to a progress arc, then a check.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "StatusMark-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/StatusMark-TS-CSS",
+    "files": [
+      "StatusMark.css",
+      "StatusMark.tsx"
+    ]
+  },
+  {
+    "name": "Stepper",
+    "category": "Components",
+    "description": "A multi-step flow with a gliding step indicator, spring transitions and horizontal or vertical layouts.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "Stepper-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Stepper-TS-CSS",
+    "files": [
+      "Stepper.css",
+      "Stepper.tsx"
+    ]
+  },
+  {
+    "name": "StickerPeel",
+    "category": "Animations",
+    "description": "A die-cut sticker you can peel at any edge, drag, throw and swing, in gloss, matte or holographic finishes.",
+    "dependencies": [],
+    "registry_item": "StickerPeel-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/StickerPeel-TS-CSS",
+    "files": [
+      "StickerPeel.css",
+      "StickerPeel.tsx"
+    ]
+  },
+  {
+    "name": "Strands",
+    "category": "Animations",
+    "description": "Spectral strands that twist inside a frosted glass orb and swell into a smooth bulge where they come together, like the new Siri.",
+    "dependencies": [],
+    "registry_item": "Strands-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Strands-TS-CSS",
+    "files": [
+      "Strands.css",
+      "Strands.tsx"
+    ]
+  },
+  {
+    "name": "StrokeText",
+    "category": "TextAnimations",
+    "description": "Outlined letterforms draw themselves on, then flood with fill.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "StrokeText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/StrokeText-TS-CSS",
+    "files": [
+      "StrokeText.css",
+      "StrokeText.tsx"
+    ]
+  },
+  {
+    "name": "SwarmCursor",
+    "category": "Animations",
+    "description": "A liquid swarm of particles that flows after the cursor, curls into eddies and pours around hovered buttons.",
+    "dependencies": [],
+    "registry_item": "SwarmCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SwarmCursor-TS-CSS",
+    "files": [
+      "SwarmCursor.css",
+      "SwarmCursor.tsx"
+    ]
+  },
+  {
+    "name": "SwipeRow",
+    "category": "Micro",
+    "description": "List row that swipes open to reveal actions and deletes on a full swipe.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "SwipeRow-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SwipeRow-TS-CSS",
+    "files": [
+      "SwipeRow.css",
+      "SwipeRow.tsx"
+    ]
+  },
+  {
+    "name": "SwipeToast",
+    "category": "Micro",
+    "description": "Toast that swipes down to dismiss and burns a thin fuse for its remaining time.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "SwipeToast-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/SwipeToast-TS-CSS",
+    "files": [
+      "SwipeToast.css",
+      "SwipeToast.tsx"
+    ]
+  },
+  {
+    "name": "TargetCursor",
+    "category": "Animations",
+    "description": "A reticle cursor whose corner brackets snap around targets, matching their shape.",
+    "dependencies": [
+      "react-dom@^19.0.0"
+    ],
+    "registry_item": "TargetCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TargetCursor-TS-CSS",
+    "files": [
+      "TargetCursor.css",
+      "TargetCursor.tsx"
+    ]
+  },
+  {
+    "name": "TearTicket",
+    "category": "Micro",
+    "description": "Ticket whose perforated stub tears off by hand, fibre by fibre, and drops away.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "TearTicket-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TearTicket-TS-CSS",
+    "files": [
+      "TearTicket.css",
+      "TearTicket.tsx"
+    ]
+  },
+  {
+    "name": "TechText",
+    "category": "TextAnimations",
+    "description": "A wordmark whose letters turn into dashed vector paths under the cursor.",
+    "dependencies": [],
+    "registry_item": "TechText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TechText-TS-CSS",
+    "files": [
+      "TechText.css",
+      "TechText.tsx"
+    ]
+  },
+  {
+    "name": "TextCursor",
+    "category": "TextAnimations",
+    "description": "Text or emoji that trails your cursor as stamped copies, a following chain or a ribbon of letters.",
+    "dependencies": [],
+    "registry_item": "TextCursor-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TextCursor-TS-CSS",
+    "files": [
+      "TextCursor.css",
+      "TextCursor.tsx"
+    ]
+  },
+  {
+    "name": "TextLoop",
+    "category": "TextAnimations",
+    "description": "A seamless text marquee that flows along curved SVG paths.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "TextLoop-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TextLoop-TS-CSS",
+    "files": [
+      "TextLoop.css",
+      "TextLoop.tsx"
+    ]
+  },
+  {
+    "name": "TextPressure",
+    "category": "TextAnimations",
+    "description": "Characters scale / warp interactively based on pointer pressure zone.",
+    "dependencies": [],
+    "registry_item": "TextPressure-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TextPressure-TS-CSS",
+    "files": [
+      "TextPressure/TextPressure.tsx"
+    ]
+  },
+  {
+    "name": "TextType",
+    "category": "TextAnimations",
+    "description": "Typewriter effect with blinking cursor and adjustable typing cadence.",
+    "dependencies": [
+      "gsap@^3.13.0"
+    ],
+    "registry_item": "TextType-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TextType-TS-CSS",
+    "files": [
+      "TextType.css",
+      "TextType.tsx"
+    ]
+  },
+  {
+    "name": "ThoughtLine",
+    "category": "Micro",
+    "description": "Reasoning trace header with a live clock that folds its steps into one line when done.",
+    "dependencies": [
+      "motion@^12.23.12",
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "ThoughtLine-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/ThoughtLine-TS-CSS",
+    "files": [
+      "ThoughtLine.css",
+      "ThoughtLine.tsx"
+    ]
+  },
+  {
+    "name": "Threads",
+    "category": "Backgrounds",
+    "description": "Flowing threads that fray apart and part around the cursor, from fine silk to contour lines.",
+    "dependencies": [],
+    "registry_item": "Threads-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Threads-TS-CSS",
+    "files": [
+      "Threads.css",
+      "Threads.tsx"
+    ]
+  },
+  {
+    "name": "TiltedCard",
+    "category": "Components",
+    "description": "A 3D card that tilts toward the cursor, with glare, a soft shadow, floating layers and a flip side.",
+    "dependencies": [],
+    "registry_item": "TiltedCard-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TiltedCard-TS-CSS",
+    "files": [
+      "TiltedCard.css",
+      "TiltedCard.tsx"
+    ]
+  },
+  {
+    "name": "Topography",
+    "category": "Backgrounds",
+    "description": "A 3D landscape drawn in glowing contour lines that rises under the cursor, with light pulses on click.",
+    "dependencies": [],
+    "registry_item": "Topography-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Topography-TS-CSS",
+    "files": [
+      "Topography.css",
+      "Topography.tsx"
+    ]
+  },
+  {
+    "name": "TrueFocus",
+    "category": "TextAnimations",
+    "description": "Applies dynamic blur / clarity based over a series of words in order.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "TrueFocus-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/TrueFocus-TS-CSS",
+    "files": [
+      "TrueFocus.css",
+      "TrueFocus.tsx"
+    ]
+  },
+  {
+    "name": "VariableProximity",
+    "category": "TextAnimations",
+    "description": "Letter styling changes continuously with pointer distance mapping.",
+    "dependencies": [],
+    "registry_item": "VariableProximity-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/VariableProximity-TS-CSS",
+    "files": [
+      "VariableProximity.css",
+      "VariableProximity.tsx"
+    ]
+  },
+  {
+    "name": "VoicePill",
+    "category": "Micro",
+    "description": "Mic button that swells into a capsule of live equalizer bars and a timer while recording.",
+    "dependencies": [
+      "@hugeicons/react@^1.1.10",
+      "@hugeicons/core-free-icons@^4.3.3"
+    ],
+    "registry_item": "VoicePill-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/VoicePill-TS-CSS",
+    "files": [
+      "VoicePill.css",
+      "VoicePill.tsx"
+    ]
+  },
+  {
+    "name": "WakeSlider",
+    "category": "Micro",
+    "description": "Thumbless range slider of thin bars where drag speed raises a wake behind the handle.",
+    "dependencies": [
+      "motion@^12.23.12"
+    ],
+    "registry_item": "WakeSlider-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/WakeSlider-TS-CSS",
+    "files": [
+      "WakeSlider.css",
+      "WakeSlider.tsx"
+    ]
+  },
+  {
+    "name": "WarmTooltip",
+    "category": "Micro",
+    "description": "Tooltip group where the first label waits, then its siblings open instantly while warm.",
+    "dependencies": [
+      "react-dom@^19.0.0",
+      "motion@^12.23.12"
+    ],
+    "registry_item": "WarmTooltip-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/WarmTooltip-TS-CSS",
+    "files": [
+      "WarmTooltip.css",
+      "WarmTooltip.tsx"
+    ]
+  },
+  {
+    "name": "WarpText",
+    "category": "TextAnimations",
+    "description": "WebGL warp that bends and refracts the text around the pointer.",
+    "dependencies": [
+      "ogl@^1.0.11"
+    ],
+    "registry_item": "WarpText-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/WarpText-TS-CSS",
+    "files": [
+      "WarpText.css",
+      "WarpText.tsx"
+    ]
+  },
+  {
+    "name": "Waves",
+    "category": "Backgrounds",
+    "description": "Dense flowing lines that sway like silk, bend around the cursor and spring back into place.",
+    "dependencies": [],
+    "registry_item": "Waves-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/Waves-TS-CSS",
+    "files": [
+      "Waves.css",
+      "Waves.tsx"
+    ]
+  },
+  {
+    "name": "WebThreads",
+    "category": "Backgrounds",
+    "description": "Glowing threads woven through luminous pinch points that light up under the cursor and carry light on click.",
+    "dependencies": [],
+    "registry_item": "WebThreads-TS-CSS",
+    "install": "npx shadcn@latest add @react-bits/WebThreads-TS-CSS",
+    "files": [
+      "WebThreads.css",
+      "WebThreads.tsx"
+    ]
+  }
+]

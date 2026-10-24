@@ -43,8 +43,11 @@ python scripts/setup_dev.py <your-name>      # nishkal | namith | vihaan | visma
 The script:
 1. switches you to your own branch (`<your-name>`) and sets it to track `origin/<your-name>`,
 2. turns on the repo's git hooks (`.githooks/`, see §6) and records your branch name for them,
-3. creates `.venv`, installs `contracts[test]` and runs the contract tests,
-4. creates `.env` from `.env.example` if you don't have one.
+3. creates `.venv` and installs `contracts[test]`, your own packages (editable, with test extras) and
+   the API + worker, then runs the contract tests and yours (`xfailed` = a skeleton you haven't built
+   yet; see *Start here* in your `contexts/<Name>.md`),
+4. creates `.env` from `.env.example` if you don't have one,
+5. installs the shared AI-assistant skills from `skills/` into `.claude/` for Claude Code.
 
 It is safe to run again at any time.
 
@@ -128,6 +131,8 @@ Use them freely, but **commits are written as yours alone**:
   tools (Copilot, Cursor, Codex, ...) have a similar setting; switch it off.
 - The assistant follows `AGENTS.md`: it edits only your paths, works only on your branch, and
   commits or pushes only when you ask.
+- How the assistant builds things (spec, tests first, review, the UI gate) is in `skills/`; see
+  `skills/README.md`. `scripts/setup_dev.py` installs them for Claude Code.
 
 ## 8. Settings the repo owner applies on GitHub
 

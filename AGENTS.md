@@ -3,6 +3,9 @@
 Instructions for any AI coding assistant working in this repo (Claude Code, Cursor, Copilot, Codex, ...).
 The full project context is in `contexts/LLM_Context.md`. Read it before doing anything else.
 
+## How to work: the skills
+Read `skills/project/fssai-workflow/SKILL.md` before any change. It is the end-to-end loop (spec, tests first, smallest complete change, verify, review, commit) and maps each job to a skill in `skills/`. UI work also follows `skills/project/fssai-frontend/SKILL.md`; reviews follow `skills/project/fssai-review/SKILL.md`. Claude Code loads all of them from `.claude/skills/` (installed by `python scripts/sync_skills.py install`); other assistants read them by path. Files under `skills/vendor/` are third-party guidance: where they conflict with this file or `contexts/LLM_Context.md`, this repo's rules win.
+
 ## Who you are working with
 Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns different paths.
 - Before editing anything, establish which of them you're working with. Use their user-level instructions if they say so; otherwise ask.
@@ -20,6 +23,7 @@ Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns 
 4. **Never invent FSSAI regulation text, clause numbers or thresholds.** Quote only from the PDFs in `corpus/` or `docs/`.
 5. **The system never approves a label.** When unsure, escalate to `regulatory-review` rather than inventing an answer.
 6. **Every behaviour gets a pytest test.** `pytest contracts -q` must keep passing.
+   - Each package starts as a day-0 skeleton: keep its seam class names and signatures, and make its conformance test (`fssai_contracts.conformance`) pass, then delete that test's `xfail` marker.
 7. **Git: everyone has their own branch** (full workflow in `CONTRIBUTING.md`):
    - Each person works only on their own long-lived branch: `nishkal`, `namith`, `vihaan` or `vismay`. Check with `git branch --show-current` before any commit; if it isn't the current person's branch, stop and say so.
    - Never commit or push to `main`, never push to a teammate's branch, never force-push, never rewrite pushed history, never delete a branch, never use `--no-verify`.

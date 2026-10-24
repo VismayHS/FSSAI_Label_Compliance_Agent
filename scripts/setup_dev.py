@@ -3,7 +3,9 @@
     python scripts/setup_dev.py <your-name>      # nishkal | namith | vihaan | vismay
 
 Switches you to your own branch, enables the repo's git hooks, creates .venv, installs the shared
-contracts, runs their tests and creates .env from .env.example. Works on Windows and macOS.
+contracts, your own packages and the API + worker (so you can run the service locally), runs the
+contract tests and yours, creates .env from .env.example and installs the AI-assistant skills.
+Works on Windows and macOS.
 """
 
 from __future__ import annotations
@@ -16,6 +18,14 @@ from pathlib import Path
 
 TEAM = ("nishkal", "namith", "vihaan", "vismay")
 ROOT = Path(__file__).resolve().parent.parent
+# Each person's Python packages (LLM_Context §5), installed editable with their test extras.
+PACKAGES = {
+    "nishkal": ("libs/ingest", "libs/retrieval", "libs/observability"),
+    "namith": ("libs/agents", "libs/prompts", "libs/guardrails"),
+    "vihaan": ("libs/gate", "libs/verification", "eval"),
+    "vismay": ("libs/llm_gateway", "services/worker", "services/api"),
+}
+RUNTIME = ("services/worker", "services/api")  # everyone can run the API locally (LLM_Context §7)
 
 
 def run(*args: str) -> None:
@@ -34,7 +44,7 @@ def venv_python() -> Path:
 
 
 def setup_git(name: str) -> None:
-    print("\n[1/4] Git: your branch and hooks")
+    print("\n[1/5] Git: your branch and hooks")
     if not git_out("config", "user.email"):
         sys.exit(
             "  git user.email is not set. Set it to the email on your GitHub account first:\n"
@@ -64,8 +74,8 @@ def setup_git(name: str) -> None:
     print(f"  on branch '{name}', pushing to origin/{name} only")
 
 
-def setup_python() -> None:
-    print("\n[2/4] Python: .venv")
+def setup_python(name: str) -> None:
+    print("\n[2/5] Python: .venv with the contracts, your packages and the API")
     if sys.version_info < (3, 11):
         sys.exit(f"  Python 3.11+ is required, this is {sys.version.split()[0]}.")
     if not venv_python().exists():
@@ -73,16 +83,20 @@ def setup_python() -> None:
         venv.create(ROOT / ".venv", with_pip=True)
     py = str(venv_python())
     run(py, "-m", "pip", "install", "--quiet", "--upgrade", "pip")
-    run(py, "-m", "pip", "install", "--quiet", "-e", "contracts[test]")
+    editable = ["contracts[test]", *(f"{p}[test]" for p in PACKAGES[name]),
+                *(p for p in RUNTIME if p not in PACKAGES[name])]
+    run(py, "-m", "pip", "install", "--quiet", *(arg for p in editable for arg in ("-e", p)))
 
 
-def run_tests() -> None:
-    print("\n[3/4] Contract tests")
+def run_tests(name: str) -> None:
+    print("\n[3/5] Tests: the contracts, then yours (xfail = a contract you haven't built yet)")
     run(str(venv_python()), "-m", "pytest", "contracts", "-q")
+    for package in PACKAGES[name]:
+        run(str(venv_python()), "-m", "pytest", package, "-q", "-rx")
 
 
 def setup_env() -> None:
-    print("\n[4/4] .env")
+    print("\n[4/5] .env")
     env, example = ROOT / ".env", ROOT / ".env.example"
     if env.exists():
         print("  .env already exists, left as is")
@@ -91,15 +105,21 @@ def setup_env() -> None:
         print("  created .env from .env.example. Fill in your own section (never commit it).")
 
 
+def install_skills() -> None:
+    print("\n[5/5] AI-assistant skills (skills/ -> .claude/skills, .claude/agents)")
+    run(sys.executable, str(ROOT / "scripts" / "sync_skills.py"), "install")
+
+
 def main() -> None:
     if len(sys.argv) != 2 or sys.argv[1].lower() not in TEAM:
         sys.exit(f"usage: python scripts/setup_dev.py <{'|'.join(TEAM)}>")
     name = sys.argv[1].lower()
     setup_git(name)
-    setup_python()
-    run_tests()
+    setup_python(name)
+    run_tests(name)
     setup_env()
-    print(f"\nDone. Read contexts/LLM_Context.md, then contexts/{name.capitalize()}.md.")
+    install_skills()
+    print(f"\nDone. Read contexts/LLM_Context.md, then contexts/{name.capitalize()}.md (start at 'Start here').")
 
 
 if __name__ == "__main__":

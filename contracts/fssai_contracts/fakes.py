@@ -113,8 +113,9 @@ class FakeLLM:
 
 class FakePromptStore:
     def get(self, name, version=None):
-        return PromptTemplate(name=name, version=version or "fake-v0",
-                              system="You are a placeholder prompt.", user_template="{input}")
+        version = version or "fake-v0"
+        return PromptTemplate(name=name, version=version, user_template="{input}",
+                              system=f"[prompt:{name}@{version}] You are a placeholder prompt.")  # §6.5 tag
 
 
 class FakeGuardrails:
@@ -179,7 +180,7 @@ class FakeResearcher:
                 explanation="Allergen statement present." if status == FindingStatus.MET
                 else "No allergen statement on the label.",
                 citations=[Citation(regulation=p.regulation, clause_id=p.clause_id,
-                                    passage_id=p.passage_id, quote=p.text[-60:])]))
+                                    passage_id=p.passage_id, quote=p.text)]))  # verbatim, PLACEHOLDER marker included
         for claim in classification.claims:
             if claim.nutrient != "protein":
                 continue
@@ -195,7 +196,7 @@ class FakeResearcher:
                 explanation=f"Declared protein {request.nutrition.protein_g} g vs condition "
                             f"{FAKE_PROTEIN_THRESHOLD_G:g} g per 100 g.",
                 citations=[Citation(regulation=p.regulation, clause_id=p.clause_id,
-                                    passage_id=p.passage_id, quote=f"at least {FAKE_PROTEIN_THRESHOLD_G:g} g protein")]))
+                                    passage_id=p.passage_id, quote=p.text)]))  # verbatim, PLACEHOLDER marker included
         return dossier
 
 

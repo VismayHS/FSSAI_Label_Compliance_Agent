@@ -8,8 +8,9 @@
 **Reading order (people and LLMs):**
 1. This file
 2. Your own `contexts/<Name>.md`
-3. `contracts/fssai_contracts/`: `schemas.py`, `interfaces.py`, `context.py`, `fakes.py`, `pipeline.py`, `registry.py`
+3. `contracts/fssai_contracts/`: `schemas.py`, `interfaces.py`, `context.py`, `fakes.py`, `pipeline.py`, `registry.py`, `conformance.py`
 4. [`CONTRIBUTING.md`](../CONTRIBUTING.md) before your first commit: one branch per person, PRs into `main`
+5. [`skills/project/fssai-workflow/SKILL.md`](../skills/project/fssai-workflow/SKILL.md) before writing code: how every change is built, tested and reviewed ([`skills/README.md`](../skills/README.md) lists all skills)
 
 The original course documents are in `docs/`:
 - `MiniProject_10_Food_Label_Compliance.pdf`: the spec
@@ -181,7 +182,8 @@ what happens if any of them fails mid-run.
 | Agents | LangGraph |
 | Retrieval | LangChain + FAISS, `sentence-transformers` run locally (small model, e.g. MiniLM-class) |
 | API + validation | FastAPI, Pydantic v2 |
-| Queue | Redis + RQ or arq (Vismay decides and justifies) |
+| Queue | Redis + RQ, in-process `SimpleWorker`s (decision 302) |
+| Web client | React + Vite + TypeScript, CSS tokens, React Bits for run-state motion (decision 303) |
 | Storage | Postgres |
 | Evaluation | TruLens |
 | Observability | OpenTelemetry → Jaeger, Prometheus, Grafana, cAdvisor |
@@ -207,7 +209,7 @@ spending limit on the account.
 | `contexts/<Name>.md` | that person | Your plan, checklist, prompts, notes |
 | `docs/*.pdf` | none | Course documents. Never edit. |
 | `docs/eval1/` | Nishkal (`*-passages.md`), Vihaan (`*-test-values.md`), Vismay (`project-plan.md`) | Evaluation 1 deliverables |
-| `docs/decisions/` | author of each file | Decision records (ADRs), one file each: `NNN-<name>-<slug>.md` |
+| `docs/decisions/` | author of each file | Decision records (ADRs), one file each: `NNN-<name>-<slug>.md`. Number blocks so parallel branches never clash: Nishkal `001–099`, Namith `100–199`, Vihaan `200–299`, Vismay `300–399`; take the next free number in your block. Index: `docs/decisions/README.md` |
 | `docs/incidents/` | author of each file | Incident log (D8), one file each: `YYYY-MM-DD-<name>-<slug>.md` |
 | `docs/runbook.md` | Namith | D8 runbook |
 | `docs/data-contract.md` | Vihaan | D1/F1 published contract |
@@ -240,7 +242,13 @@ spending limit on the account.
 | `.env.example` | everyone, **own section only** | Pre-split into one section per owner |
 | `README.md`, `Makefile`, `.github/` | Vismay | |
 | `CONTRIBUTING.md`, `.githooks/`, `scripts/setup_dev.py` | Vismay | Branch workflow, the git hooks that enforce it, one-time clone setup |
+| `skills/`, `scripts/sync_skills.py` | Vismay (propose changes in a PR) | Shared AI-assistant skills: our `project/` skills plus pinned `vendor/` copies of taste-skill, Emil's skills, impeccable, React Bits, ponytail, ECC, ruflo. Read by everyone; see `skills/README.md` |
 | `AGENTS.md`, `CLAUDE.md`, `.claude/settings.json` | Vismay | Instructions every AI coding assistant loads (`CLAUDE.md` imports `AGENTS.md` + this file); shared Claude Code settings (attribution off) |
+
+**Day-0 baseline.** Every Python package in this table already exists as a tested skeleton (Vismay,
+2026-10-24): the seam classes under the names `.env.example` switches to, each method raising
+`NotImplementedError("<task>: ...")`, and a conformance test marked `xfail` until it is built. A
+skeleton belongs to its path owner like the rest of their paths. See *Start here* in each `contexts/<Name>.md`.
 
 Each `libs/*` and `services/*` folder is its own Python package with its **own `pyproject.toml`**,
 which lists only its own dependencies. There is no shared requirements file to fight over.
@@ -266,11 +274,13 @@ which lists only its own dependencies. There is no shared requirements file to f
   - structured events via `event()`
 - **`registry.py`**: the switchboard. `IMPL_<SEAM>=module:Class` in `.env` picks the real implementation; if the variable is empty, the fake is used.
 - **`dev_llm.py`**: a bare OpenAI-compatible client, so agent work can use a real LLM before Vismay's gateway exists.
+- **`conformance.py`**: one `check_<seam>(impl)` per seam (gate, retriever, prompts, guardrails, classifier, researcher, verifier, router, pipeline, run store). It tests the edges everyone else relies on: shapes, recording rules, verbatim citations, never upgrading a route, escalation on injection, scope and budget. Plus `sample_request()` for your own tests. The fakes pass every check (`contracts/tests/test_conformance.py`).
 
 **How to use them:**
 
 1. **Code against the interface, never against a teammate's class.**
 2. **Develop and test against the fakes.** Your tests must not need anyone else's unfinished code.
+   Your seam's `conformance.check_<seam>` must pass before you switch it on.
 3. **Integrate by flipping a switch.** When your implementation is ready, set
    `IMPL_RETRIEVER=fssai_retrieval.faiss:FaissRetriever` (for example) in `.env`. No one else
    edits code to pick it up.
@@ -291,7 +301,7 @@ Run the contract tests:
 python -m venv .venv
 .venv\Scripts\Activate.ps1      # Windows PowerShell   (macOS/Linux: source .venv/bin/activate)
 pip install -e "contracts[test]"
-pytest contracts -q        # 9 tests: §4.1 pass/fail, out-of-scope, injection, retry→escalate, budget, outage, gate, registry
+pytest contracts -q        # §4.1 pass/fail, out-of-scope, injection, retry→escalate, budget, outage, gate, registry + conformance kit
 ```
 
 ---
@@ -303,16 +313,35 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
 
 | Method + path | Body / headers | Returns |
 |---|---|---|
-| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id` (optional) | `202 {run_id, status_url}` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` |
-| `GET /v1/runs/{run_id}` | | `RunStatus` (result included when done) |
-| `GET /v1/runs/{run_id}/trace` | | Full reconstruction: every step, query, passage, prompt version, latency, cost, verdict (D5) |
+| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id` (optional) | `202 {run_id, status_url, trace_url, correlation_id}` + `Location` · `400` bad/missing client id · `413` body over `API_MAX_REQUEST_BYTES` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` + `Retry-After` · `503` queue down |
+| `GET /v1/runs?limit=` | | Recent runs, newest first: id, state, product name, route |
+| `GET /v1/runs/{run_id}` | | `RunStatus`: state, the accepted `request`, `correlation_id`, and the `result` when done |
+| `GET /v1/runs/{run_id}/trace` | | Full reconstruction (D5): the request, every step in order with inputs and outputs (queries, full passages, LLM messages and text), prompt versions, per-step and per-agent latency, tokens and cost, queue wait, verdict, route |
 | `POST /v1/runs/{run_id}/feedback` | `{satisfactory, reason}` | `201` (Vihaan) |
 | `GET /v1/feedback/summary` | | Aggregates (Vihaan) |
 | `GET /v1/quarantine?limit=` | | Rejected records with field-level errors (Vihaan) |
 | `GET /healthz` · `GET /readyz` · `GET /metrics` | | On **every** HTTP service: liveness, dependency readiness, Prometheus metrics |
 
-The API mounts every `router` it finds in `services/api/app/routers/*.py` automatically, so
-Vihaan's routes appear without anyone editing `main.py`.
+- Run ids are 32-character hex. Every response carries `X-Correlation-Id` (the caller's, if it is a
+  safe 1–128 character id, otherwise a new one); the same id is on the run, its job, every step and
+  every log line.
+- Submission order: client id → size limit → gate (rate limit, validate, quarantine) → save `queued`
+  → enqueue. A reject never creates a run or a job (D1, demo #4). Non-JSON bodies are quarantined too.
+- Runs are executed per `RUN_DISPATCH` (decision 302): `queue` (RQ on Redis, `python -m fssai_worker`)
+  in Compose, `inline` (a thread pool in the API) for local development.
+
+**Adding routes.** The API mounts every `router` it finds in `services/api/app/routers/*.py`
+automatically, so Vihaan's routes appear without anyone editing `main.py`. A router reaches the
+shared services through `request.app.state`: `gate` (the `RequestGate`, e.g. its quarantine),
+`run_store` (the `RunStore`), `dispatcher` and `settings`. Call blocking code with
+`fastapi.concurrency.run_in_threadpool`.
+
+Run the API locally (inline mode, fakes by default):
+
+```bash
+<venv-python> -m pip install -e contracts -e services/worker -e services/api
+<venv-python> -m uvicorn app.main:create_app --factory --env-file .env --port 8000   # docs at /docs
+```
 
 ---
 
@@ -371,6 +400,7 @@ running the full stack. If you can't make it, catch up in the chat.
 
 ### 8.5 Definition of done (any task)
 - The code is in your own paths, and its tests pass with fakes **and** with real implementations once those exist.
+- A seam implementation passes its `conformance.check_<seam>` test with the `xfail` marker removed.
 - Steps go through `ctx.record()`. Events go through `ctx.event()`. Metrics are exposed if relevant.
 - Any new config is env-only and added to your section of `.env.example` with a comment.
 - The task is ticked in your `contexts/<Name>.md`, and the decision is recorded in `docs/decisions/` if you made one.
@@ -412,7 +442,7 @@ Vismay fills in the dates once they're announced. **Evaluation 1:** `____`. **Re
 
 | Phase | When | Team milestone (everyone's personal file breaks this down) |
 |---|---|---|
-| **0. Setup** | Days 1–2 | Everyone has cloned the repo, run `scripts/setup_dev.py <name>` (own branch, hooks, `pytest contracts`), and merged an empty package skeleton from their own branch into `main`. Product category chosen (decision record 001). |
+| **0. Setup** | Days 1–2 | Everyone has cloned the repo, run `scripts/setup_dev.py <name>` (own branch, hooks, `pytest contracts`, own package skeletons installed), and merged a first small PR from their own branch into `main`. Product category chosen (decision record 001). |
 | **1. Evaluation 1** | Week 1 | Corpus confirmed; §4.1 passages and test values written up; data contract v1; **SLO declared and committed**; walking skeleton (`compose up` → submit → fake pipeline → result); project plan. |
 | **2. Real end-to-end** | End of week 2 | Real index, retriever, LangGraph researcher, verifier, router and LLM gateway switched in with `IMPL_*`. The §4.1 case runs on the real stack, even if rough. The course requires this by week 2. |
 | **3. All 22 requirements** | Weeks 3–4 | Guardrails, eval + before/after, prompt comparison, caching, rate limits, breaker, cost, observability, Locust + scaling, feedback, runbook. |

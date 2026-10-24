@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Pack Mark System · FSSAI Label Check</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#14181C;--ink-2:#4A535C;--ground:#EEF1EE;--panel:#FFFFFF;--rule:#C9CFC9;--met:#1A7F3C;--unmet:#B3261E;--undet:#8A5A00;--na:#5B6470;--path:#1D4F91}
+*{box-sizing:border-box;margin:0}body{width:1440px;height:900px;overflow:hidden;background:var(--ground);color:var(--ink);font:400 15px/1.5 Archivo,sans-serif}
+header{height:56px;background:var(--ink);color:#fff;display:flex;align-items:center;gap:40px;padding:0 32px}
+.wm{font-weight:800;font-stretch:80%;font-size:20px;letter-spacing:-.01em}nav{display:flex;gap:24px;font-size:14px;color:#C8CDD2}nav b{color:#fff;font-weight:600}
+.api{margin-left:auto;font-size:13px;color:#C8CDD2;display:flex;gap:8px;align-items:center}.api i{width:10px;height:10px;border:2px solid #6FCF97;display:inline-block}
+main{display:grid;grid-template-columns:440px 1fr;gap:24px;padding:24px 32px}
+section{background:var(--panel);padding:24px}h2{font-size:20px;font-weight:700;font-stretch:85%;margin-bottom:16px}
+.seg{display:flex;border:1px solid var(--ink);width:max-content;margin-bottom:20px}.seg span{padding:6px 16px;font-size:13px}.seg .on{background:var(--ink);color:#fff}
+label{display:block;font-size:13px;font-weight:600;font-stretch:80%;margin:12px 0 4px}.f{border:1px solid var(--rule);padding:8px 10px;font-size:14px}
+.np{display:grid;grid-template-columns:1fr 1fr;border-top:3px solid var(--ink);margin-top:16px}.np div{display:flex;justify-content:space-between;border-bottom:1px solid var(--rule);padding:6px 0;font-size:14px}.np div:nth-child(odd){margin-right:16px}
+.np b{font-variant-numeric:tabular-nums}
+.act{display:flex;gap:16px;align-items:center;margin-top:20px}.btn{background:var(--ink);color:#fff;padding:10px 20px;font-weight:600}.link{color:var(--path);font-weight:600;font-size:14px}
+.decl{border:2px solid var(--ink);display:grid;grid-template-columns:150px 1fr;font-size:14px}.decl div{padding:8px 12px;border-bottom:1px solid var(--ink)}.decl div:nth-child(odd){font-weight:700;font-stretch:80%;border-right:1px solid var(--ink)}
+.decl .last{border-bottom:0}.route{display:flex;gap:10px;align-items:center;font-weight:700;font-size:18px}
+.mk{width:20px;height:20px;border:2px solid currentColor;display:inline-grid;place-items:center;flex:none}.mk.met::after{content:"";width:10px;height:10px;background:currentColor}
+.mk.unmet::after{content:"✕";font-size:13px;font-weight:800;line-height:1}.mk.undet::after{content:"";width:10px;height:10px;background:linear-gradient(135deg,currentColor 50%,transparent 50%)}
+.mono{font-family:"JetBrains Mono",monospace;font-size:13px}
+.notice{margin:12px 0 20px;font-size:14px;color:var(--ink)}
+.strip{display:flex;align-items:center;gap:0;margin-bottom:20px}.st{display:flex;gap:8px;align-items:center;font-size:13px;font-weight:600;color:var(--met)}.st em{font-style:normal;color:var(--ink)}
+.ln{height:2px;width:36px;background:var(--path);margin:0 10px}
+.fd{display:grid;grid-template-columns:28px 170px 1fr 90px;gap:12px;padding:14px 0;border-top:1px solid var(--rule);align-items:start}
+.fd .st2{font-weight:700;font-size:14px}.q{margin-top:8px;background:#F4F6F4;padding:10px 12px;font-size:14px}.q small{display:block;font-size:12px;color:var(--ink-2);margin-bottom:4px}
+.tabs{display:flex;gap:24px;border-bottom:1px solid var(--rule);margin:4px 0 0;font-size:14px;font-weight:600}.tabs span{padding:8px 0}.tabs .on{border-bottom:3px solid var(--path)}
+</style></head><body>
+<header><span class="wm">FSSAI Label Check</span><nav><b>New check</b><span>Recent runs</span><span>API docs</span></nav><span class="api"><i></i>API ready · inline</span></header>
+<main>
+<section><h2>Label to check</h2><div class="seg"><span class="on">Form</span><span>JSON</span></div>
+<label>Product name</label><div class="f">Roasted chana</div>
+<label>Declared category</label><div class="f">demo-category</div>
+<label>Claims as printed</label><div class="f">Source of protein</div>
+<label>Allergen statement</label><div class="f">Contains: chickpea</div>
+<div class="np"><div>Energy <b>380 kcal</b></div><div>Protein <b>8 g</b></div><div>Carbohydrate <b>55 g</b></div><div>Total sugars <b>3 g</b></div><div>Total fat <b>6 g</b></div><div>Basis <b>per 100 g</b></div></div>
+<div class="act"><span class="btn">Check label</span><span class="link">Load the §4.1 example</span></div></section>
+<section>
+<div class="decl">
+<div>Route</div><div class="route" style="color:var(--undet)"><span class="mk undet"></span><span style="color:var(--ink)">revise-and-recheck</span></div>
+<div>Reason</div><div>Unmet or undetermined: CLM-PROTEIN-SOURCE</div>
+<div>Category</div><div>demo-category · in scope</div>
+<div>Claims</div><div>Source of protein · nutrient content, protein</div>
+<div class="last">Run</div><div class="last mono">c5152227a57f404887e7519edf03d102 · 7 steps · 0.6 s · $0.0000</div></div>
+<p class="notice">Compliance finding only. This is not an approval for print; a regulatory affairs professional decides.</p>
+<div class="strip"><span class="st"><span class="mk met"></span><em>Guardrails</em></span><span class="ln"></span><span class="st"><span class="mk met"></span><em>Classifier</em></span><span class="ln"></span><span class="st"><span class="mk met"></span><em>Researcher</em></span><span class="ln"></span><span class="st"><span class="mk met"></span><em>Verifier</em></span><span class="ln"></span><span class="st"><span class="mk met"></span><em>Router</em></span><span class="ln"></span><span class="st"><span class="mk met"></span><em>Output filter</em></span></div>
+<div class="tabs"><span class="on">Findings 2</span><span>Trace 7 steps</span><span>Request</span></div>
+<div class="fd"><span class="mk unmet" style="color:var(--unmet)"></span><span class="mono">CLM-PROTEIN-SOURCE</span><div><b>Condition for claim ‘Source of protein’</b><p>Declared protein 8 g vs condition 10 g per 100 g.</p><div class="q"><small>FSS-AC-2018 · clause FAKE-AC-PROTEIN</small>“at least 10 g protein”</div></div><span class="st2" style="color:var(--unmet)">Unmet</span></div>
+<div class="fd"><span class="mk met" style="color:var(--met)"></span><span class="mono">LBL-ALLERGEN</span><div><b>Allergen declaration</b><p>Allergen statement present.</p></div><span class="st2" style="color:var(--met)">Met</span></div>
+</section></main></body></html>
