@@ -231,5 +231,11 @@ the web client."*
 - S2.3 done (v1): web client in `services/web` (decision 303, `PRODUCT.md`, impeccable direction "Pack Mark System"). Feedback buttons wait for Vihaan's endpoint (S3.6).
   - Impeccable finish review: two fix rounds, every scored item resolved; a last trace-layout regression (cost clipped below ~1400px) fixed after it, checked at 1280px. `services/web/DESIGN.md` + `.impeccable/design.json` record the shipped system. Review captures: `node services/web/scripts/capture.mjs services/web/.impeccable/review name=url[|selector]`.
 - S3.3: decisions 301 (polling) and 302 (RQ) written; deployment boundaries record still to do with Compose.
+- Team baseline (so nobody starts from nothing, and S2.4 is a series of `.env` flips):
+  - `fssai_contracts.conformance` gives one `check_<seam>` per seam, tested on the fakes.
+  - Every teammate package exists as a skeleton, and each seam's conformance test stays `xfail` until it is built.
+  - `setup_dev.py` installs each person's packages and runs their tests.
+  - Each context file now has a *Start here* section.
+  - It reaches their branches when they `git merge origin/main` after the PR; nothing was pushed to their branches.
 - Next: Compose + Dockerfiles + Postgres run store + `scripts/smoke.py` (S1.2), then the breaker demo (S3.1) and `docs/architecture.md` (S1.3).
 - Run locally: `uvicorn app.main:create_app --factory --env-file .env --port 8000`, then `npm --prefix services/web run dev` and open http://localhost:5173.

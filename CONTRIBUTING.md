@@ -43,7 +43,9 @@ python scripts/setup_dev.py <your-name>      # nishkal | namith | vihaan | visma
 The script:
 1. switches you to your own branch (`<your-name>`) and sets it to track `origin/<your-name>`,
 2. turns on the repo's git hooks (`.githooks/`, see §6) and records your branch name for them,
-3. creates `.venv`, installs `contracts[test]` and runs the contract tests,
+3. creates `.venv` and installs `contracts[test]`, your own packages (editable, with test extras) and
+   the API + worker, then runs the contract tests and yours (`xfailed` = a skeleton you haven't built
+   yet; see *Start here* in your `contexts/<Name>.md`),
 4. creates `.env` from `.env.example` if you don't have one,
 5. installs the shared AI-assistant skills from `skills/` into `.claude/` for Claude Code.
 

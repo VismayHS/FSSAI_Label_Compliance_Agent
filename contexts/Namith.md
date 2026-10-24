@@ -52,7 +52,7 @@ I'm Namith, one of 4 people building the "FSSAI Label Compliance Agent" (a unive
 Design & AgentOps project). Before anything else, read from the repo:
 1. contexts/LLM_Context.md  (project, team, architecture, rules; stable)
 2. contexts/Namith.md       (my workstream, tasks, status)
-3. contracts/fssai_contracts/*.py  (schemas, interfaces, context, fakes, pipeline, registry)
+3. contracts/fssai_contracts/*.py  (schemas, interfaces, context, fakes, pipeline, registry, conformance)
 
 Rules for this session:
 - I may only create/edit files under: libs/agents/, libs/prompts/, libs/guardrails/,
@@ -67,6 +67,8 @@ Rules for this session:
   INCLUDING the full passages returned. LLM clients record their own llm steps.
 - Every system prompt starts with "[prompt:<name>@<version>]".
 - Every behaviour gets a pytest test (use a fake LLM in unit tests; real-LLM tests are marked slow).
+- My package skeletons already exist (day-0 baseline): fill them in, keep their class names and
+  signatures, and make each conformance test (fssai_contracts.conformance) pass, then delete its xfail marker.
 - Git: I work only on my own branch `namith` (check `git branch --show-current`). Never commit or
   push to main or a teammate's branch, never force-push, never --no-verify, merge origin/main
   (never rebase). No Co-Authored-By/"Generated with" lines. Commit or push only when I ask.
@@ -75,14 +77,46 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ---
 
+## Start here: your day-0 baseline
+
+Your packages already exist as **skeletons**: installable, tested, wired to the right `IMPL_*` names,
+and empty. Vismay scaffolded them on 2026-10-24 so all four of us start from the same working base.
+They are yours like everything else in your paths: change anything except a seam's class name and
+method signatures, which other people's code and `.env` depend on.
+
+| Package | What you fill in | Its contract test | Task |
+|---|---|---|---|
+| `libs/prompts` | `fssai_prompts.store:FilePromptStore` | `check_prompt_store` | M1.1 |
+| `libs/agents` | `fssai_agents.classifier:LLMClassifier` | `check_classifier` | M1.2 |
+| `libs/agents` | `fssai_agents.researcher:LangGraphResearcher` | `check_researcher` | M2.1 |
+| `libs/agents` | `fssai_agents.graph:LangGraphPipeline` | `check_pipeline` | M2.2 |
+| `libs/guardrails` | `fssai_guardrails.guardrails:Guardrails` | `check_guardrails` | M3.1 |
+
+**How a skeleton tells you you're done.** Every skeleton method raises `NotImplementedError("<task>: ...")`.
+Its test calls the shared check in `contracts/fssai_contracts/conformance.py`, marked
+`xfail(raises=NotImplementedError, strict=True)`. That gives three states:
+
+| `pytest libs/prompts libs/agents libs/guardrails -q` says | Meaning | Do |
+|---|---|---|
+| `xfailed` | not built yet | build it |
+| `FAILED` with an `AssertionError` | built, but it breaks a contract edge (the message says which) | fix it |
+| `FAILED` with `XPASS(strict)` | built and conforming | delete the `xfail` line: from now on it guards you |
+
+**Switching on.** When a seam's contract test passes without its marker, set its `IMPL_*` variable in
+your `.env`, run `pytest contracts -q` and a local run (LLM_Context §7) with it on, add it as a comment
+in your `.env.example` section, and tell Vismay. Until then everyone else keeps using the fake.
+
+Each package README lists its files and commands. `conformance.sample_request()` gives you a valid
+§4.1-style request for your own tests.
+
+---
+
 ## Phase 0: setup (days 1–2)
 
-- [ ] **M0.1 Set up and create package skeletons.** Clone the repo and run `python scripts/setup_dev.py namith`. It puts you on your own branch `namith`, turns on the git hooks, creates `.venv`, runs the 9 contract tests and creates `.env` (CONTRIBUTING.md §2). Then create packages:
-  - `libs/agents` → `fssai_agents`
-  - `libs/prompts` → `fssai_prompts`
-  - `libs/guardrails` → `fssai_guardrails`
-
-  Each needs its own `pyproject.toml` and a smoke test. Commit on `namith`, push, and open your first PR (`main` ← `namith`).
+- [ ] **M0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py namith` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
+  1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
+  2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_prompt_store`, `check_guardrails`, `check_classifier`, `check_researcher`, `check_pipeline`).
+  3. Make one small commit of your own on `namith` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `namith`), so you've done the whole loop once.
 - [ ] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
 
 ## Phase 1: Evaluation 1 (week 1)
