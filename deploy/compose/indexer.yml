@@ -1,0 +1,31 @@
+# Indexer (owner Nishkal, D2/N2.3): a one-shot job that builds the regulation index, then exits 0.
+# Included from the root docker-compose.yml. Paths are relative to this file.
+#
+# For the worker (Vismay, deploy/compose/worker.yml):
+#   depends_on:  indexer: {condition: service_completed_successfully}
+#   volumes:     - index-data:/data/index:ro       # INDEX_DIR=/data/index
+#                - hf-cache:/data/hf-cache:ro       # the embedding model the indexer downloaded
+#   environment: HF_HOME=/data/hf-cache, HF_HUB_OFFLINE=1   (queries are embedded with the same model)
+#   image:       install fssai-retrieval[embeddings] (CPU torch: see libs/ingest/Dockerfile)
+# The two volumes are declared here, once; other fragments only reference them.
+services:
+  indexer:
+    build:
+      context: ../..
+      dockerfile: libs/ingest/Dockerfile
+    image: fssai-indexer:local
+    env_file:
+      - path: ../../.env      # EMBEDDING_MODEL, CHUNK_MAX_CHARS, LOG_LEVEL
+        required: false
+    environment:
+      INDEX_DIR: /data/index
+      HF_HOME: /data/hf-cache
+    volumes:
+      - ../../corpus:/corpus:ro        # raw/ PDFs + sources.yaml + claim_triggers.yaml
+      - index-data:/data/index
+      - hf-cache:/data/hf-cache
+    restart: "no"
+
+volumes:
+  index-data:
+  hf-cache:

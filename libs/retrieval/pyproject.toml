@@ -4,14 +4,26 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fssai-retrieval"
-version = "0.1.0"
-description = "FAISS retriever over the regulation index, with retrieval cache"
+version = "0.2.0"
+description = "Hybrid FAISS + BM25 retriever over the regulation index, with Redis retrieval cache"
 requires-python = ">=3.11"
-# Add each real dependency with bounds as a task needs it, e.g. "faiss-cpu>=1.8,<2".
-dependencies = ["fssai-contracts"]
+dependencies = [
+    "fssai-contracts",
+    "fssai-observability",
+    "faiss-cpu>=1.8,<2",
+    "langchain-core>=1.0,<2",
+    "langchain-community>=0.4,<1",
+    "numpy>=1.26,<3",
+    "pyyaml>=6,<7",
+    "prometheus-client>=0.20,<1",
+    "redis>=5,<9",
+]
 
 [project.optional-dependencies]
-test = ["pytest>=9"]
+# The local sentence-transformers model (pulls torch). The worker and indexer images install it;
+# without it the retriever serves BM25 only and logs why (decision 002).
+embeddings = ["langchain-huggingface>=1.0,<2", "sentence-transformers>=3,<7"]
+test = ["pytest>=9", "fakeredis>=2.40,<3"]
 
 [tool.setuptools.packages.find]
 include = ["fssai_retrieval*"]
