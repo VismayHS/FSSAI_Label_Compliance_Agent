@@ -17,7 +17,6 @@ def pending(task):
                              reason=f"{task} not built yet: delete this marker when it passes")
 
 
-@pending("M1.2")
 def test_classifier_conforms():
     check_classifier(LLMClassifier.from_registry())
 
