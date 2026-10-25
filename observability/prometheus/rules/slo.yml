@@ -1,0 +1,73 @@
+# SLO recording rules and burn-rate alerts (owner Nishkal; loadtest/SLO.md; extra: Alertmanager-style burn rate).
+# Latency SLI: share of runs finishing within 60 s (p95 target -> 5 % budget). Failure SLI: share of runs
+# that end `failed` (1 % budget). Multi-window, multi-burn-rate alerts after the Google SRE workbook:
+# page on 14.4x over 1 h confirmed by 5 m; ticket on 6x over 6 h confirmed by 30 m.
+# The worker histogram covers execution time; the load test's client-side full_run also includes queue wait.
+groups:
+  - name: fssai-slo-recording
+    interval: 30s
+    rules:
+      - record: fssai:run_duration_seconds:p95_5m
+        expr: histogram_quantile(0.95, sum by (le) (rate(fssai_run_duration_seconds_bucket[5m])))
+      - record: fssai:run_duration_seconds:p50_5m
+        expr: histogram_quantile(0.50, sum by (le) (rate(fssai_run_duration_seconds_bucket[5m])))
+      - record: fssai:http_request_seconds:p95_5m
+        expr: histogram_quantile(0.95, sum by (le, route) (rate(fssai_http_request_duration_seconds_bucket[5m])))
+    # slow-run ratio = 1 - (runs <= 60 s) / (all runs), per window
+      - record: fssai:run_slow_ratio:rate5m
+        expr: 1 - (sum(rate(fssai_run_duration_seconds_bucket{le="60"}[5m])) / sum(rate(fssai_run_duration_seconds_count[5m])))
+      - record: fssai:run_slow_ratio:rate30m
+        expr: 1 - (sum(rate(fssai_run_duration_seconds_bucket{le="60"}[30m])) / sum(rate(fssai_run_duration_seconds_count[30m])))
+      - record: fssai:run_slow_ratio:rate1h
+        expr: 1 - (sum(rate(fssai_run_duration_seconds_bucket{le="60"}[1h])) / sum(rate(fssai_run_duration_seconds_count[1h])))
+      - record: fssai:run_slow_ratio:rate6h
+        expr: 1 - (sum(rate(fssai_run_duration_seconds_bucket{le="60"}[6h])) / sum(rate(fssai_run_duration_seconds_count[6h])))
+      - record: fssai:run_failed_ratio:rate5m
+        expr: sum(rate(fssai_runs_finished_total{state="failed"}[5m])) / sum(rate(fssai_runs_finished_total[5m]))
+      - record: fssai:run_failed_ratio:rate30m
+        expr: sum(rate(fssai_runs_finished_total{state="failed"}[30m])) / sum(rate(fssai_runs_finished_total[30m]))
+      - record: fssai:run_failed_ratio:rate1h
+        expr: sum(rate(fssai_runs_finished_total{state="failed"}[1h])) / sum(rate(fssai_runs_finished_total[1h]))
+      - record: fssai:run_failed_ratio:rate6h
+        expr: sum(rate(fssai_runs_finished_total{state="failed"}[6h])) / sum(rate(fssai_runs_finished_total[6h]))
+
+  - name: fssai-slo-alerts
+    rules:
+      - alert: RunLatencySLOFastBurn
+        expr: fssai:run_slow_ratio:rate1h > (14.4 * 0.05) and fssai:run_slow_ratio:rate5m > (14.4 * 0.05)
+        labels: {severity: page, slo: run-latency}
+        annotations:
+          summary: "Runs slower than 60 s are burning the p95 budget 14x too fast"
+          description: "{{ $value | humanizePercentage }} of runs over the last hour took more than 60 s (budget 5 %). Check queue depth and worker CPU on the service-overview dashboard."
+      - alert: RunLatencySLOSlowBurn
+        expr: fssai:run_slow_ratio:rate6h > (6 * 0.05) and fssai:run_slow_ratio:rate30m > (6 * 0.05)
+        labels: {severity: ticket, slo: run-latency}
+        annotations:
+          summary: "Runs slower than 60 s are burning the p95 budget 6x too fast"
+      - alert: RunFailureSLOFastBurn
+        expr: fssai:run_failed_ratio:rate1h > (14.4 * 0.01) and fssai:run_failed_ratio:rate5m > (14.4 * 0.01)
+        labels: {severity: page, slo: run-failures}
+        annotations:
+          summary: "Failed runs are burning the 1 % budget 14x too fast"
+          description: "See docs/runbook.md; worker logs carry run_id and correlation_id."
+      - alert: RunFailureSLOSlowBurn
+        expr: fssai:run_failed_ratio:rate6h > (6 * 0.01) and fssai:run_failed_ratio:rate30m > (6 * 0.01)
+        labels: {severity: ticket, slo: run-failures}
+        annotations:
+          summary: "Failed runs are burning the 1 % budget 6x too fast"
+      - alert: IndexStale
+        expr: (time() - fssai_index_built_timestamp_seconds) > 30 * 24 * 3600
+        labels: {severity: ticket}
+        annotations:
+          summary: "The loaded regulation index is over 30 days old; check for new FSSAI amendments"
+      - alert: RetrievalDegraded
+        expr: increase(fssai_retrieval_degraded_total[10m]) > 0
+        labels: {severity: ticket}
+        annotations:
+          summary: "Dense retrieval failed and BM25 served the query (embedding model missing?)"
+      - alert: ScrapeTargetDown
+        expr: up == 0
+        for: 2m
+        labels: {severity: ticket}
+        annotations:
+          summary: "{{ $labels.job }} target {{ $labels.instance }} is down"

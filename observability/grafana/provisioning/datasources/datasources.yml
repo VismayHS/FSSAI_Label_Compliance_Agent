@@ -1,0 +1,31 @@
+# Grafana datasources (owner Nishkal). Fixed uids so every dashboard JSON can refer to them.
+apiVersion: 1
+datasources:
+  - name: Prometheus
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      timeInterval: 5s
+
+  - name: Jaeger
+    uid: jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
+
+  # Runs, step traces, quarantine and feedback (Vismay's and Vihaan's tables). Use a read-only role here:
+  # set GRAFANA_PG_USER / GRAFANA_PG_PASSWORD in .env to one (falls back to the app user locally).
+  - name: Postgres
+    uid: postgres
+    type: grafana-postgresql-datasource
+    url: $GRAFANA_PG_HOST
+    user: $GRAFANA_PG_USER
+    jsonData:
+      database: $GRAFANA_PG_DB
+      sslmode: disable
+      postgresVersion: 1600
+    secureJsonData:
+      password: $GRAFANA_PG_PASSWORD

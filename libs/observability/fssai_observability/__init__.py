@@ -1,17 +1,18 @@
-"""Logging, tracing and metric helpers every service calls at start-up (contexts/Nishkal.md N3.1). Day-0 skeleton.
+"""Logging, tracing and metric helpers every service calls at start-up (contexts/Nishkal.md N3.1, D5).
 
-- setup_logging(service): JSON lines (one object per record) with service, level and message, plus
-  run_id and correlation_id when the record carries them (logging `extra=`).
-- setup_tracing(service): OTel SDK -> OTLP exporter at OTEL_EXPORTER_OTLP_ENDPOINT; a no-op when that is unset.
-Both are idempotent and never raise in a process with no observability stack running. The API and
-worker call them once these work (Vismay, S2.2).
+    from fssai_observability import setup_logging, setup_tracing
+    setup_logging("api")    # JSON lines on stderr, with run_id / correlation_id when a record carries them
+    setup_tracing("api")    # OTel -> OTLP/HTTP at OTEL_EXPORTER_OTLP_ENDPOINT; a no-op when that is unset
+
+Both are idempotent and never raise in a process with no observability stack running.
 """
 from __future__ import annotations
 
+from .logs import JsonFormatter, setup_logging
+from .metrics import publish_index_manifest, start_metrics_server
+from .tracing import attach_trace_context, inject_trace_context, setup_tracing, span, tracing_enabled
 
-def setup_logging(service: str) -> None:
-    raise NotImplementedError("N3.1: JSON-lines logging with run_id / correlation_id")
-
-
-def setup_tracing(service: str) -> None:
-    raise NotImplementedError("N3.1: OTel tracing; a no-op without OTEL_EXPORTER_OTLP_ENDPOINT")
+__all__ = [
+    "JsonFormatter", "attach_trace_context", "inject_trace_context", "publish_index_manifest", "setup_logging",
+    "setup_tracing", "span", "start_metrics_server", "tracing_enabled",
+]

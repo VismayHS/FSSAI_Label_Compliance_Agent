@@ -1,15 +1,10 @@
-"""What every service relies on from fssai_observability. xfail until N3.1 is built (strict: delete the marker then)."""
+"""What every service relies on from fssai_observability."""
 import json
 import logging
 
-import pytest
-
 from fssai_observability import setup_logging, setup_tracing
 
-pending = pytest.mark.xfail(raises=NotImplementedError, strict=True, reason="N3.1 not built yet: delete this marker when it passes")
 
-
-@pending
 def test_logs_are_json_lines_with_run_ids(capfd):
     setup_logging("test")
     setup_logging("test")  # idempotent: still one line per record
@@ -21,7 +16,6 @@ def test_logs_are_json_lines_with_run_ids(capfd):
     assert record["service"] == "test" and record["run_id"] == "r1" and record["correlation_id"] == "c1"
 
 
-@pending
 def test_tracing_is_a_no_op_without_an_endpoint(monkeypatch):
     monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
     setup_tracing("test")
