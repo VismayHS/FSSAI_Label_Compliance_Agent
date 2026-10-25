@@ -1,12 +1,15 @@
 """Liveness, readiness and Prometheus metrics (F8). Every HTTP service exposes these three."""
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from fssai_contracts.fakes import InMemoryRunStore
+from fssai_contracts.registry import DEFAULTS
 
 router = APIRouter(tags=["operations"])
 
@@ -35,7 +38,19 @@ async def readyz(request: Request) -> JSONResponse:
     checks["run_store"] = {"ok": store_ok, "detail": store_detail}
 
     ready = all(c["ok"] for c in checks.values())
-    return JSONResponse({"ready": ready, "checks": checks}, status_code=200 if ready else 503)
+    return JSONResponse({"ready": ready, "checks": checks, "components": components()},
+                        status_code=200 if ready else 503)
+
+
+def components() -> dict[str, dict]:
+    """Which implementation each seam resolves to (its IMPL_* variable, else the contracts' default), so the
+    web client can say when it is showing stand-ins. Names only: nothing is imported or built. The API and
+    the workers read the same .env, so this is what the workers run too."""
+    out = {}
+    for seam, default in DEFAULTS.items():
+        path = os.environ.get(f"IMPL_{seam.upper()}", "").split("#", 1)[0].strip() or default
+        out[seam] = {"impl": path, "stand_in": path.startswith("fssai_contracts.")}
+    return out
 
 
 @router.get("/metrics", summary="Prometheus metrics", include_in_schema=False)
