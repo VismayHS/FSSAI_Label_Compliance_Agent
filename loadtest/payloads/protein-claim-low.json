@@ -1,0 +1,21 @@
+{
+  "client_reference": "loadtest-protein-claim-low",
+  "declared_category": "breakfast-cereals",
+  "package": {"net_quantity": 300, "net_quantity_unit": "g", "principal_display_panel_cm2": 140},
+  "label": {
+    "product_name": "Honey Corn Flakes",
+    "brand_name": "Loadtest Foods",
+    "front_of_pack_text": "Source of protein. Crunchy corn flakes with honey.",
+    "claims": ["Source of protein"],
+    "ingredients": "Corn grits (85%), sugar, honey (3%), salt, malt extract (barley)",
+    "allergen_statement": "Contains barley.",
+    "veg_status": "veg",
+    "fssai_licence_number": "00000000000000",
+    "manufacturer_name_address": "Loadtest Foods Pvt Ltd, Bengaluru",
+    "date_marking": "MFD 01/2026 USE BY 12/2026",
+    "batch_or_lot": "LT-002"
+  },
+  "nutrition": {"basis": "per_100g", "serving_size": 30, "serving_unit": "g", "energy_kcal": 380,
+                "protein_g": 2.5, "carbohydrate_g": 86, "total_sugars_g": 12, "added_sugars_g": 11,
+                "total_fat_g": 0.8, "saturated_fat_g": 0.2, "trans_fat_g": 0, "sodium_mg": 480}
+}

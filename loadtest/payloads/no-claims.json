@@ -1,0 +1,21 @@
+{
+  "client_reference": "loadtest-no-claims",
+  "declared_category": "breakfast-cereals",
+  "package": {"net_quantity": 1, "net_quantity_unit": "kg", "principal_display_panel_cm2": 300},
+  "label": {
+    "product_name": "Rolled Oats",
+    "brand_name": "Loadtest Foods",
+    "front_of_pack_text": "100% whole grain rolled oats.",
+    "claims": [],
+    "ingredients": "Rolled oats",
+    "allergen_statement": "Contains oats. May contain wheat.",
+    "veg_status": "veg",
+    "fssai_licence_number": "00000000000000",
+    "manufacturer_name_address": "Loadtest Foods Pvt Ltd, Bengaluru",
+    "date_marking": "MFD 01/2026 BEST BEFORE 01/2027",
+    "batch_or_lot": "LT-003"
+  },
+  "nutrition": {"basis": "per_100g", "serving_size": 40, "serving_unit": "g", "energy_kcal": 389,
+                "protein_g": 12, "carbohydrate_g": 66, "total_sugars_g": 1, "added_sugars_g": 0,
+                "total_fat_g": 7, "saturated_fat_g": 1.2, "trans_fat_g": 0, "sodium_mg": 5}
+}
