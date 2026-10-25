@@ -275,3 +275,14 @@ the web client."*
 - Decided `EMBEDDING_MODEL=hashing` as the clean-clone default (in Nishkal's section, noted in his file): the
   indexer now succeeds on a fresh clone with no download; the real model lives in the shared `.env`.
 
+
+**2026-10-26**
+- S2.4, Namith's part, dry run (his branch at `65fde8b`, not merged into mine): with `IMPL_PROMPTS` and
+  `IMPL_CLASSIFIER` on, the reference pipeline passes `check_pipeline`; the §4.1 request reports
+  `prompt_versions={"classifier": "1.0.0"}`, and the out-of-scope request goes to `regulatory-review`. His prompt
+  YAML files ship inside the built package, so the worker image will have them. Flip both switches once his PR merges.
+- Gateway now sends its own `User-Agent` (`fssai-label-agent/0.1`): Namith found Groq's Cloudflare front answers
+  library defaults with 403 (error 1010). Once agents use `IMPL_LLM=fssai_llm_gateway.client:GatewayLLMClient`,
+  his `fssai_agents.dev_llm` wrapper is no longer needed.
+- For Namith and Nishkal: the stub LLM has no `classifier` fixture yet, so under load tests the classifier gets the
+  default reply, retries once to repair it and falls back to rules (2 LLM calls per run instead of 1).
