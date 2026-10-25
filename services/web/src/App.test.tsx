@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import App from "./App";
-import { completedRun, fullTrace, json, mockApi, readyz, RUN_ID } from "./test/api";
+import { completedRun, fullTrace, json, mockApi, readyz, readyz_body, RUN_ID } from "./test/api";
 
 const NOTICE = /not an approval for print/i;
 
@@ -17,9 +17,16 @@ describe("the analyst workspace", () => {
     mockApi({ "GET /readyz": readyz });
     render(<App />);
     expect(screen.getByRole("heading", { name: "Check a label before it goes to print" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Check the §4.1 example" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Check the example label" })).toBeInTheDocument();
+    expect(screen.getByText("Describe the label.")).toBeInTheDocument();
+    expect(screen.getByText("Read the result.")).toBeInTheDocument();
     expect(screen.getByText(/never approves a label/i)).toBeInTheDocument();
-    expect(await screen.findByText(/API ready · inline execution/)).toBeInTheDocument();
+    expect(await screen.findByText("Service ready")).toBeInTheDocument();
+    const guide = screen.getByLabelText("What the three recommendations mean");
+    for (const route of ["clear-for-print", "revise-and-recheck", "regulatory-review"]) {
+      expect(within(guide).getByText(route)).toBeInTheDocument();
+    }
+    expect(screen.queryByText(/Demo mode/)).not.toBeInTheDocument(); // readyz lists no stand-ins here
     expect(screen.getByLabelText("Product name")).toHaveValue("Multigrain flakes");
     expect(screen.getByLabelText("Declared category")).toHaveValue("breakfast-cereals");
   });
@@ -285,5 +292,29 @@ describe("the analyst workspace", () => {
     expect(posts).toHaveLength(2);
     expect(JSON.parse(String(posts[1]!.init!.body))).toEqual({ satisfactory: false, reason: "Missed the <b>RDA</b> basis" });
     expect(new Headers(posts[1]!.init!.headers).get("X-Client-Id")).toMatch(/^web-/);
+  });
+
+  it("says plainly when parts of the check are stand-ins, and names them", async () => {
+    const components = {
+      classifier: { impl: "fssai_contracts.fakes:FakeClassifier", stand_in: true },
+      researcher: { impl: "fssai_contracts.fakes:FakeResearcher", stand_in: true },
+      retriever: { impl: "fssai_retrieval.faiss_retriever:FaissRetriever", stand_in: false },
+    };
+    mockApi({ "GET /readyz": () => json({ ...readyz_body(), components }) });
+    render(<App />);
+    const notice = await screen.findByRole("note");
+    expect(notice).toHaveTextContent("Demo mode");
+    expect(notice).toHaveTextContent("The classifier and researcher are placeholders");
+    expect(notice).not.toHaveTextContent("regulation search");
+  });
+
+  it("explains the result in plain words: what needs attention and what to do", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(/1 of 2 checked requirements needs attention: Condition for claim 'Source of protein'\. Fix it on the label, then check again\./))
+      .toBeInTheDocument();
+    expect(screen.getByText(/One row per requirement the system checked/)).toBeInTheDocument();
+    expect(screen.getByText(/Quotes verified/)).toBeInTheDocument();
   });
 });

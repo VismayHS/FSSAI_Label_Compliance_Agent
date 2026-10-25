@@ -198,6 +198,8 @@ export function RequestPanel({ onAccepted, initial, initialKey }: {
           onChange={switchMode} aria-label="Input format" size="sm" radius={0} inset={2} trackColor="var(--panel-2)" thumbColor="var(--ink)"
           textColor="var(--ink)" activeTextColor="var(--on-ink)" />
       </div>
+      <p className="request__intro">Type the label exactly as printed on the pack. It starts filled in with an example;{" "}
+        <strong>Clear</strong> empties the form.</p>
 
       <form onSubmit={submit} noValidate aria-describedby={notice ? `${formId}-notice` : undefined}>
         {mode === "form" ? (
@@ -267,7 +269,7 @@ export function RequestPanel({ onAccepted, initial, initialKey }: {
           <button type="submit" className="button" disabled={busy || waitS > 0} aria-busy={busy || undefined}>
             {busy ? "Checking…" : "Check label"}
           </button>
-          <button type="button" className="button-link" onClick={() => load(SECTION_41_EXAMPLE)}>Load the §4.1 example</button>
+          <button type="button" className="button-link" onClick={() => load(SECTION_41_EXAMPLE)}>Load the example</button>
           <button type="button" className="button-link" onClick={() => load(EMPTY_REQUEST)}>Clear</button>
         </div>
         <p className="request__client">Sent as client <code>{me}</code>; rate limits apply per client.</p>
