@@ -7,13 +7,13 @@ Routers reach shared services through `request.app.state`: `gate`, `run_store`, 
 from __future__ import annotations
 
 import importlib
-import logging
 import os
 import pkgutil
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
 
 from fastapi import APIRouter, FastAPI
+from fssai_observability import setup_logging, setup_tracing
 
 from fssai_contracts.registry import build
 from fssai_worker.dispatch import Dispatcher, from_environ
@@ -46,10 +46,11 @@ def mount_routers(app: FastAPI) -> list[str]:
 
 def create_app(*, gate=None, run_store=None, pipeline=None, dispatcher: Dispatcher | None = None,
                settings: Settings | None = None) -> FastAPI:
-    logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"), format="%(message)s")
+    setup_logging("api")
+    setup_tracing("api")
     run_store = run_store or build("run_store")
-    if dispatcher is None:
-        dispatcher = from_environ(Deps(pipeline=pipeline or build("pipeline"), run_store=run_store))
+    if dispatcher is None:  # a factory: only inline mode builds the pipeline inside the API
+        dispatcher = from_environ(lambda: Deps(pipeline=pipeline or build("pipeline"), run_store=run_store))
 
     @asynccontextmanager
     async def lifespan(app: FastAPI):
@@ -57,6 +58,9 @@ def create_app(*, gate=None, run_store=None, pipeline=None, dispatcher: Dispatch
         pool = getattr(app.state.dispatcher, "pool", None)
         if pool is not None:
             pool.shutdown(wait=False, cancel_futures=True)
+        close = getattr(app.state.run_store, "close", None)  # e.g. the Postgres store's connection pool
+        if callable(close):
+            close()
 
     app = FastAPI(title="FSSAI Label Compliance Agent", version="0.1.0", lifespan=lifespan,
                   description="Checks a packaged-food label against FSSAI regulations and returns findings "

@@ -163,3 +163,13 @@ def test_list_runs_newest_first_with_product_and_route(env):
     assert [r["product_name"] for r in runs] == ["Masala peanuts", "Roasted chana"]
     assert runs[1]["route"] == "revise-and-recheck" and runs[0]["complete"] is True
     assert env.client.get("/v1/runs?limit=0").status_code == 422
+
+
+def test_trace_links_to_jaeger_only_when_tracing_is_on(env, monkeypatch):
+    run_id = env.submit().json()["run_id"]
+    monkeypatch.setenv("JAEGER_UI_URL", "http://localhost:16686/")
+    monkeypatch.delenv("OTEL_EXPORTER_OTLP_ENDPOINT", raising=False)
+    assert env.client.get(f"/v1/runs/{run_id}/trace").json()["jaeger_url"] is None
+    monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://jaeger:4318")
+    url = env.client.get(f"/v1/runs/{run_id}/trace").json()["jaeger_url"]
+    assert url.startswith("http://localhost:16686/search?service=worker") and run_id in url

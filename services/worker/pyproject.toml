@@ -9,6 +9,7 @@ description = "Queue consumer: executes label-check runs with the registry's pip
 requires-python = ">=3.11"
 dependencies = [
     "fssai-contracts",
+    "fssai-observability",
     "rq>=2.12,<3",
     "redis>=8.1,<9",
     "prometheus-client>=0.26,<1",

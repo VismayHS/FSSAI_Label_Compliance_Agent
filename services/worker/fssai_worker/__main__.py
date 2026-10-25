@@ -5,10 +5,10 @@ once, metrics accumulate on this process's /metrics port, and nothing per-run ou
 """
 from __future__ import annotations
 
-import logging
 import os
 
 import redis
+from fssai_observability import setup_logging, setup_tracing
 from prometheus_client import start_http_server
 from rq import Queue, SimpleWorker
 from rq.timeouts import TimerDeathPenalty, UnixSignalDeathPenalty
@@ -23,7 +23,8 @@ class Worker(SimpleWorker):
 
 
 def main() -> None:
-    logging.basicConfig(level=os.environ.get("LOG_LEVEL", "INFO"), format="%(message)s")
+    setup_logging("worker")
+    setup_tracing("worker")
     start_http_server(int(os.environ.get("WORKER_METRICS_PORT", "9100") or 9100))
     default_deps()  # fail at start, not on the first job, if an IMPL_* path is wrong
     conn = redis.Redis.from_url(os.environ["REDIS_URL"])

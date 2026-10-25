@@ -78,4 +78,5 @@ class RunTrace(BaseModel):
     agents: dict[str, AgentRollup] = Field(default_factory=dict)
     steps: list[StepRecord] = Field(default_factory=list)
     error: str | None = None
+    jaeger_url: str | None = None  # this run's spans in Jaeger, when JAEGER_UI_URL is set
     notice: str = NOT_AN_APPROVAL

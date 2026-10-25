@@ -9,7 +9,7 @@ from __future__ import annotations
 
 import os
 from concurrent.futures import Future, ThreadPoolExecutor
-from typing import Mapping, Protocol
+from typing import Callable, Mapping, Protocol
 
 from .jobs import Deps, execute_run
 
@@ -63,10 +63,12 @@ class QueueDispatcher:
         return True, f"queue '{QUEUE_NAME}' reachable, {self.queue.count} job(s) waiting"
 
 
-def from_env(env: Mapping[str, str], deps: Deps) -> Dispatcher:
+def from_env(env: Mapping[str, str], deps: Deps | Callable[[], Deps]) -> Dispatcher:
+    """`deps` may be a factory: only inline mode builds the pipeline, so in queue mode the API process
+    never imports the agent stack (it lives in the worker image)."""
     mode = env.get("RUN_DISPATCH", "inline").split("#", 1)[0].strip() or "inline"
     if mode == "inline":
-        return InlineDispatcher(deps, workers=int(env.get("INLINE_WORKERS", "2") or 2))
+        return InlineDispatcher(deps() if callable(deps) else deps, workers=int(env.get("INLINE_WORKERS", "2") or 2))
     if mode == "queue":
         import redis
         conn = redis.Redis.from_url(env["REDIS_URL"], socket_timeout=5, socket_connect_timeout=5)
@@ -75,5 +77,5 @@ def from_env(env: Mapping[str, str], deps: Deps) -> Dispatcher:
     raise RuntimeError(f"RUN_DISPATCH must be 'inline' or 'queue', not '{mode}'")
 
 
-def from_environ(deps: Deps) -> Dispatcher:
+def from_environ(deps: Deps | Callable[[], Deps]) -> Dispatcher:
     return from_env(os.environ, deps)

@@ -13,6 +13,8 @@ from functools import lru_cache
 from prometheus_client import Counter, Histogram
 from pydantic import ValidationError
 
+from fssai_observability import attach_trace_context, inject_trace_context, span
+
 from fssai_contracts.context import RunContext
 from fssai_contracts.registry import build
 from fssai_contracts.schemas import LabelCheckRequest, RunState, RunStatus, utcnow
@@ -38,14 +40,21 @@ def default_deps() -> Deps:
 
 
 def payload_for(run_id: str, correlation_id: str, request: LabelCheckRequest) -> dict:
-    """What travels on the queue: plain JSON, so any worker can pick it up."""
-    return {"run_id": run_id, "correlation_id": correlation_id, "request": request.model_dump(mode="json")}
+    """What travels on the queue: plain JSON, so any worker can pick it up. `trace` carries the caller's
+    OpenTelemetry context (empty when tracing is off), so the run continues the API's trace (D5)."""
+    return {"run_id": run_id, "correlation_id": correlation_id, "request": request.model_dump(mode="json"),
+            "trace": inject_trace_context()}
 
 
 def execute_run(payload: dict, deps: Deps | None = None) -> str:
     """Run one label check and save the outcome. Returns the final state. Never raises for a bad run:
     a failure is saved as RunState.FAILED so the client sees it when polling."""
-    deps = deps or default_deps()
+    with attach_trace_context(payload.get("trace")), \
+            span("worker.execute_run", run_id=payload["run_id"], correlation_id=payload["correlation_id"]):
+        return _execute(payload, deps or default_deps())
+
+
+def _execute(payload: dict, deps: Deps) -> str:
     run_id, correlation_id = payload["run_id"], payload["correlation_id"]
     ctx = RunContext.new(run_id=run_id, correlation_id=correlation_id)
     store = deps.run_store
