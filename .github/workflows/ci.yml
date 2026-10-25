@@ -78,8 +78,10 @@ jobs:
       - uses: actions/checkout@v4.2.2
       - name: cp .env.example .env (exactly what a clean clone gets)
         run: cp .env.example .env
+      # No --wait: it counts the indexer's exit 1 (EMBEDDING_MODEL is empty on a clean clone) as a failure,
+      # although the worker's dependency on it is optional. smoke.py waits for /readyz itself.
       - name: docker compose up
-        run: docker compose up -d --build --wait --wait-timeout 600 api worker web
+        run: docker compose up -d --build api worker web
       - name: Smoke test (demo #1)
         run: python3 scripts/smoke.py --timeout 300
       - name: Logs on failure
