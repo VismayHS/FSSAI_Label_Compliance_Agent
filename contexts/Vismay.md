@@ -85,11 +85,11 @@ Summarise my current task in 3 lines, then wait for my go.
   - Fill in the dates in LLM_Context §9.
   - Check with the instructor that a team of 4 is OK (the spec says 2–3).
   - Decide whether the repo stays public. It contains the course PDFs; you can make it private under Settings → General.
-- [ ] **S0.2 Create package skeletons.** Create `services/api`, `services/worker` and `libs/llm_gateway` packages (each with its own `pyproject.toml`), plus a `Makefile` with `install`, `test`, `up`, `down` and `smoke` targets.
+- [x] **S0.2 Create package skeletons.** Create `services/api`, `services/worker` and `libs/llm_gateway` packages (each with its own `pyproject.toml`), plus a `Makefile` with `install`, `test`, `up`, `down` and `smoke` targets.
 
 ## Phase 1: Evaluation 1 (week 1): the walking skeleton
 
-- [ ] **S1.1 Build the API and worker on fakes (A4, F1).** This is the system's first end-to-end path.
+- [x] **S1.1 Build the API and worker on fakes (A4, F1).** This is the system's first end-to-end path.
   - `POST /v1/runs`:
     1. read `X-Client-Id` (required) and `X-Correlation-Id` (optional, otherwise generate one),
     2. call `build("gate").check(raw, client_id)`,
@@ -110,7 +110,7 @@ Summarise my current task in 3 lines, then wait for my go.
   id middleware adds it to logs and response headers and passes it into the job. Tests with TestClient,
   fakeredis and an in-memory run store: 202 path, 422 path enqueues nothing, 429 path, status polling.
   ```
-- [ ] **S1.2 Set up Compose (D3, D4).**
+- [x] **S1.2 Set up Compose (D3, D4).**
   - The root `docker-compose.yml` only `include:`s the files in `deploy/compose/`. Your fragments are api, worker, redis, postgres and web.
   - Every service gets a health check and `depends_on: condition: service_healthy`.
   - The worker has no fixed `container_name` or host port, so `--scale worker=3` works.
@@ -124,7 +124,7 @@ Summarise my current task in 3 lines, then wait for my go.
   smoke = scripts/smoke.py (Python standard library only, so it runs on Windows and macOS) that submits
   the §4.1-style fake request, polls, and asserts the route. Verify it works from a clean clone with only `cp .env.example .env`.
   ```
-- [ ] **S1.3 Assemble the Evaluation 1 project plan** in `docs/eval1/project-plan.md`. Build it from LLM_Context §§2–4, 9 and 10, Nishkal's passages, Vihaan's test values and Namith's topology draft. Add a first `docs/architecture.md` diagram **with deployment boundaries marked**.
+- [x] **S1.3 Assemble the Evaluation 1 project plan** in `docs/eval1/project-plan.md`. Build it from LLM_Context §§2–4, 9 and 10, Nishkal's passages, Vihaan's test values and Namith's topology draft. Add a first `docs/architecture.md` diagram **with deployment boundaries marked**.
 
 ## Phase 2: real end-to-end (by end of week 2)
 
@@ -172,31 +172,31 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 3: all requirements (weeks 3–4)
 
-- [ ] **S3.1 Make the circuit breaker demonstrable (A5).** Add a `make demo-breaker` target that points the gateway at the stub with `STUB_DOWN=1` (or a dead URL), submits runs, shows the breaker opening (metric and log), shows runs completing as `regulatory-review` with `complete=false` and an honest reason, then recovers.
+- [x] **S3.1 Make the circuit breaker demonstrable (A5).** Add a `make demo-breaker` target that points the gateway at the stub with `STUB_DOWN=1` (or a dead URL), submits runs, shows the breaker opening (metric and log), shows runs completing as `regulatory-review` with `complete=false` and an honest reason, then recovers.
 - [ ] **S3.2 Report cost (L5).**
   - Build the `cost.json` dashboard: cost per run, cost per step name, tokens by agent.
   - Write a script that computes **cost per 100 runs** and the **largest single cost driver** (the step with the highest total cost) from the `run_steps` table, after a batch of real-provider runs. You can use Vihaan's eval set run 4–5 times.
-- [ ] **S3.3 Write decision records.**
+- [x] **S3.3 Write decision records.**
   - Async model: polling vs callback, and why. A4 requires a justification.
   - Queue choice.
   - Deployment boundaries (D3): why api, worker, indexer, redis, postgres and stub-llm are separate, considering scaling, failure isolation, independent release and resource profile.
-- [ ] **S3.4 Audit for secrets (D4).** Add a CI check (or `make audit`) that greps for keys, URLs and model ids and fails on any hit.
-- [ ] **S3.5 Keep the worker stateless (A7 support).** Nothing per-worker on disk, breaker state in Redis, and the index on a read-only volume. Support Nishkal's scaling runs.
+- [x] **S3.4 Audit for secrets (D4).** Add a CI check (or `make audit`) that greps for keys, URLs and model ids and fails on any hit.
+- [x] **S3.5 Keep the worker stateless (A7 support).** Nothing per-worker on disk, breaker state in Redis, and the index on a read-only volume. Support Nishkal's scaling runs.
 - [ ] **S3.6 Finish the web client.** Feedback buttons work, and the escalation path is clear.
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **S4.1 Test from a clean clone (demo #1).** Write `scripts/clean_clone_test.py`: clone into a temp dir, `cp .env.example .env` (plus the provider key), `docker compose up -d`, wait for healthy, `make smoke`. Run it before every demo rehearsal.
-- [ ] **S4.2 Write the README** so a stranger can run the system without help (the course will test this). Include:
+- [x] **S4.1 Test from a clean clone (demo #1).** Write `scripts/clean_clone_test.py`: clone into a temp dir, `cp .env.example .env` (plus the provider key), `docker compose up -d`, wait for healthy, `make smoke`. Run it before every demo rehearsal.
+- [x] **S4.2 Write the README** so a stranger can run the system without help (the course will test this). Include:
   - prerequisites, then setup in three commands,
   - how to submit a request (curl and the web client),
   - where the dashboards are,
   - how to run eval and Locust,
   - links to the runbook, incident log, `.env.example` and eval set.
 - [ ] **S4.3 Assemble the report.** Merge `docs/report/*.md` into the final report covering every point in spec §11, and run two rehearsals of all 10 demo items with the team.
-- [ ] **S4.4 Write at least one incident entry** in `docs/incidents/`.
+- [x] **S4.4 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
-  - [ ] **GitHub Actions CI:** contract tests, each package's tests, `docker compose build`, and smoke on PRs
+  - [x] **GitHub Actions CI:** contract tests, each package's tests, `docker compose build`, and smoke on PRs
   - [ ] **Reviewer console:** a page listing `regulatory-review` runs, showing citations next to the retrieved passages, with accept/override actions → feedback
   - [ ] **Live progress over SSE** instead of polling
   - [ ] **PDF export** of a finding
@@ -239,3 +239,29 @@ the web client."*
   - It reaches their branches when they `git merge origin/main` after the PR; nothing was pushed to their branches.
 - Next: Compose + Dockerfiles + Postgres run store + `scripts/smoke.py` (S1.2), then the breaker demo (S3.1) and `docs/architecture.md` (S1.3).
 - Run locally: `uvicorn app.main:create_app --factory --env-file .env --port 8000`, then `npm --prefix services/web run dev` and open http://localhost:5173.
+
+**2026-10-25 (branch `vismay`, after merging `main` with Nishkal's PR #2)**
+- S1.1 done: `libs/run_store` (`PostgresRunStore`: `runs.doc` + one `run_steps` row per step; an older save never
+  overwrites a newer one), schema `deploy/postgres/init/10-vismay-runs.sql`. Passes `check_run_store` on real Postgres.
+- S1.2 done: root `docker-compose.yml` includes every fragment; mine are api, worker, redis (AOF), postgres and web
+  (nginx proxies the API). A clean `.env.example` boots; `scripts/smoke.py` passes through the API and through web;
+  `--scale worker=3` spreads runs and Prometheus finds all three. The indexer dependency is `required: false`
+  (incident `2026-10-25-vismay-indexer-py311-worker-crashloop`). `Makefile` wraps every command.
+- S2.2 finished: API and worker use `fssai_observability`; one Jaeger trace from the API's submit span through the
+  queue to the worker; the trace endpoint returns `jaeger_url`.
+- S2.4 started: Nishkal's `FaissRetriever` switched on in my local `.env` and verified in the stack. The fake
+  researcher retrieves real clauses (FSS-LD-2020 5(14), FSS-AC-2018 Schedule I item 11). Namith's and Vihaan's
+  seams are still fakes.
+- S1.3 done: `docs/eval1/project-plan.md`; `docs/architecture.md` status updated. S3.3 done: decision 304.
+- S3.1 done at gateway level: `python -m fssai_llm_gateway.demo` (in the worker container) shows open → fail fast
+  → recover against the stub. Runs degrade to `regulatory-review` once Namith's agents call the LLM.
+- S3.2 built, numbers pending: `scripts/cost_report.py` and the `cost.json` Grafana dashboard (all panels query
+  cleanly). Cost per 100 runs needs real-provider runs (Vihaan's eval set ×4-5).
+- S3.4 done: `scripts/audit_secrets.py` (tested) + CI. S3.5 done: stateless by design, verified with 3 replicas.
+- S3.6 partly: feedback form ready, shown only when the API serves `POST /v1/runs/{run_id}/feedback` (Vihaan).
+- S4.1 done: `scripts/clean_clone_test.py` passed in 5.8 min. S4.2 done: README rewritten as a clean-clone guide.
+- S4.4 done: incident above. Extra done: GitHub Actions CI (Python 3.11 tests with Postgres, compile check,
+  audit, web, Compose + smoke on PRs into main); first run green in 2m12s.
+- Also fixed Nishkal's `chunker.py` for Python 3.11 (noted in his file).
+- Still open: S0.1 GitHub rulesets/dates/instructor check, S2.4 for Namith's and Vihaan's parts, S3.2 numbers,
+  S3.6 once Vihaan's endpoint lands, S4.3 report, extras (reviewer console, SSE, PDF export, webhook).

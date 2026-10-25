@@ -38,6 +38,7 @@ def main() -> int:
     p.add_argument("--timeout", type=float, default=900, help="seconds for build + start + smoke")
     p.add_argument("--keep", action="store_true", help="leave the stack and folder for debugging")
     args = p.parse_args()
+    sys.stdout.reconfigure(line_buffering=True)  # keep our lines in order with the subprocesses' output
 
     work = Path(tempfile.mkdtemp(prefix="fssai-clean-"))
     clone = work / "repo"
