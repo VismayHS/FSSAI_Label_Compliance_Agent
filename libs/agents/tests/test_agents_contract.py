@@ -21,7 +21,6 @@ def test_classifier_conforms():
     check_classifier(LLMClassifier.from_registry())
 
 
-@pending("M2.1")
 def test_researcher_conforms():
     check_researcher(LangGraphResearcher.from_registry())
 
