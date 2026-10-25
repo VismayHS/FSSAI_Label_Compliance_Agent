@@ -315,3 +315,15 @@ Tell Vismay (worker/compose):
 
 Running locally (Windows): HuggingFace downloads failed TLS verification behind the antivirus (incident).
 The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `HF_HUB_OFFLINE=1`.
+
+**2026-10-25 (written by Vismay, noted here as the team rule asks): two things found while bringing up Compose.**
+- **Fixed for you:** `libs/ingest/fssai_ingest/chunker.py` line 255 put a backslash inside an f-string
+  expression. That is a `SyntaxError` before Python 3.12, so the indexer container (`python:3.11-slim`)
+  exited 1 at import; the tests passed only because the local `.venv` is Python 3.13. The regex now runs on
+  the line above. Logic and output are unchanged, and all 32 ingest tests pass. CI now compiles every file
+  on Python 3.11, so this can't recur unnoticed.
+- **Your call:** with `EMBEDDING_MODEL=` empty in `.env.example`, a clean clone's indexer exits 1. The worker
+  still starts, because `deploy/compose/worker.yml` makes the indexer dependency `required: false`, but the
+  real retriever then has no index. Please decide what a clean clone should get: the real model name in
+  your section, or `hashing`, or a README step. Until then the demo machine's `.env` needs
+  `EMBEDDING_MODEL` set before `docker compose up`.
