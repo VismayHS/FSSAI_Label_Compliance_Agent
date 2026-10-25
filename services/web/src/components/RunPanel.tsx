@@ -9,6 +9,7 @@ import { ms, shortId, time } from "../lib/format";
 import { useRun } from "../lib/useRun";
 import { AgentStrip } from "./AgentStrip";
 import { DeclarationBlock } from "./DeclarationBlock";
+import { Feedback } from "./Feedback";
 import { Findings } from "./Findings";
 import LatticeLoader from "./reactbits/LatticeLoader/LatticeLoader";
 import { Trace } from "./Trace";
@@ -152,6 +153,7 @@ function RunView({ runId, focus, initialTab, onRequest }: {
               <pre className="code-block">{JSON.stringify(status.request, null, 2)}</pre>
             )}
           </div>
+          <Feedback key={runId} runId={runId} />
         </>
       )}
     </section>

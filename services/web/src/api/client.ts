@@ -1,5 +1,6 @@
 // The HTTP contract of contexts/LLM_Context.md §7. Every outcome the UI must show is a typed result,
 // so no screen has to guess what a status code meant.
+import { clientId } from "../lib/clientId";
 import type { FieldError, Readiness, RunStatus, RunSummary, RunTrace } from "./types";
 
 declare global {
@@ -75,3 +76,33 @@ export async function getReadiness(signal?: AbortSignal): Promise<Readiness | nu
   }
 }
 
+
+const FEEDBACK_PATH = /^\/v1\/runs\/\{[^}]+\}\/feedback$/;
+
+/** Whether the API serves POST /v1/runs/{run_id}/feedback (Vihaan's router, L6). Until it is merged the
+ * feedback form stays hidden rather than offering something that cannot work. */
+export async function feedbackAvailable(signal?: AbortSignal): Promise<boolean> {
+  try {
+    const spec = await getJson<{ paths?: Record<string, Record<string, unknown>> }>("/openapi.json", signal);
+    return Object.entries(spec.paths ?? {}).some(([path, ops]) => FEEDBACK_PATH.test(path) && "post" in ops);
+  } catch {
+    return false;
+  }
+}
+
+export async function sendFeedback(runId: string, satisfactory: boolean, reason: string): Promise<void> {
+  let res: Response;
+  try {
+    res = await fetch(`${base()}/v1/runs/${runId}/feedback`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Client-Id": clientId() },
+      body: JSON.stringify({ satisfactory, reason }),
+    });
+  } catch {
+    throw new ApiError("The service is unreachable. Your feedback was not sent.");
+  }
+  if (!res.ok) {
+    const detail = await res.json().then((b: { detail?: unknown }) => b.detail).catch(() => undefined);
+    throw new ApiError(typeof detail === "string" ? detail : `The service answered ${res.status}; feedback not sent.`, res.status);
+  }
+}

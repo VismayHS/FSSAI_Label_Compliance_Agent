@@ -252,4 +252,38 @@ describe("the analyst workspace", () => {
     expect(link).toHaveAttribute("href", `#/runs/${RUN_ID}`);
     expect(screen.getByRole("link", { name: "Recent runs" })).toHaveAttribute("aria-current", "page");
   });
+
+  it("hides feedback until the API serves the endpoint", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()),
+              "GET /openapi.json": () => json({ paths: { "/v1/runs": { post: {} } } }) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByRole("tab", { name: /Findings/ })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("group", { name: "Satisfactory" })).not.toBeInTheDocument());
+  });
+
+  it("sends feedback on a finished run, with the reason as plain text", async () => {
+    const user = userEvent.setup();
+    const { calls } = mockApi({
+      "GET /readyz": readyz,
+      [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()),
+      "GET /openapi.json": () => json({ paths: { "/v1/runs/{run_id}/feedback": { post: {} } } }),
+      [`POST /v1/runs/${RUN_ID}/feedback`]: [() => json({ detail: "reason too short" }, 422), () => json({}, 201)],
+    });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    const group = await screen.findByRole("group", { name: "Satisfactory" });
+    const send = screen.getByRole("button", { name: "Send feedback" });
+    expect(send).toBeDisabled();
+    await user.click(within(group).getByRole("button", { name: "No, not satisfactory" }));
+    await user.type(screen.getByLabelText("Why (optional)"), "  Missed the <b>RDA</b> basis  ");
+    await user.click(send);
+    expect(await screen.findByRole("alert")).toHaveTextContent("reason too short");
+    await user.click(send);
+    expect(await screen.findByText(/Feedback recorded/)).toBeInTheDocument();
+    const posts = calls.filter((c) => c.method === "POST" && c.url.endsWith("/feedback"));
+    expect(posts).toHaveLength(2);
+    expect(JSON.parse(String(posts[1]!.init!.body))).toEqual({ satisfactory: false, reason: "Missed the <b>RDA</b> basis" });
+    expect(new Headers(posts[1]!.init!.headers).get("X-Client-Id")).toMatch(/^web-/);
+  });
 });
