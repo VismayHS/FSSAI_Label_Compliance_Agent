@@ -112,14 +112,14 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ---
 
-## Phase 0: setup (days 1–2)
+## Phase 0: setup
 
 - [ ] **V0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py vihaan` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_gate`, `check_verifier`, `check_router`).
   3. Make one small commit of your own on `vihaan` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `vihaan`), so you've done the whole loop once.
 
-## Phase 1: Evaluation 1 (week 1)
+## Phase 1: Evaluation 1 items
 
 - [ ] **V1.1 Publish the data contract (F1, D1).** Write `docs/data-contract.md` covering:
   - **Fields:** every field of `LabelCheckRequest` with type, unit, whether required, range and permitted values.
@@ -167,7 +167,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   For each, give the full request JSON, the expected route and the expected finding with citations to both regulations. This becomes the reference answer.
 - [ ] **V1.4 Write the first 5 eval scenarios** in `eval/scenarios.jsonl` (`EvalScenario` format): the 4 cases from V1.3 plus 1 out-of-scope category.
 
-## Phase 2: real end-to-end (by end of week 2)
+## Phase 2: real end-to-end
 
 - [ ] **V2.1 Build the verifier agent (A3).** `fssai_verification.verifier:AgentVerifier` is the second agent. It has its own prompt, its own tools (`resolve_citation`, `clause_lookup`) and its own state. For each finding it checks:
   1. **Citations resolve.** Each quote is a substring of a passage in `dossier.passages` (normalise whitespace and quotes). This check is deterministic, and it alone can fail a finding.
@@ -194,7 +194,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   Every route gets a human-readable reason. Write the rules in `docs/decisions/2xx-vihaan-routing-rules.md`.
 - [ ] **V2.3 Switch them on.** Add `IMPL_GATE`, `IMPL_VERIFIER` and `IMPL_ROUTER` examples to your `.env.example` section, and tell Vismay to flip them.
 
-## Phase 3: all requirements (weeks 3–4)
+## Phase 3: all requirements
 
 - [ ] **V3.1 Build the full eval set (L3).** It needs **≥20 scenarios** (aim for 25), each with an expected route, expected findings and a **supporting passage (real quote)**. Cover:
   - the §4.1 variants,
@@ -259,3 +259,6 @@ experiments and live quality monitoring from user feedback."*
 
 ## Notes / log
 (your notes here)
+- 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).
+- 2026-10-26 (Vismay): your GitHub collaborator invite is still pending, and you can't push until you accept it
+  (github.com/VismayHS/FSSAI_Label_Compliance_Agent/invitations). Do that before V0.1.

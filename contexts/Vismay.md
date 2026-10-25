@@ -75,7 +75,7 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ---
 
-## Phase 0: setup (days 1–2)
+## Phase 0: setup
 
 - [x] **S0.1 Set up the GitHub repo.**
   - Add Nishkal, Namith and Vihaan as collaborators, and write their GitHub usernames into the table in `LLM_Context.md` §1.
@@ -87,7 +87,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - Decide whether the repo stays public. It contains the course PDFs; you can make it private under Settings → General.
 - [x] **S0.2 Create package skeletons.** Create `services/api`, `services/worker` and `libs/llm_gateway` packages (each with its own `pyproject.toml`), plus a `Makefile` with `install`, `test`, `up`, `down` and `smoke` targets.
 
-## Phase 1: Evaluation 1 (week 1): the walking skeleton
+## Phase 1: Evaluation 1 items: the walking skeleton
 
 - [x] **S1.1 Build the API and worker on fakes (A4, F1).** This is the system's first end-to-end path.
   - `POST /v1/runs`:
@@ -126,7 +126,7 @@ Summarise my current task in 3 lines, then wait for my go.
   ```
 - [x] **S1.3 Assemble the Evaluation 1 project plan** in `docs/eval1/project-plan.md`. Build it from LLM_Context §§2–4, 9 and 10, Nishkal's passages, Vihaan's test values and Namith's topology draft. Add a first `docs/architecture.md` diagram **with deployment boundaries marked**.
 
-## Phase 2: real end-to-end (by end of week 2)
+## Phase 2: real end-to-end
 
 - [x] **S2.1 Build the LLM gateway (A5, L5).** `fssai_llm_gateway.client:GatewayLLMClient` implements `LLMClient`:
   - **Provider adapter:** OpenAI-compatible, configured by `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL`, with an optional fallback `LLM_FALLBACK_*`.
@@ -170,7 +170,7 @@ Summarise my current task in 3 lines, then wait for my go.
   ```
 - [ ] **S2.4 Integrate the real implementations.** As teammates merge, switch the `IMPL_*` variables in your local `.env` (and in `.env.example` comments) and run `make smoke` plus the §4.1 request on the real stack.
 
-## Phase 3: all requirements (weeks 3–4)
+## Phase 3: all requirements
 
 - [x] **S3.1 Make the circuit breaker demonstrable (A5).** Add a `make demo-breaker` target that points the gateway at the stub with `STUB_DOWN=1` (or a dead URL), submits runs, shows the breaker opening (metric and log), shows runs completing as `regulatory-review` with `complete=false` and an honest reason, then recovers.
 - [ ] **S3.2 Report cost (L5).**
@@ -288,3 +288,6 @@ the web client."*
   default reply, retries once to repair it and falls back to rules (2 LLM calls per run instead of 1).
 - S2.4: Namith's PR #4 merged; `IMPL_PROMPTS` and `IMPL_CLASSIFIER` are now on in `.env.example` and in my `.env`.
   Every package's tests pass on the merge (`scripts/test_all.py`).
+- Deadline moved: the whole project is due by Fri 30 Oct (the first review). LLM_Context §9 now states the one
+  deadline; phases are only the order of work. Dropped the week numbers from every person's phase headings (with a
+  dated note in each file's log) and updated the project plan.

@@ -106,7 +106,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ---
 
-## Phase 0: setup (days 1–2)
+## Phase 0: setup
 
 - [ ] **N0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py nishkal` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
@@ -125,7 +125,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   print a table. Add a test using a tiny generated PDF fixture.
   ```
 
-## Phase 1: Evaluation 1 (week 1)
+## Phase 1: Evaluation 1 items
 
 - [x] **N1.1 Find the §4.1 passages (the reference answer).** Read the two regulations yourself; the LLM only helps you search. Find:
   - (a) the clause(s) in the **Claims 2018** regulation that set the condition for a "source of protein" claim (the exact threshold and basis, e.g. per 100 g, per 100 kcal or per serving, whichever the regulation actually says),
@@ -159,7 +159,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   ```
 - [x] **N1.3 Write a decision record for the chunking strategy.** Write `docs/decisions/002-nishkal-chunking.md`. Chunk at clause or sub-clause level, never across clauses. Keep schedule and table rows whole. Each chunk's metadata records `regulation`, `clause_id`, `heading_path`, `doc_version` and `page`, plus a short "context header" (e.g. "FSS-AC-2018 › Schedule I › Protein") prepended before embedding. Explain how this helps the cross-regulation problem; that explanation becomes your L1 report section.
 
-## Phase 2: real end-to-end (by end of week 2)
+## Phase 2: real end-to-end
 
 - [x] **N2.1 Build the ingest CLI (D2, L1).** Running `python -m fssai_ingest build --corpus corpus/raw --out /data/index` does:
   - read → parse → clause-aware chunk → embed locally (sentence-transformers, model name from env) → FAISS (through LangChain),
@@ -192,7 +192,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   ```
 - [x] **N2.3 Add the indexer container.** In `deploy/compose/indexer.yml`, add a one-shot `indexer` service that builds the index into a named volume on `docker compose up`, idempotently. The worker waits for `service_completed_successfully`. Tell Vismay the volume name and mount path.
 
-## Phase 3: all requirements (weeks 3–4)
+## Phase 3: all requirements
 
 - [x] **N3.1 Build the observability library and stack (D5).**
   - **Library:** `fssai_observability` provides `setup_logging(service)` (JSON lines with `run_id` and `correlation_id` when present), `setup_tracing(service)` (OTel SDK → OTLP to Jaeger, a no-op if `OTEL_EXPORTER_OTLP_ENDPOINT` is unset) and Prometheus helpers.
@@ -332,3 +332,4 @@ The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `
   still runs BM25 + claim hints. The real MiniLM-class model is set in the team's shared `.env` for the demo and
   for your recall numbers. Change it back if you disagree; it is your section.
 
+- 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).

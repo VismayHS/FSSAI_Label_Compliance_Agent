@@ -446,17 +446,24 @@ We develop on both. Everything runs in Linux containers, so most differences dis
 
 ## 9. Phases and milestones
 
-Vismay fills in the dates once they're announced. **Evaluation 1 (first review):** **30 October 2026**. **Report + repo due**
-(one week before the presentation): `____`. **Evaluation 2 / demo:** `____`.
+**Deadline: everything is due by Friday 30 October 2026, the first review (Evaluation 1).** The team decided on
+2026-10-26 to finish the **whole project** by then: every task in every personal file, all 22 requirements, all 10 demo
+items, the report sections and the rehearsals. There are no intermediate deadlines. Finish as fast as you can; finishing
+early is better. The phases below are only the order of work, because each one builds on the one before.
 
-| Phase | When | Team milestone (everyone's personal file breaks this down) |
-|---|---|---|
-| **0. Setup** | Days 1–2 | Everyone has cloned the repo, run `scripts/setup_dev.py <name>` (own branch, hooks, `pytest contracts`, own package skeletons installed), and merged a first small PR from their own branch into `main`. Product category chosen (decision record 001). |
-| **1. Evaluation 1** | Week 1 | Corpus confirmed; §4.1 passages and test values written up; data contract v1; **SLO declared and committed**; walking skeleton (`compose up` → submit → fake pipeline → result); project plan. |
-| **2. Real end-to-end** | End of week 2 | Real index, retriever, LangGraph researcher, verifier, router and LLM gateway switched in with `IMPL_*`. The §4.1 case runs on the real stack, even if rough. The course requires this by week 2. |
-| **3. All 22 requirements** | Weeks 3–4 | Guardrails, eval + before/after, prompt comparison, caching, rate limits, breaker, cost, observability, Locust + scaling, feedback, runbook. |
-| **4. Hardening + extras** | Week 5 | Extras (§11), clean-clone test, README a stranger can follow, report sections, two demo rehearsals. |
-| **5. Freeze** | Due date | Report + repo submitted. After that only demo rehearsal and bug fixes, no new features. |
+| Phase | Team milestone (everyone's personal file breaks this down) |
+|---|---|
+| **0. Setup** | Everyone has cloned the repo, run `scripts/setup_dev.py <name>` (own branch, hooks, `pytest contracts`, own package skeletons installed), and merged a first small PR from their own branch into `main`. Product category chosen (decision record 001). |
+| **1. Evaluation 1 items** | Corpus confirmed; §4.1 passages and test values written up; data contract v1; **SLO declared and committed**; walking skeleton (`compose up` → submit → fake pipeline → result); project plan. |
+| **2. Real end-to-end** | Real index, retriever, LangGraph researcher, verifier, router and LLM gateway switched in with `IMPL_*`. The §4.1 case runs on the real stack. |
+| **3. All 22 requirements** | Guardrails, eval + before/after, prompt comparison, caching, rate limits, breaker, cost, observability, Locust + scaling, feedback, runbook. |
+| **4. Hardening + extras** | Clean-clone test, report sections, two rehearsals of all 10 demo items, and the extras (§11). |
+| **5. Freeze** | Review day, 30 Oct. Only bug fixes, no new features. `main` must boot from a clean clone. |
+
+What this means in practice:
+- **Merge often.** Open a PR into `main` whenever you have finished work. The once-per-day limit still holds, so don't sit on finished work.
+- **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
+- **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
 
 ---
 
