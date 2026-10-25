@@ -25,6 +25,5 @@ def test_researcher_conforms():
     check_researcher(LangGraphResearcher.from_registry())
 
 
-@pending("M2.2")
 def test_pipeline_conforms():
     check_pipeline(LangGraphPipeline.from_registry())
