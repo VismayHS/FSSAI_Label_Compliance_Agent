@@ -327,3 +327,8 @@ The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `
   real retriever then has no index. Please decide what a clean clone should get: the real model name in
   your section, or `hashing`, or a README step. Until then the demo machine's `.env` needs
   `EMBEDDING_MODEL` set before `docker compose up`.
+- **Decided (Vismay, 2026-10-25, on the team's behalf):** a clean clone gets `EMBEDDING_MODEL=hashing` in your
+  `.env.example` section. It builds offline, keeps model names out of the repo (D4), and the hybrid retriever
+  still runs BM25 + claim hints. The real MiniLM-class model is set in the team's shared `.env` for the demo and
+  for your recall numbers. Change it back if you disagree; it is your section.
+

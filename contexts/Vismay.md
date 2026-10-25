@@ -77,7 +77,7 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ## Phase 0: setup (days 1–2)
 
-- [ ] **S0.1 Set up the GitHub repo.**
+- [x] **S0.1 Set up the GitHub repo.**
   - Add Nishkal, Namith and Vihaan as collaborators, and write their GitHub usernames into the table in `LLM_Context.md` §1.
   - The four personal branches (`nishkal`, `namith`, `vihaan`, `vismay`) already exist on GitHub, along with `CONTRIBUTING.md`, `.githooks/` and `scripts/setup_dev.py`. Run `python scripts/setup_dev.py vismay` yourself, and from now on work only on `vismay` like everyone else.
   - Apply the GitHub settings in CONTRIBUTING.md §8: merge commits only (no squash or rebase), don't auto-delete head branches, a ruleset on `main` (require a PR, block force-pushes and deletion), and a ruleset on the four personal branches (block force-pushes and deletion).
@@ -270,5 +270,8 @@ the web client."*
   exit 1 as a failure; fixed in CI.
 - S0.1 mostly done: collaborators added (Vihaan's invite still pending), CODEOWNERS, Evaluation 1 date
   (30 Oct 2026), merge commits only, rulesets on `main` (PR + green CI, no force-push or deletion) and on the
-  personal branches. Left: confirm the team of 4 with the instructor; decide public vs private.
+  personal branches. Team of 4 confirmed with the instructor. Repo stays public (the free plan enforces rulesets only on
+  public repos, and the course reviews it).
+- Decided `EMBEDDING_MODEL=hashing` as the clean-clone default (in Nishkal's section, noted in his file): the
+  indexer now succeeds on a fresh clone with no download; the real model lives in the shared `.env`.
 

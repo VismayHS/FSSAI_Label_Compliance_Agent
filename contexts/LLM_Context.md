@@ -32,7 +32,7 @@ Each person commits and pushes **only to their own branch**. Nobody works on `ma
 
 - **Repo:** https://github.com/VismayHS/FSSAI_Label_Compliance_Agent (owner: Vismay, GitHub `VismayHS`)
 - **Course:** UE24AM342AA5, ML System Design & AgentOps, Dept of CSE (AI & ML), PESU. Mini Project 10, Jackfruit (Level 3).
-- **Team size:** the course says 2–3 students per team; we are 4. Vismay confirms this with the instructor.
+- **Team size:** the course says 2–3 students per team; we are 4. Confirmed with the instructor (2026-10-25).
 - **Goal:** all 22 requirements and all 10 demo items, plus the extras in §11. We want a project good enough to put on a CV, not just enough to pass.
 
 Each workstream deliberately covers several course units, so every person learns part of the
