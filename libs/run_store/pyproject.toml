@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fssai-run-store"
+version = "0.1.0"
+description = "Postgres RunStore: runs and their step traces, shared by every API replica and worker"
+requires-python = ">=3.11"
+dependencies = [
+    "fssai-contracts",
+    "psycopg[binary]>=3.2,<4",
+    "psycopg-pool>=3.2,<4",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=9"]
+
+[tool.setuptools.packages.find]
+include = ["fssai_run_store*"]
