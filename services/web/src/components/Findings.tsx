@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { Finding, FindingStatus, Verdict } from "../api/types";
-import { STATUS_WORD } from "../lib/format";
+import { STATUS_MEANING, STATUS_WORD } from "../lib/format";
 import { Mark } from "./Mark";
 
 /** Most severe first, so what must change is read before what passed. */
@@ -37,9 +37,15 @@ export function Findings({ findings, verdict }: { findings: Finding[]; verdict: 
         ))}
       </span>
       <span className="findings__verdict">
-        Verifier: {verdict?.action === "accept" ? "every citation resolves to retrieved text" : verdict?.escalation_reason ?? verdict?.action ?? "not run"}
+        {verdict?.action === "accept" ? "Quotes verified: each one matches regulation text the system retrieved"
+          : `Quotes not verified: ${verdict?.escalation_reason ?? verdict?.action ?? "the verifier did not run"}`}
       </span>
     </div>
+    <dl className="findings__legend">
+      {counts.map(([s]) => (
+        <div key={s}><dt>{STATUS_WORD[s]}</dt><dd>{STATUS_MEANING[s]}</dd></div>
+      ))}
+    </dl>
     {shown.length === 0 && <p className="empty">Every finding is filtered out. Turn a status back on above.</p>}
     <ol className="findings">
       {shown.map((f) => {

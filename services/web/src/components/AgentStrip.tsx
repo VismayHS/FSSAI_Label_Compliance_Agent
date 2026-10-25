@@ -6,12 +6,12 @@ import { Mark, type MarkKind } from "./Mark";
 
 /** The agreed hand-off order (contracts/fssai_contracts/pipeline.py), shown as marks on one path. */
 const STAGES: { label: string; role: string; match: (s: StepRecord) => boolean }[] = [
-  { label: "Guardrails", role: "screens the label text", match: (s) => s.agent === "guardrails" && s.name === "screen_input" },
-  { label: "Classifier", role: "category and claims", match: (s) => s.agent === "classifier" },
-  { label: "Researcher", role: "finds the provisions", match: (s) => s.agent === "researcher" },
-  { label: "Verifier", role: "checks every citation", match: (s) => s.agent === "verifier" },
-  { label: "Router", role: "chooses the route", match: (s) => s.agent === "router" },
-  { label: "Output filter", role: "blocks any approval", match: (s) => s.agent === "guardrails" && s.name === "filter_output" },
+  { label: "Guardrails", role: "checks the text is safe to read", match: (s) => s.agent === "guardrails" && s.name === "screen_input" },
+  { label: "Classifier", role: "finds the category and claims", match: (s) => s.agent === "classifier" },
+  { label: "Researcher", role: "finds the rules that apply", match: (s) => s.agent === "researcher" },
+  { label: "Verifier", role: "checks every quote", match: (s) => s.agent === "verifier" },
+  { label: "Router", role: "picks the recommendation", match: (s) => s.agent === "router" },
+  { label: "Output filter", role: "makes sure nothing reads as approved", match: (s) => s.agent === "guardrails" && s.name === "filter_output" },
 ];
 
 export interface Stage {
@@ -42,7 +42,8 @@ export function AgentStrip({ steps, working }: { steps: StepRecord[] | null; wor
         <li key={stage.label} className="strip__stage" data-kind={stage.kind} style={{ "--i": i } as CSSProperties}>
           <Mark kind={working ? "running" : stage.kind} />
           <span className="strip__label">{stage.label}</span>
-          <span className="strip__meta">{working ? stage.role : stage.detail}</span>
+          <span className="strip__meta">{stage.role}</span>
+          {steps && !working && <span className="strip__detail">{stage.detail}</span>}
           <span className="visually-hidden">{working ? ", waiting" : `, ${stage.kind}`}</span>
         </li>
       ))}

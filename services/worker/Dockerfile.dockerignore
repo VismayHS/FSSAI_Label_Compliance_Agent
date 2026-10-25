@@ -1,0 +1,8 @@
+# Build context is the repo root; send only what the worker image copies.
+*
+!contracts/
+!libs/
+!services/worker/
+**/__pycache__
+**/*.egg-info
+**/tests

@@ -214,6 +214,8 @@ export interface RunTrace {
   agents: Record<string, AgentRollup>;
   steps: StepRecord[];
   error: string | null;
+  /** This run's spans in Jaeger; null when tracing is off. */
+  jaeger_url?: string | null;
   notice: string;
 }
 
@@ -230,6 +232,8 @@ export interface RunSummary {
 export interface Readiness {
   ready: boolean;
   checks: Record<string, { ok: boolean; detail: string }>;
+  /** Which implementation each seam runs; `stand_in` = the contracts' placeholder (GET /readyz). */
+  components?: Record<string, { impl: string; stand_in: boolean }>;
 }
 
 export const TERMINAL_STATES: ReadonlySet<RunState> = new Set(["completed", "failed"]);

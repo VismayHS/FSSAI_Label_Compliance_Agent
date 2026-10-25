@@ -332,7 +332,15 @@ Findings N | Trace · N steps | Request. 44px, 600 `--t-sm`, `ink-2`; hover `ink
 - **Step spine:** a head row and an `ol` of `details` rows on one template. A 3px `path` spine runs through the mark column, knocked out behind each mark (done or error). Head: #, "Step · agent, kind · prompt", Latency, Tokens, Cost. Summary line 1: index, mono step name with agent (700, 82%), right-aligned mono latency, tokens and cost. Line 2 (`--t-xs`): kind (`unmet` 700 with ", failed" on error) · mono prompt version. Hover `panel-2`. Detail: error banner, the query, returned passages (mono regulation and clause, score, full text) and a "Raw input and output" disclosure in `path` with JSON on `panel-2`, max 28rem.
 
 ### Waiting and empty states
-Waiting: React Bits LatticeLoader (3x3 square cells, arrow pattern, `path` colour, no glow) with a mono timer and "Queued for a worker" or "Agents are checking the label", in a `role="status"` region. Empty run: Display heading, lede, the pending strip, a framed §4.1 example with its own primary button, and the never-approves notice.
+Waiting: React Bits LatticeLoader (3x3 square cells, arrow pattern, `path` colour, no glow) with a mono timer and "Queued for a worker" or "Agents are checking the label", in a `role="status"` region.
+
+### First-time guidance (plain words for someone new)
+- **Empty run:** the Display heading; the demo notice (below); a three-step `ol.howto` (describe the label, press Check label, read the result; bold lead-in per step, max 68ch); the pending strip; the framed example ("Try the example", button "Check the example label"; §4.1 named once, in brackets); the route guide (`dl.route-guide`, a heading plus three columns of mark + route word + what it means, one column on phones); the never-approves notice.
+- **Form:** a one-line `request__intro` under the panel heading says the form starts filled in and Clear empties it.
+- **Result:** the route row is labelled *Recommendation* and its help line is this run's outcome in plain words (`whatItMeans`: how many requirements need attention, by title, and what to do; clear and review have their own sentences). The router's own text stays as *Reason given*. Each tab opens with a one-line `tabpanel__intro`. Findings carry a status legend (`dl.findings__legend`, `--t-xs`) and the verifier line reads "Quotes verified".
+- **Strip:** each stage keeps its plain role ("finds the rules that apply") and, after a run, adds its step count and time on a 600-weight line (`strip__detail`). Stages align to the top (`align-content: start`).
+- **Demo notice:** a `warn` banner (`role="note"`, text max 60ch), shown on the empty and result views whenever `/readyz` reports reasoning parts as stand-ins, naming them in plain words. It disappears by itself as real parts are switched on. Never hide it to make a demo look finished.
+- **Header:** plain status words ("Service ready", "Service not ready: …"); the technical detail is in the tooltip.
 
 ### Recent runs
 A table with route mark plus route (or state), product link, state (", incomplete" when `complete` is false), tabular time and a short mono id.

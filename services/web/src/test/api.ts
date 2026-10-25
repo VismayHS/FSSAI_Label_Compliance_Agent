@@ -32,4 +32,5 @@ export function mockApi(routes: Record<string, Handler | Handler[]>) {
   return { calls, fetchMock };
 }
 
-export const readyz = () => json({ ready: true, checks: { dispatch: { ok: true, detail: "inline execution (development mode, no queue)" }, run_store: { ok: true, detail: "InMemoryRunStore" } } });
+export const readyz_body = () => ({ ready: true, checks: { dispatch: { ok: true, detail: "inline execution (development mode, no queue)" }, run_store: { ok: true, detail: "InMemoryRunStore" } } });
+export const readyz = () => json(readyz_body());

@@ -336,12 +336,21 @@ shared services through `request.app.state`: `gate` (the `RequestGate`, e.g. its
 `run_store` (the `RunStore`), `dispatcher` and `settings`. Call blocking code with
 `fastapi.concurrency.run_in_threadpool`.
 
-Run the API locally (inline mode, fakes by default):
+Run the whole stack (queue mode, Postgres run store, every service), from the repo root:
 
 ```bash
-<venv-python> -m pip install -e contracts -e services/worker -e services/api
+cp .env.example .env                 # once; then set your own section
+docker compose up -d --build         # web :8080 · API + /docs :8000 · Grafana :3000 · Prometheus :9090 · Jaeger :16686
+python scripts/smoke.py              # demo #1: ready, one run to completion, one reject that starts no run
+```
+
+Or the API alone without Docker (inline mode, fakes by default):
+
+```bash
 <venv-python> -m uvicorn app.main:create_app --factory --env-file .env --port 8000   # docs at /docs
 ```
+
+`GET /v1/runs/{run_id}/trace` also returns `jaeger_url`, this run's spans in Jaeger, when tracing is on.
 
 ---
 
@@ -437,7 +446,7 @@ We develop on both. Everything runs in Linux containers, so most differences dis
 
 ## 9. Phases and milestones
 
-Vismay fills in the dates once they're announced. **Evaluation 1:** `____`. **Report + repo due**
+Vismay fills in the dates once they're announced. **Evaluation 1 (first review):** **30 October 2026**. **Report + repo due**
 (one week before the presentation): `____`. **Evaluation 2 / demo:** `____`.
 
 | Phase | When | Team milestone (everyone's personal file breaks this down) |

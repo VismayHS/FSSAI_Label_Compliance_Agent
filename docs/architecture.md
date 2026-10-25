@@ -53,14 +53,15 @@ The API and the workers are separate because they scale on different things: one
 other is tens of seconds of agent work per run. Putting them in one container would make every API
 replica carry the model and index memory, and a slow run could starve request handling.
 
-## Status (2026-10-24)
+## Status (2026-10-25)
 
 | Part | State |
 |---|---|
-| API, worker, queue, gateway, web client | built and tested on the contracts' fakes |
-| Postgres run store, Compose files, nginx for web | next (Vismay S1.2) |
-| Gate, verifier, router | fakes until Vihaan's land |
-| Classifier, researcher, LangGraph pipeline, guardrails, prompts | fakes until Namith's land |
-| Corpus, index, retriever, observability stack, stub LLM | fakes / not yet, Nishkal |
+| API, worker, queue, Postgres run store, gateway, web client | built; running in Compose (`docker compose up -d --build`) |
+| Compose stack, nginx for web, smoke test, clean-clone test, CI | built and verified: clean `.env.example` boots, `--scale worker=3` works |
+| Tracing across the queue | one Jaeger trace from the API's submit span to the worker's run |
+| Corpus, index, hybrid retriever, observability stack, stub LLM | Nishkal's, merged; real retriever verified in the stack |
+| Gate, verifier, router | fakes until Vihaan's land (skeletons + conformance tests ready) |
+| Classifier, researcher, LangGraph pipeline, guardrails, prompts | fakes until Namith's land (skeletons + conformance tests ready) |
 
 Locally without Docker, `RUN_DISPATCH=inline` runs jobs inside the API process (decision 302).

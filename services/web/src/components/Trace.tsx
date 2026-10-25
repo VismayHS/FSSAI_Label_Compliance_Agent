@@ -64,6 +64,13 @@ export function Trace({ runId }: { runId: string }) {
         </p>
       )}
 
+      {trace.jaeger_url && (
+        <p className="trace__jaeger">
+          <a href={trace.jaeger_url} target="_blank" rel="noreferrer">Open this run's spans in Jaeger</a>
+          {" "}(API and worker, across the queue)
+        </p>
+      )}
+
       <h3 className="trace__heading">Steps in order</h3>
       {trace.steps.length === 0 ? (
         <p className="empty">{trace.state === "failed" ? "The run failed before any step was recorded." : "No steps recorded yet."}</p>

@@ -120,3 +120,19 @@ def test_queue_dispatcher_is_not_ready_when_redis_is_down():
     conn = redis_lib.Redis.from_url("redis://127.0.0.1:1/0", socket_connect_timeout=0.2)
     ok, reason = dispatch.QueueDispatcher(conn, job_timeout_s=60).ready()
     assert not ok and "unreachable" in reason
+
+
+def test_queue_mode_never_builds_the_pipeline():
+    def boom():
+        raise AssertionError("queue mode must not build the pipeline inside the API")
+
+    assert dispatch.from_env({"RUN_DISPATCH": "queue", "REDIS_URL": "redis://localhost:1/0"}, boom).mode == "queue"
+    assert dispatch.from_env({}, deps).mode == "inline"  # inline builds it from the factory
+
+
+def test_payload_carries_trace_context_and_old_payloads_still_run():
+    payload = payload_for("run-t", "corr-t", request())
+    assert isinstance(payload["trace"], dict)  # empty when tracing is off, a W3C traceparent when on
+    payload.pop("trace")
+    d = deps()
+    assert execute_run(payload, d) == RunState.COMPLETED.value

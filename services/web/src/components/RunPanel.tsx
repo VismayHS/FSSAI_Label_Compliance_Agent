@@ -2,28 +2,38 @@ import { useEffect, useRef, useState } from "react";
 
 import { submitRun } from "../api/client";
 
-import type { LabelCheckRequest, RunStatus } from "../api/types";
+import type { LabelCheckRequest, Readiness, RunStatus } from "../api/types";
 import { clientId } from "../lib/clientId";
 import { SECTION_41_EXAMPLE } from "../lib/example";
-import { ms, shortId, time } from "../lib/format";
+import { ms, ROUTE_MEANING, shortId, time } from "../lib/format";
 import { useRun } from "../lib/useRun";
 import { AgentStrip } from "./AgentStrip";
 import { DeclarationBlock } from "./DeclarationBlock";
+import { DemoNotice } from "./DemoNotice";
+import { Feedback } from "./Feedback";
 import { Findings } from "./Findings";
+import { Mark } from "./Mark";
 import LatticeLoader from "./reactbits/LatticeLoader/LatticeLoader";
 import { Trace } from "./Trace";
 
 type Tab = "findings" | "trace" | "request";
 
-export function RunPanel({ runId, focus, onAccepted, initialTab, onRequest }: {
+const TAB_INTRO: Record<Tab, string> = {
+  findings: "One row per requirement the system checked, most serious first, each with the regulation text it rests on.",
+  trace: "Every step the system took, in order, with what it searched for and the text it got back. For audit and debugging.",
+  request: "Exactly what was submitted for this check.",
+};
+
+export function RunPanel({ runId, focus, onAccepted, initialTab, onRequest, ready }: {
   runId: string | null; focus: boolean; onAccepted: (runId: string) => void; initialTab?: "trace";
-  onRequest: (runId: string, request: LabelCheckRequest) => void;
+  onRequest: (runId: string, request: LabelCheckRequest) => void; ready?: Readiness | null;
 }) {
-  if (!runId) return <EmptyRun onAccepted={onAccepted} />;
-  return <RunView key={runId} runId={runId} focus={focus} initialTab={initialTab ?? "findings"} onRequest={onRequest} />;
+  if (!runId) return <EmptyRun onAccepted={onAccepted} ready={ready} />;
+  return <RunView key={runId} runId={runId} focus={focus} initialTab={initialTab ?? "findings"} onRequest={onRequest}
+    ready={ready} />;
 }
 
-function EmptyRun({ onAccepted }: { onAccepted: (runId: string) => void }) {
+function EmptyRun({ onAccepted, ready }: { onAccepted: (runId: string) => void; ready?: Readiness | null }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const runExample = async () => {
@@ -37,30 +47,54 @@ function EmptyRun({ onAccepted }: { onAccepted: (runId: string) => void }) {
   return (
     <section className="panel run run--empty" aria-labelledby="run-empty-title">
       <h2 id="run-empty-title">Check a label before it goes to print</h2>
-      <p className="run__lede">
-        Each requirement gets a finding that cites the regulation and clause it rests on, with the quoted words.
-        The label is then routed to <strong>clear-for-print</strong>, <strong>revise-and-recheck</strong> or{" "}
-        <strong>regulatory-review</strong>.
-      </p>
+      <DemoNotice ready={ready} />
+      <ol className="howto">
+        <li><strong>Describe the label.</strong> Type what is printed on the pack into the form. It starts filled in
+          with an example you can edit or clear.</li>
+        <li><strong>Press Check label.</strong> The system reads the label against the two FSSAI regulations, in the six
+          steps below, and shows each one as it runs.</li>
+        <li><strong>Read the result.</strong> Every requirement it checked is marked met, unmet or cannot determine,
+          with the exact regulation text it rests on, and the label gets one of three recommendations.</li>
+      </ol>
       <AgentStrip steps={null} working={false} />
       <div className="run__example">
         <div>
-          <h3>The §4.1 case</h3>
-          <p>A pack claims “Source of protein”. Is the claim permitted, given the protein on its nutrition panel? The answer
-            sits in the Claims regulation, which the Labelling regulation never points to.</p>
+          <h3>Try the example</h3>
+          <p>A breakfast cereal claims &ldquo;Source of protein&rdquo; and declares 8 g of protein per 100 g. Is the claim
+            allowed? The rule is in the Claims regulation, which the Labelling regulation never mentions: finding it is
+            what this system is built for. (It is the course spec&rsquo;s &sect;4.1 test case.)</p>
         </div>
         <button type="button" className="button" onClick={runExample} disabled={busy} aria-busy={busy || undefined}>
-          {busy ? "Checking…" : "Check the §4.1 example"}
+          {busy ? "Checking…" : "Check the example label"}
         </button>
       </div>
       {error && <p className="banner" data-tone="error" role="alert">{error}</p>}
+      <RouteGuide />
       <p className="notice">The service never approves a label for print. A regulatory affairs professional decides.</p>
     </section>
   );
 }
 
-function RunView({ runId, focus, initialTab, onRequest }: {
+/** What each recommendation means, in plain words, before anyone has run a check. */
+function RouteGuide() {
+  return (
+    <>
+    <h3 className="route-guide__title" id="route-guide-title">What the three recommendations mean</h3>
+    <dl className="route-guide" aria-labelledby="route-guide-title">
+      {(["clear-for-print", "revise-and-recheck", "regulatory-review"] as const).map((route) => (
+        <div key={route}>
+          <dt><Mark kind={route} /> <span className="mono">{route}</span></dt>
+          <dd>{ROUTE_MEANING[route]}</dd>
+        </div>
+      ))}
+    </dl>
+    </>
+  );
+}
+
+function RunView({ runId, focus, initialTab, onRequest, ready }: {
   runId: string; focus: boolean; initialTab: Tab; onRequest: (runId: string, request: LabelCheckRequest) => void;
+  ready?: Readiness | null;
 }) {
   const { status, error, reconnecting } = useRun(runId);
   const request = status?.request ?? null;
@@ -102,6 +136,7 @@ function RunView({ runId, focus, initialTab, onRequest }: {
         </p>
       </div>
 
+      <DemoNotice ready={ready} />
       {reconnecting && <p className="banner" data-tone="warn" role="status">Connection lost. Retrying…</p>}
 
       {working && (
@@ -146,12 +181,14 @@ function RunView({ runId, focus, initialTab, onRequest }: {
             ))}
           </div>
           <div id={`panel-${tab}`} role="tabpanel" aria-labelledby={`tab-${tab}`} className="tabpanel">
+            <p className="tabpanel__intro">{TAB_INTRO[tab]}</p>
             {tab === "findings" && <Findings findings={result.findings} verdict={result.verdict} />}
             {tab === "trace" && <Trace runId={runId} />}
             {tab === "request" && (
               <pre className="code-block">{JSON.stringify(status.request, null, 2)}</pre>
             )}
           </div>
+          <Feedback key={runId} runId={runId} />
         </>
       )}
     </section>

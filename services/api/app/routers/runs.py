@@ -7,13 +7,16 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import re
 import uuid
 from typing import Annotated
+from urllib.parse import urlencode
 
 from fastapi import APIRouter, Header, Path, Query, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import JSONResponse
+from fssai_observability import span
 from prometheus_client import Counter
 
 from fssai_contracts.schemas import FieldError, RunState, RunStatus, utcnow
@@ -33,6 +36,14 @@ RunId = Annotated[str, Path(pattern=r"^[0-9a-f]{32}$", description="32-character
 def _problem(status: int, detail: str, request: Request) -> JSONResponse:
     return JSONResponse(Problem(detail=detail, correlation_id=request.state.correlation_id).model_dump(),
                         status_code=status)
+
+
+def _jaeger_url(run_id: str) -> str | None:
+    """A Jaeger search for this run's spans (the worker tags them with run_id). None when tracing is off."""
+    base = os.environ.get("JAEGER_UI_URL", "").split("#", 1)[0].strip().rstrip("/")
+    if not base or not os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "").split("#", 1)[0].strip():
+        return None
+    return f"{base}/search?" + urlencode({"service": "worker", "tags": json.dumps({"run_id": run_id})})
 
 
 def _parse(body: bytes) -> tuple[dict, list[FieldError]]:
@@ -97,7 +108,9 @@ async def submit_run(request: Request, x_client_id: str | None = Header(None, de
                        client_id=x_client_id, correlation_id=cid, request=decision.request)
     await run_in_threadpool(state.run_store.save, status)
     try:
-        await run_in_threadpool(state.dispatcher.submit, payload_for(run_id, cid, decision.request))
+        with span("api.submit_run", run_id=run_id, correlation_id=cid, client_id=x_client_id):
+            payload = payload_for(run_id, cid, decision.request)  # carries this span's context to the worker
+        await run_in_threadpool(state.dispatcher.submit, payload)
     except Exception as exc:  # noqa: BLE001 - the queue being down must end as an honest error
         failed = status.model_copy(update={"state": RunState.FAILED, "updated_at": utcnow(),
                                            "error": "could not queue the run; try again"})
@@ -140,7 +153,7 @@ async def get_trace(request: Request, run_id: RunId):
     result = status.result
     trace = RunTrace(run_id=status.run_id, correlation_id=status.correlation_id, state=status.state,
                      submitted_at=status.submitted_at, updated_at=status.updated_at, request=status.request,
-                     error=status.error)
+                     error=status.error, jaeger_url=_jaeger_url(status.run_id))
     if result is None:
         return trace
     agents: dict[str, AgentRollup] = {}

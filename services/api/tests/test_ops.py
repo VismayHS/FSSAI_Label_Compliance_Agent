@@ -78,3 +78,13 @@ def test_create_app_builds_its_dependencies_from_the_registry(monkeypatch):
     assert app.state.dispatcher.mode == "inline"
     with TestClient(app) as client:
         assert client.get("/readyz").status_code == 200
+
+
+def test_readyz_says_which_parts_are_stand_ins(env, monkeypatch):
+    for seam in ("CLASSIFIER", "RETRIEVER"):
+        monkeypatch.delenv(f"IMPL_{seam}", raising=False)
+    monkeypatch.setenv("IMPL_RETRIEVER", "fssai_retrieval.faiss_retriever:FaissRetriever   # real")
+    parts = env.client.get("/readyz").json()["components"]
+    assert parts["classifier"] == {"impl": "fssai_contracts.fakes:FakeClassifier", "stand_in": True}
+    assert parts["retriever"] == {"impl": "fssai_retrieval.faiss_retriever:FaissRetriever", "stand_in": False}
+    assert set(parts) >= {"gate", "llm", "researcher", "verifier", "router", "guardrails", "pipeline", "run_store"}

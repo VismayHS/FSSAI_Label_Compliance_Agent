@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
 import App from "./App";
-import { completedRun, fullTrace, json, mockApi, readyz, RUN_ID } from "./test/api";
+import { completedRun, fullTrace, json, mockApi, readyz, readyz_body, RUN_ID } from "./test/api";
 
 const NOTICE = /not an approval for print/i;
 
@@ -17,10 +17,18 @@ describe("the analyst workspace", () => {
     mockApi({ "GET /readyz": readyz });
     render(<App />);
     expect(screen.getByRole("heading", { name: "Check a label before it goes to print" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Check the §4.1 example" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Check the example label" })).toBeInTheDocument();
+    expect(screen.getByText("Describe the label.")).toBeInTheDocument();
+    expect(screen.getByText("Read the result.")).toBeInTheDocument();
     expect(screen.getByText(/never approves a label/i)).toBeInTheDocument();
-    expect(await screen.findByText(/API ready · inline execution/)).toBeInTheDocument();
-    expect(screen.getByLabelText("Product name")).toHaveValue("Roasted chana");
+    expect(await screen.findByText("Service ready")).toBeInTheDocument();
+    const guide = screen.getByLabelText("What the three recommendations mean");
+    for (const route of ["clear-for-print", "revise-and-recheck", "regulatory-review"]) {
+      expect(within(guide).getByText(route)).toBeInTheDocument();
+    }
+    expect(screen.queryByText(/Demo mode/)).not.toBeInTheDocument(); // readyz lists no stand-ins here
+    expect(screen.getByLabelText("Product name")).toHaveValue("Multigrain flakes");
+    expect(screen.getByLabelText("Declared category")).toHaveValue("breakfast-cereals");
   });
 
   it("submits the form, polls the run and shows route, findings, citations and the notice", async () => {
@@ -143,6 +151,21 @@ describe("the analyst workspace", () => {
     expect(document.querySelectorAll(".steps > li")).toHaveLength(7);
     expect(document.querySelectorAll(".steps .mark[data-kind='done']")).toHaveLength(7);
     expect(screen.getAllByText(/PLACEHOLDER, NOT REAL REGULATION TEXT/).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("link", { name: /Jaeger/ })).not.toBeInTheDocument(); // tracing off in the fixture
+  });
+
+  it("links the trace to Jaeger when tracing is on", async () => {
+    const user = userEvent.setup();
+    const url = "http://localhost:16686/search?service=worker";
+    mockApi({
+      "GET /readyz": readyz,
+      [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()),
+      [`GET /v1/runs/${RUN_ID}/trace`]: () => json({ ...fullTrace(), jaeger_url: url }),
+    });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await user.click(await screen.findByRole("tab", { name: /Trace/ }));
+    expect(await screen.findByRole("link", { name: /Jaeger/ })).toHaveAttribute("href", url);
   });
 
   it("supports arrow keys across the result tabs", async () => {
@@ -235,5 +258,63 @@ describe("the analyst workspace", () => {
     const link = await screen.findByRole("link", { name: "Roasted chana" });
     expect(link).toHaveAttribute("href", `#/runs/${RUN_ID}`);
     expect(screen.getByRole("link", { name: "Recent runs" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("hides feedback until the API serves the endpoint", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()),
+              "GET /openapi.json": () => json({ paths: { "/v1/runs": { post: {} } } }) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByRole("tab", { name: /Findings/ })).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("group", { name: "Satisfactory" })).not.toBeInTheDocument());
+  });
+
+  it("sends feedback on a finished run, with the reason as plain text", async () => {
+    const user = userEvent.setup();
+    const { calls } = mockApi({
+      "GET /readyz": readyz,
+      [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()),
+      "GET /openapi.json": () => json({ paths: { "/v1/runs/{run_id}/feedback": { post: {} } } }),
+      [`POST /v1/runs/${RUN_ID}/feedback`]: [() => json({ detail: "reason too short" }, 422), () => json({}, 201)],
+    });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    const group = await screen.findByRole("group", { name: "Satisfactory" });
+    const send = screen.getByRole("button", { name: "Send feedback" });
+    expect(send).toBeDisabled();
+    await user.click(within(group).getByRole("button", { name: "No, not satisfactory" }));
+    await user.type(screen.getByLabelText("Why (optional)"), "  Missed the <b>RDA</b> basis  ");
+    await user.click(send);
+    expect(await screen.findByRole("alert")).toHaveTextContent("reason too short");
+    await user.click(send);
+    expect(await screen.findByText(/Feedback recorded/)).toBeInTheDocument();
+    const posts = calls.filter((c) => c.method === "POST" && c.url.endsWith("/feedback"));
+    expect(posts).toHaveLength(2);
+    expect(JSON.parse(String(posts[1]!.init!.body))).toEqual({ satisfactory: false, reason: "Missed the <b>RDA</b> basis" });
+    expect(new Headers(posts[1]!.init!.headers).get("X-Client-Id")).toMatch(/^web-/);
+  });
+
+  it("says plainly when parts of the check are stand-ins, and names them", async () => {
+    const components = {
+      classifier: { impl: "fssai_contracts.fakes:FakeClassifier", stand_in: true },
+      researcher: { impl: "fssai_contracts.fakes:FakeResearcher", stand_in: true },
+      retriever: { impl: "fssai_retrieval.faiss_retriever:FaissRetriever", stand_in: false },
+    };
+    mockApi({ "GET /readyz": () => json({ ...readyz_body(), components }) });
+    render(<App />);
+    const notice = await screen.findByRole("note");
+    expect(notice).toHaveTextContent("Demo mode");
+    expect(notice).toHaveTextContent("The classifier and researcher are placeholders");
+    expect(notice).not.toHaveTextContent("regulation search");
+  });
+
+  it("explains the result in plain words: what needs attention and what to do", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(/1 of 2 checked requirements needs attention: Condition for claim 'Source of protein'\. Fix it on the label, then check again\./))
+      .toBeInTheDocument();
+    expect(screen.getByText(/One row per requirement the system checked/)).toBeInTheDocument();
+    expect(screen.getByText(/Quotes verified/)).toBeInTheDocument();
   });
 });

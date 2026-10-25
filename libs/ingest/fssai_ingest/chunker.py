@@ -252,7 +252,8 @@ class _Parser:
             return False
         key = self._key(self.stack[:1])
         if _SEE.match(line):
-            self.headings[key] += f" [{re.sub(r'^[\[(]\s*|\s*[\])]\s*$', '', line)}]"
+            see = re.sub(r"^[\[(]\s*|\s*[\])]\s*$", "", line)  # outside the f-string: Python 3.11 forbids \ there
+            self.headings[key] += f" [{see}]"
             self.schedule_see_seen = True
             self.current.lines.append(line)
             if self.schedule_title_seen:

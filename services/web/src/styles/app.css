@@ -481,9 +481,76 @@ legend {
   line-height: 1;
   max-width: 16ch;
 }
-.run__lede {
-  max-width: 62ch;
+/* First-time guidance: how a check works, in three plain steps */
+.howto {
+  max-width: 68ch;
+  padding-left: var(--s-5);
   font-size: var(--t-md);
+}
+.howto li + li {
+  margin-top: var(--s-2);
+}
+.howto li::marker {
+  font-weight: 700;
+}
+.route-guide {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--s-4);
+  margin-bottom: 0;
+}
+.route-guide__title {
+  font-size: var(--t-md);
+}
+.route-guide dt {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--t-sm);
+  font-weight: 700;
+}
+.route-guide dd {
+  margin: var(--s-1) 0 0;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+.demo-notice p {
+  max-width: 60ch; /* about 80 characters of this small proportional text */
+}
+.demo-notice p + p {
+  margin-top: var(--s-1);
+}
+.request__intro {
+  margin-top: var(--s-2);
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+.tabpanel__intro {
+  max-width: 72ch;
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+.findings__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-5);
+  margin: var(--s-2) 0 0;
+  font-size: var(--t-xs);
+  color: var(--ink-2);
+}
+.findings__legend div {
+  display: flex;
+  gap: var(--s-1);
+}
+.findings__legend dt {
+  font-weight: 700;
+  color: var(--ink);
+}
+.findings__legend dt::after {
+  content: ":";
+}
+.findings__legend dd {
+  margin: 0;
 }
 .run__example {
   display: flex;
@@ -624,6 +691,7 @@ legend {
   position: relative;
   display: grid;
   grid-template-rows: auto auto auto;
+  align-content: start;
   justify-items: start;
   gap: var(--s-1);
   min-width: 0;
@@ -642,6 +710,11 @@ legend {
 .strip__meta {
   font-size: var(--t-xs);
   color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.strip__detail {
+  font-size: var(--t-xs);
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .strip__stage[data-kind="skipped"] .strip__label {
@@ -1019,6 +1092,9 @@ tbody th {
   }
 }
 @media (max-width: 720px) {
+  .route-guide {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .totals {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1105,4 +1181,22 @@ tbody th {
     transform: none;
     opacity: 1;
   }
+}
+
+/* Feedback (L6): shown under a finished run once the API serves the endpoint */
+.feedback {
+  margin-top: var(--s-6);
+}
+.feedback__choice {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-2);
+  margin-top: var(--s-2);
+}
+.feedback .button {
+  margin-top: var(--s-3);
+}
+.feedback__done {
+  margin-top: var(--s-6);
+  font-weight: 600;
 }
