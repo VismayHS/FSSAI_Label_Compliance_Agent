@@ -214,6 +214,8 @@ export interface RunTrace {
   agents: Record<string, AgentRollup>;
   steps: StepRecord[];
   error: string | null;
+  /** This run's spans in Jaeger; null when tracing is off. */
+  jaeger_url?: string | null;
   notice: string;
 }
 

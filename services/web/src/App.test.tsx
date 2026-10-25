@@ -20,7 +20,8 @@ describe("the analyst workspace", () => {
     expect(screen.getByRole("button", { name: "Check the §4.1 example" })).toBeInTheDocument();
     expect(screen.getByText(/never approves a label/i)).toBeInTheDocument();
     expect(await screen.findByText(/API ready · inline execution/)).toBeInTheDocument();
-    expect(screen.getByLabelText("Product name")).toHaveValue("Roasted chana");
+    expect(screen.getByLabelText("Product name")).toHaveValue("Multigrain flakes");
+    expect(screen.getByLabelText("Declared category")).toHaveValue("breakfast-cereals");
   });
 
   it("submits the form, polls the run and shows route, findings, citations and the notice", async () => {
@@ -143,6 +144,21 @@ describe("the analyst workspace", () => {
     expect(document.querySelectorAll(".steps > li")).toHaveLength(7);
     expect(document.querySelectorAll(".steps .mark[data-kind='done']")).toHaveLength(7);
     expect(screen.getAllByText(/PLACEHOLDER, NOT REAL REGULATION TEXT/).length).toBeGreaterThan(0);
+    expect(screen.queryByRole("link", { name: /Jaeger/ })).not.toBeInTheDocument(); // tracing off in the fixture
+  });
+
+  it("links the trace to Jaeger when tracing is on", async () => {
+    const user = userEvent.setup();
+    const url = "http://localhost:16686/search?service=worker";
+    mockApi({
+      "GET /readyz": readyz,
+      [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()),
+      [`GET /v1/runs/${RUN_ID}/trace`]: () => json({ ...fullTrace(), jaeger_url: url }),
+    });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await user.click(await screen.findByRole("tab", { name: /Trace/ }));
+    expect(await screen.findByRole("link", { name: /Jaeger/ })).toHaveAttribute("href", url);
   });
 
   it("supports arrow keys across the result tabs", async () => {
