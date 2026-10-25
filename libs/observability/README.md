@@ -1,19 +1,26 @@
 # fssai_observability (`libs/observability`)
 
-JSON logs, OTel tracing and metric helpers that every service imports (D5).
+JSON logs, OTel tracing and metric helpers that every service imports (D5, F8). Owner: Nishkal · task N3.1.
 
-**Owner:** Nishkal · tasks in [`contexts/Nishkal.md`](../../contexts/Nishkal.md) · day-0 skeleton from the baseline.
+```python
+from fssai_observability import setup_logging, setup_tracing, span, inject_trace_context, attach_trace_context
 
-| File | What | Task |
-|---|---|---|
-| `fssai_observability/__init__.py` | `setup_logging`, `setup_tracing` | N3.1 |
-| `tests/test_observability_contract.py` | what callers rely on (xfail until built) | N3.1 |
+setup_logging("worker")   # JSON lines on stderr; run_id/correlation_id from `extra=`; RunContext events flattened
+setup_tracing("worker")   # OTel -> OTLP/HTTP at OTEL_EXPORTER_OTLP_ENDPOINT (http://jaeger:4318); no-op if unset
 
-```bash
-<venv-python> -m pip install -e "libs/observability[test]"     # setup_dev.py nishkal already does this
-<venv-python> -m pytest libs/observability -q                  # xfail = not built yet; a FAIL says which contract edge broke
+with span("retrieval.search", k=5): ...                 # a child span; nothing at all without OTel
+payload["trace"] = inject_trace_context()               # API, when enqueuing a run
+with attach_trace_context(payload.get("trace")): ...    # worker: the run joins the API's trace
 ```
 
-**Done when** the conformance test passes without its `xfail` marker and your own tests cover the
-behaviour in your task. Then switch it on with nothing: the API and worker call it at start-up once it works in your `.env` (and as a comment in your
-section of `.env.example`), and tell Vismay.
+Both setup functions are idempotent and never raise. `setup_logging` replaces a plain `basicConfig` console
+handler, so lines are not doubled. `publish_index_manifest` exposes index freshness as `fssai_index_*`
+gauges (the retriever calls it when it loads an index).
+
+The stack that receives all this (Prometheus, Grafana, Jaeger, cAdvisor, exporters) is
+`deploy/compose/observability.yml`, configured from `observability/`.
+
+```bash
+<venv-python> -m pip install -e "libs/observability[test]"
+<venv-python> -m pytest libs/observability -q
+```

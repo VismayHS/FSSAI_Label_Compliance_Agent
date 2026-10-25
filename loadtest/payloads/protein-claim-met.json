@@ -1,0 +1,21 @@
+{
+  "client_reference": "loadtest-protein-claim-met",
+  "declared_category": "breakfast-cereals",
+  "package": {"net_quantity": 500, "net_quantity_unit": "g", "principal_display_panel_cm2": 180},
+  "label": {
+    "product_name": "Multigrain Protein Flakes",
+    "brand_name": "Loadtest Foods",
+    "front_of_pack_text": "Source of protein. Made with wheat, oats and soya.",
+    "claims": ["Source of protein"],
+    "ingredients": "Wheat flakes (55%), oat flakes (20%), soya flakes (15%), sugar, salt, vitamins",
+    "allergen_statement": "Contains wheat, oats and soy.",
+    "veg_status": "veg",
+    "fssai_licence_number": "00000000000000",
+    "manufacturer_name_address": "Loadtest Foods Pvt Ltd, Bengaluru",
+    "date_marking": "MFD 01/2026 USE BY 12/2026",
+    "batch_or_lot": "LT-001"
+  },
+  "nutrition": {"basis": "per_100g", "serving_size": 30, "serving_unit": "g", "energy_kcal": 375,
+                "protein_g": 14, "carbohydrate_g": 66, "total_sugars_g": 7, "added_sugars_g": 5,
+                "total_fat_g": 5, "saturated_fat_g": 1, "trans_fat_g": 0, "sodium_mg": 300}
+}

@@ -1,0 +1,32 @@
+{
+  "documents": [
+    {
+      "filename": "FSS-AC-2018_compendium_2021-11-16.pdf",
+      "regulation": "FSS-AC-2018",
+      "title": "Food Safety and Standards (Advertising and Claims) Regulations, 2018 (compendium)",
+      "version_label": "Version-II",
+      "version_date": "2021-11-16",
+      "sha256": "347a16b05d1e9796b88f86e3fe2a4bdb480c5da81df531aba576cf38267d5576",
+      "page_count": 23,
+      "has_text_layer": true,
+      "source_url": "https://fssai.gov.in/upload/uploadfiles/files/Compendium_Advertising_Claims_Regulations_16_11_2021.pdf",
+      "retrieved_via": "https://web.archive.org/web/20260605090411id_/https://fssai.gov.in/upload/uploadfiles/files/Compendium_Advertising_Claims_Regulations_16_11_2021.pdf",
+      "retrieved_on": "2026-10-25",
+      "principal_notification": "F.No. 1-94/FSSAI/SP(Claims and Advertisements)/2017, dated 19 November 2018"
+    },
+    {
+      "filename": "FSS-LD-2020_compendium.pdf",
+      "regulation": "FSS-LD-2020",
+      "title": "Food Safety and Standards (Labelling and Display) Regulations, 2020 (compendium)",
+      "version_label": "Version-VI",
+      "version_date": "2023-02-22",
+      "sha256": "73a3f2e97da6c71bcea30f1f379c8545e276d3c387aa0329460a5b52ca92355e",
+      "page_count": 42,
+      "has_text_layer": true,
+      "source_url": "https://fssai.gov.in/upload/uploadfiles/files/Comp_Labelling.pdf",
+      "retrieved_via": "https://web.archive.org/web/20260329130834id_/https://fssai.gov.in/upload/uploadfiles/files/Comp_Labelling.pdf",
+      "retrieved_on": "2026-10-25",
+      "principal_notification": "F. No. 1-94/FSSAI/SP(Labelling)/2014(Pt-2), dated 17 November 2020"
+    }
+  ]
+}

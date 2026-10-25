@@ -1,0 +1,3 @@
+# The load generator runs on the host, outside the system under test.
+#   <venv-python> -m pip install -r loadtest/requirements.txt
+locust>=2.30,<3

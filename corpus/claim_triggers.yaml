@@ -1,0 +1,61 @@
+# Claim-trigger map: claim wording -> the Advertising & Claims clauses that set its condition.
+# Owner: Nishkal. Used by FaissRetriever as a retrieval *hint* (decision 002): when a query names a
+# nutrient claim, these clauses are fused into the ranking (reciprocal-rank fusion), never forced in.
+# Turn off with RETRIEVAL_CLAIM_HINTS=0. Copied into INDEX_DIR by `fssai_ingest build`.
+#
+# Why it exists: the Labelling regulation never points at the Claims regulation, so a query about a
+# label claim does not resemble the clause that decides it (spec §3, §5). The researcher still has to
+# search; this only makes the claim condition reachable in one step for wordings we know.
+#
+# Every clause id below was read from corpus/raw/FSS-AC-2018_compendium_2021-11-16.pdf (amended
+# Schedule I, operationalised w.e.f. 26 Oct 2021). libs/retrieval/tests check each one resolves
+# in the real index. Do not add ids from memory.
+
+# Claim words of Schedule I column (3) and their synonyms from Schedule II (regulation 5(3)).
+claim_words:
+  - source
+  - high
+  - rich
+  - low
+  - free
+  - very low
+  - reduced
+  - contains
+  - provides
+  - increased
+  - more
+  - higher
+  - enhanced
+  - light
+  - lite
+  - zero
+  - without
+  - negligible
+  - little
+
+# Clauses relevant to every nutrient content claim.
+always:
+  - {regulation: FSS-AC-2018, clause_id: "5(3)"}          # claims shall meet Schedule I; wording per Schedule II
+  - {regulation: FSS-AC-2018, clause_id: "Schedule II"}   # synonyms ("Provides", "Contains" = source)
+  - {regulation: FSS-AC-2018, clause_id: "2(1)(l)"}       # nutrition claim / nutrient content claim definitions
+
+# Nutrient words -> Schedule I row (Sl. No. in the amended Schedule I).
+nutrients:
+  energy:            {patterns: [energy, calorie, calories, kcal], item: 1}
+  fat:               {patterns: ["fat", "fats"], item: 2}
+  cholesterol:       {patterns: [cholesterol], item: 3}
+  saturated fat:     {patterns: ["saturated fat", "saturated fats"], item: 4}
+  unsaturated fat:   {patterns: ["unsaturated fat"], item: 5}
+  trans fat:         {patterns: ["trans fat", "trans-fat"], item: 6}
+  mufa:              {patterns: [mufa, monounsaturated], item: 7}
+  pufa:              {patterns: [pufa, polyunsaturated], item: 8}
+  omega 3:           {patterns: ["omega 3", "omega-3", "alpha-linolenic", "epa", "dha"], item: 9}
+  sugars:            {patterns: [sugar, sugars], item: 10}
+  protein:           {patterns: [protein, proteins], item: 11}
+  vitamins minerals: {patterns: [vitamin, vitamins, mineral, minerals, calcium, iron, zinc, iodine], item: 12}
+  sodium:            {patterns: [sodium, salt], item: 13}
+  dietary fibre:     {patterns: [fibre, fiber], item: 14}
+  probiotics:        {patterns: [probiotic, probiotics], item: 15}
+  glycemic index:    {patterns: ["glycemic", "glycaemic", "low gi"], item: 16}
+  lactose:           {patterns: [lactose], item: 18}
+  gluten:            {patterns: [gluten], item: 19}

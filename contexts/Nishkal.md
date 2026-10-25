@@ -112,7 +112,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_retriever`).
   3. Make one small commit of your own on `nishkal` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `nishkal`), so you've done the whole loop once.
-- [ ] **N0.2 Get the corpus and propose a product category.**
+- [x] **N0.2 Get the corpus and propose a product category.**
   - Download both regulations from the official FSSAI site (fssai.gov.in): the Labelling & Display Regulations 2020 and the Advertising & Claims Regulations 2018, including the latest consolidated or amended versions if published.
   - Check each has a text layer (`pdftotext file.pdf - | head`).
   - Commit them to `corpus/raw/` together with `corpus/manifest.json`. For each file record: title, notification or version date, source URL, sha256, page count, and text-layer yes/no.
@@ -127,7 +127,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 1: Evaluation 1 (week 1)
 
-- [ ] **N1.1 Find the §4.1 passages (the reference answer).** Read the two regulations yourself; the LLM only helps you search. Find:
+- [x] **N1.1 Find the §4.1 passages (the reference answer).** Read the two regulations yourself; the LLM only helps you search. Find:
   - (a) the clause(s) in the **Claims 2018** regulation that set the condition for a "source of protein" claim (the exact threshold and basis, e.g. per 100 g, per 100 kcal or per serving, whichever the regulation actually says),
   - (b) the **Labelling 2020** clauses on declaring nutritional information (protein included),
   - (c) anything that modifies these (exemptions, definitions).
@@ -142,7 +142,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   clause id, page, verbatim quote, why it matters for the §4.1 case. Never invent clause numbers or
   thresholds; if unsure, mark "TO VERIFY".
   ```
-- [ ] **N1.2 Declare the SLO before measuring anything (D6).** Write `loadtest/SLO.md`:
+- [x] **N1.2 Declare the SLO before measuring anything (D6).** Write `loadtest/SLO.md`:
   - the target p95 for a *complete run* (submission → final result) at a stated concurrency,
   - the justification against spec §1: an analyst's pre-print check, not a real-time path,
   - how it will be measured.
@@ -157,11 +157,11 @@ Each package README lists its files and commands. `conformance.sample_request()`
   budget, and what counts as failure (timeouts, FAILED state, incomplete). Leave X and C as my decision
   with reasoning for 2-3 options.
   ```
-- [ ] **N1.3 Write a decision record for the chunking strategy.** Write `docs/decisions/002-nishkal-chunking.md`. Chunk at clause or sub-clause level, never across clauses. Keep schedule and table rows whole. Each chunk's metadata records `regulation`, `clause_id`, `heading_path`, `doc_version` and `page`, plus a short "context header" (e.g. "FSS-AC-2018 › Schedule I › Protein") prepended before embedding. Explain how this helps the cross-regulation problem; that explanation becomes your L1 report section.
+- [x] **N1.3 Write a decision record for the chunking strategy.** Write `docs/decisions/002-nishkal-chunking.md`. Chunk at clause or sub-clause level, never across clauses. Keep schedule and table rows whole. Each chunk's metadata records `regulation`, `clause_id`, `heading_path`, `doc_version` and `page`, plus a short "context header" (e.g. "FSS-AC-2018 › Schedule I › Protein") prepended before embedding. Explain how this helps the cross-regulation problem; that explanation becomes your L1 report section.
 
 ## Phase 2: real end-to-end (by end of week 2)
 
-- [ ] **N2.1 Build the ingest CLI (D2, L1).** Running `python -m fssai_ingest build --corpus corpus/raw --out /data/index` does:
+- [x] **N2.1 Build the ingest CLI (D2, L1).** Running `python -m fssai_ingest build --corpus corpus/raw --out /data/index` does:
   - read → parse → clause-aware chunk → embed locally (sentence-transformers, model name from env) → FAISS (through LangChain),
   - **Idempotency:** stable chunk ids (hash of doc sha + clause id + text). Re-running with no changes does nothing.
   - **Partial re-embed:** `--reembed changed` re-embeds only chunks whose text or embedding model changed, without rebuilding everything.
@@ -176,7 +176,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   Write index_manifest.json. Tests: idempotent re-run (same chunk count, no new vectors), changed-text
   re-embed touches only that chunk, splitter keeps a schedule table row in one chunk.
   ```
-- [ ] **N2.2 Implement `FaissRetriever` (the `Retriever` interface).**
+- [x] **N2.2 Implement `FaissRetriever` (the `Retriever` interface).**
   - `search(query, ctx, k, regulation)` filters by regulation.
   - `get_clause(regulation, clause_id)` is an exact metadata lookup.
   - It returns `Passage` objects with scores.
@@ -190,11 +190,11 @@ Each package README lists its files and commands. `conformance.sample_request()`
   works, and a recall test that the §4.1 Claims clause from docs/eval1/section-4.1-passages.md is in
   top-5 for 3 phrasings of the question.
   ```
-- [ ] **N2.3 Add the indexer container.** In `deploy/compose/indexer.yml`, add a one-shot `indexer` service that builds the index into a named volume on `docker compose up`, idempotently. The worker waits for `service_completed_successfully`. Tell Vismay the volume name and mount path.
+- [x] **N2.3 Add the indexer container.** In `deploy/compose/indexer.yml`, add a one-shot `indexer` service that builds the index into a named volume on `docker compose up`, idempotently. The worker waits for `service_completed_successfully`. Tell Vismay the volume name and mount path.
 
 ## Phase 3: all requirements (weeks 3–4)
 
-- [ ] **N3.1 Build the observability library and stack (D5).**
+- [x] **N3.1 Build the observability library and stack (D5).**
   - **Library:** `fssai_observability` provides `setup_logging(service)` (JSON lines with `run_id` and `correlation_id` when present), `setup_tracing(service)` (OTel SDK → OTLP to Jaeger, a no-op if `OTEL_EXPORTER_OTLP_ENDPOINT` is unset) and Prometheus helpers.
   - **Stack:** `deploy/compose/observability.yml` brings up Prometheus, Grafana (provisioned datasources and dashboards), Jaeger and cAdvisor.
   - **Dashboard:** `service-overview.json` shows p50/p95 latency, error rate, throughput, availability, and CPU and memory per container.
@@ -207,13 +207,13 @@ Each package README lists its files and commands. `conformance.sample_request()`
   Build service-overview.json with p50/p95 (histogram_quantile), error rate, RPS, availability (up),
   container CPU/memory from cAdvisor. Everything configured via env; no hard-coded hosts outside compose.
   ```
-- [ ] **N3.2 Expose freshness and throughput metrics (D2).** Expose `index_built_timestamp`, `index_chunks_total`, `index_doc_version_info` and `ingest_chunks_per_second` as metrics. The worker loads the manifest at start-up, so these work even though the indexer exits.
-- [ ] **N3.3 Add caching (D7).** Write `docs/decisions/003-nishkal-caching.md` explaining which caches and why.
+- [x] **N3.2 Expose freshness and throughput metrics (D2).** Expose `index_built_timestamp`, `index_chunks_total`, `index_doc_version_info` and `ingest_chunks_per_second` as metrics. The worker loads the manifest at start-up, so these work even though the indexer exits.
+- [x] **N3.3 Add caching (D7).** Write `docs/decisions/003-nishkal-caching.md` explaining which caches and why.
   - Cache query embeddings and retrieval results in Redis.
   - The key includes the index version, so a rebuild invalidates the cache automatically.
   - Expose hit and miss metrics.
   - Use `CACHE_ENABLED` to switch it on and off for the comparison.
-- [ ] **N3.4 Build the stub LLM service (D6).** `services/stub_llm` is a small FastAPI app implementing an OpenAI-compatible `POST /v1/chat/completions`.
+- [x] **N3.4 Build the stub LLM service (D6).** `services/stub_llm` is a small FastAPI app implementing an OpenAI-compatible `POST /v1/chat/completions`.
   - It returns canned JSON per `[prompt:<name>@...]` tag, using fixtures you copy from Namith's prompts once they exist, and a generic fallback until then.
   - Latency is configurable: a log-normal distribution with mean and p95 from env.
   - It reports realistic `usage` token counts.
@@ -239,13 +239,13 @@ Each package README lists its files and commands. `conformance.sample_request()`
 ## Phase 4: hardening, extras, report
 
 - [ ] **N4.1 Run the §4.1 rehearsal (you lead demo item 10).** On the real stack, check that the trace shows the claims condition being found *after* the labelling search, and that both regulations are cited.
-- [ ] **N4.2 Write your report section** in `docs/report/retrieval-and-performance.md`.
-- [ ] **N4.3 Write at least one incident entry** in `docs/incidents/`.
+- [x] **N4.2 Write your report section** in `docs/report/retrieval-and-performance.md`.
+- [x] **N4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras** (pick in order):
-  - [ ] hybrid BM25 + dense retrieval with a cross-encoder reranker, and measure the difference
-  - [ ] recall@k against the eval set's supporting passages
-  - [ ] claim-trigger map: a YAML file mapping claim wordings to Claims-regulation clause ids, used as a retrieval hint
-  - [ ] Alertmanager SLO burn-rate alert
+  - [x] hybrid BM25 + dense retrieval with a cross-encoder reranker, and measure the difference
+  - [x] recall@k against the eval set's supporting passages
+  - [x] claim-trigger map: a YAML file mapping claim wordings to Claims-regulation clause ids, used as a retrieval hint
+  - [x] Alertmanager SLO burn-rate alert
 
 ## CV line you'll be able to write
 *"Built the retrieval and performance layer of a multi-agent regulatory-compliance service:
@@ -264,4 +264,54 @@ SLO, including bottleneck analysis under horizontal scaling."*
   - Load-test results depend on the machine, so record the OS, CPU and Docker memory limit with every Locust run.
 
 ## Notes / log
-(your notes here)
+
+**2026-10-25: Phases 0–3 built, tested on the real corpus; stack-level measurements still to run.**
+
+Done (details in the files named):
+- **Corpus:** both FSSAI compendia in `corpus/raw/` (fssai.gov.in was unreachable, so archived copies of
+  the official URLs were used; incident + decision 004), `sources.yaml`, generated `manifest.json`,
+  `tools/manifest.py`, `tools/grep_pdf.py`.
+- **Category:** breakfast cereals, *proposed* in decision 001. Post it in the group chat for the team
+  to confirm. `.env.example` now says `CORPUS_CATEGORIES=breakfast-cereals`.
+- **§4.1 passages:** `docs/eval1/section-4.1-passages.md`, 12 passages quoted from the PDFs. Key
+  findings for Vihaan and Namith: the condition is **% of RDA** (Schedule I item 11, substituted
+  text); **no protein RDA value exists in the corpus** (both regulations defer to ICMR). This needs a
+  team decision before the test values are final (options in that file).
+- **SLO:** `loadtest/SLO.md`: p95 ≤ 60 s at 5 concurrent, ≤ 1 % failed. **Commit it on its own
+  first and get it into `main` today** (the timestamp is the evidence).
+- **Ingest + retrieval:** clause-aware chunker (425 chunks, 52 superseded; table rows whole),
+  idempotent build with partial re-embed, hybrid FAISS + BM25 + claim hints, exact `get_clause`.
+  Real-model recall: hit@5 = 1.0, MRR 0.823 (dense alone 0.857 / 0.736). `check_retriever` passes; the
+  xfail markers are gone.
+- **Observability:** library (JSON logs, OTel, trace propagation helpers, freshness gauges); Compose
+  stack (Prometheus with DNS discovery for scaled workers, Grafana with provisioned datasources and the
+  `service-overview` dashboard, Jaeger, cAdvisor, Redis and Postgres exporters); SLO burn-rate rules.
+- **Stub LLM:** `services/stub_llm`, tested behind Vismay's real `GatewayLLMClient` (the breaker opens).
+- **Load-test tooling:** `loadtest/locustfile.py` (`full_run` = submit → terminal),
+  `run_matrix.py`, `summarize.py`, payloads. Smoke-tested against the API inline on fakes.
+- **Docs:** decisions 001–004, report section, 3 incidents.
+
+Not done yet:
+- N0.1: first commit, push and PR (your own git step).
+- N3.5/N3.6/N4.1: need the full stack (root `docker-compose.yml` from Vismay). Then run
+  `loadtest/run_matrix.py` and fill in `loadtest/results/README.md` and section 4 of the report.
+- Docker images (`libs/ingest/Dockerfile`, `services/stub_llm/Dockerfile`) are written and the
+  Compose fragments validate with `docker compose config`, but the images were **not built** here (the
+  Docker daemon was not running). Build them once: `docker compose build indexer stub-llm`.
+- Stub fixtures per prompt: copy real responses once Namith's prompt names exist
+  (`services/stub_llm/fssai_stub_llm/fixtures/README.md`).
+
+Tell Vismay (worker/compose):
+- worker `depends_on: indexer: {condition: service_completed_successfully}`; mount `index-data:/data/index:ro`
+  and `hf-cache:/data/hf-cache:ro`; env `INDEX_DIR=/data/index`, `HF_HOME=/data/hf-cache`, `HF_HUB_OFFLINE=1`.
+  The volumes are declared in `deploy/compose/indexer.yml`: reference them, don't redeclare them.
+- The worker image needs `contracts`, `libs/observability` and `libs/retrieval[embeddings]` with CPU torch
+  (`--index-url https://download.pytorch.org/whl/cpu`, as in `libs/ingest/Dockerfile`), or every
+  replica pulls ~2 GB of CUDA wheels.
+- Prometheus expects the API's `/metrics` on `api:8000` and the worker's on `worker:9100`.
+- Include my fragments in the root `docker-compose.yml`: `indexer.yml`, `stub-llm.yml`, `observability.yml`.
+- Call `setup_logging(...)` / `setup_tracing(...)` at start-up; carry the trace with
+  `inject_trace_context()` / `attach_trace_context()` across the queue.
+
+Running locally (Windows): HuggingFace downloads failed TLS verification behind the antivirus (incident).
+The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `HF_HUB_OFFLINE=1`.
