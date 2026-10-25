@@ -1,7 +1,7 @@
 # Evaluation 1: project plan
 
 Owner: Vismay (S1.3), assembled from the team's own documents; each section links its source, which stays
-the authority. Status as of **2026-10-25**. Sections marked *pending* fill in as their owners merge.
+the authority. **Evaluation 1 (first review): 30 October 2026.** Status as of **2026-10-25**. Sections marked *pending* fill in as their owners merge.
 
 ## 1. Problem and scope
 We check a proposed packaged-food label (as text) and its package specification against two FSSAI

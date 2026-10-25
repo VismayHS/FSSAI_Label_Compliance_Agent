@@ -446,7 +446,7 @@ We develop on both. Everything runs in Linux containers, so most differences dis
 
 ## 9. Phases and milestones
 
-Vismay fills in the dates once they're announced. **Evaluation 1:** `____`. **Report + repo due**
+Vismay fills in the dates once they're announced. **Evaluation 1 (first review):** **30 October 2026**. **Report + repo due**
 (one week before the presentation): `____`. **Evaluation 2 / demo:** `____`.
 
 | Phase | When | Team milestone (everyone's personal file breaks this down) |
