@@ -1,0 +1,28 @@
+{"id": "s41-short", "query": "source of protein claim condition", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 11"}], "tags": ["section-4.1", "cross-regulation"]}
+{"id": "s41-spec", "query": "The label carries the claim 'source of protein'. Is the claim permitted, given the protein content declared on the nutrition panel?", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 11"}], "tags": ["section-4.1", "cross-regulation"]}
+{"id": "s41-plain", "query": "what must a food meet before it can say it is a source of protein", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 11"}], "tags": ["section-4.1", "cross-regulation"]}
+{"id": "s41-labelling", "query": "protein must be declared in the nutritional information per 100 g", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(3)(b)"}], "tags": ["section-4.1"]}
+{"id": "s41-rule", "query": "nutrient content claims must comply with the conditions in Schedule I", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "5(3)"}], "tags": ["section-4.1", "cross-regulation"]}
+{"id": "s41-rda", "query": "definition of recommended dietary allowance and which values apply", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "2(1)(n)"}, {"regulation": "FSS-LD-2020", "clause_id": "2(1)(q)"}], "tags": ["section-4.1"]}
+{"id": "s41-high", "query": "high protein claim requirement", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 11"}], "tags": ["cross-regulation"]}
+{"id": "fibre-source", "query": "can the pack say high in fibre", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 14"}], "tags": ["cross-regulation"]}
+{"id": "sugar-low", "query": "conditions for a low sugar claim on a solid food", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 10"}], "tags": ["cross-regulation"]}
+{"id": "sodium-low", "query": "low sodium claim limit", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 13"}], "tags": ["cross-regulation"]}
+{"id": "gluten-free", "query": "gluten free claim", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule I, item 19"}, {"regulation": "FSS-LD-2020", "clause_id": "Schedule II, 2.5"}], "tags": ["cross-regulation"]}
+{"id": "no-added-sugar", "query": "when may a label say no added sugar", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "6(1)"}], "tags": []}
+{"id": "synonyms", "query": "can 'provides protein' be used instead of 'source of protein'", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule II"}], "tags": ["cross-regulation"]}
+{"id": "comparative", "query": "reduced fat comparative claim minimum difference", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "5(4)"}], "tags": []}
+{"id": "allergen", "query": "how must allergens such as wheat and milk be declared", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(14)"}], "tags": []}
+{"id": "veg-logo", "query": "vegetarian symbol green circle size on principal display panel", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(4)"}], "tags": []}
+{"id": "nutrition-exempt", "query": "which foods are exempt from nutritional labelling", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(3)(c)"}], "tags": ["exemption"]}
+{"id": "small-pack", "query": "small package under 100 square centimetres exemption from labelling requirements", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "8(1)"}], "tags": ["exemption"]}
+{"id": "tolerance", "query": "tolerance allowed on declared nutrient values during shelf life", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(3)(d)"}], "tags": []}
+{"id": "protein-calc", "query": "how is the protein content calculated from nitrogen", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(3)(e)"}], "tags": []}
+{"id": "date-marking", "query": "date of manufacture and expiry declaration format", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(10)"}], "tags": []}
+{"id": "fssai-logo", "query": "FSSAI logo and licence number on the label", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "5(7)"}], "tags": []}
+{"id": "brand-disclaimer", "query": "brand name containing the word natural needs a disclaimer", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "4(7)"}], "tags": []}
+{"id": "natural", "query": "conditions for describing a food as natural", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "Schedule V, item 1"}, {"regulation": "FSS-AC-2018", "clause_id": "9(2)"}], "tags": []}
+{"id": "doctor", "query": "label says recommended by doctors", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "10(2)"}], "tags": []}
+{"id": "health-claim", "query": "conditions a health claim must satisfy", "relevant": [{"regulation": "FSS-AC-2018", "clause_id": "7(1)"}], "tags": []}
+{"id": "cereal-dextrin", "query": "breakfast cereals with added dextrin dietary fibre declaration", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "Schedule II, 1(9)"}], "tags": []}
+{"id": "pdp-letters", "query": "minimum height of letters on the principal display panel", "relevant": [{"regulation": "FSS-LD-2020", "clause_id": "6(3)"}], "tags": []}
