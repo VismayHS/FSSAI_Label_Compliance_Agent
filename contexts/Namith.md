@@ -121,7 +121,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 1: Evaluation 1 (week 1)
 
-- [ ] **M1.1 Build the prompt registry (L2).**
+- [x] **M1.1 Build the prompt registry (L2).**
   - Store prompts as files: `libs/prompts/prompts/<name>/<version>.yaml` with fields `name`, `version`, `system`, `user_template`, `notes`.
   - `FilePromptStore.get(name, version=None)` returns the version pinned in env (`PROMPT_<NAME>_VERSION`) or the latest one.
   - The version reaches every response through `ctx.record(prompt_name=..., prompt_version=...)`. `RunResult.prompt_versions` already collects it.
@@ -132,7 +132,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   matching the file, and fail loudly otherwise. Add a CLI `python -m fssai_prompts list` that prints
   name/version/pinned. Tests: pinning, latest, tag validation, render().
   ```
-- [ ] **M1.2 Build the classifier (F3).**
+- [x] **M1.2 Build the classifier (F3).**
   - **Product category:** use the declared category, cross-checked against the label text. Set `in_scope=False` if the category isn't in `CORPUS_CATEGORIES`.
   - **Claims:** detect them from `label.claims` *and* from the front-of-pack text (claims are often hidden in marketing copy). Each `DetectedClaim` gets a `claim_type` and a `nutrient`.
   - Use the LLM with JSON output, plus a rule-based fallback if the LLM fails.
@@ -255,4 +255,4 @@ output-authorisation guardrails."*
 - Unit tests must not hit the real LLM. Use a scripted fake, and mark real-LLM tests `slow`.
 
 ## Notes / log
-(your notes here)
+- 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
