@@ -265,3 +265,10 @@ the web client."*
 - Also fixed Nishkal's `chunker.py` for Python 3.11 (noted in his file).
 - Still open: S0.1 GitHub rulesets/dates/instructor check, S2.4 for Namith's and Vihaan's parts, S3.2 numbers,
   S3.6 once Vihaan's endpoint lands, S4.3 report, extras (reviewer console, SSE, PDF export, webhook).
+- PR #3 merged (merge commit `e5e44d3`) after CI passed, including the first Compose boot plus smoke test on a
+  clean GitHub runner. That job first failed on `docker compose up --wait`, which counts the indexer's expected
+  exit 1 as a failure; fixed in CI.
+- S0.1 mostly done: collaborators added (Vihaan's invite still pending), CODEOWNERS, Evaluation 1 date
+  (30 Oct 2026), merge commits only, rulesets on `main` (PR + green CI, no force-push or deletion) and on the
+  personal branches. Left: confirm the team of 4 with the instructor; decide public vs private.
+

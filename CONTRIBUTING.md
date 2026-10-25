@@ -136,9 +136,10 @@ Use them freely, but **commits are written as yours alone**:
 
 ## 8. Settings the repo owner applies on GitHub
 
-(Vismay, once; listed so everyone knows what to expect.)
-- **Settings → General → Pull Requests:** allow merge commits only (untick squash and rebase
-  merging), and untick "Automatically delete head branches".
-- **Settings → Rules → Rulesets → New branch ruleset** for `main`: require a pull request before
-  merging, block force pushes, restrict deletions.
-- A second ruleset for `nishkal`, `namith`, `vihaan`, `vismay`: block force pushes, restrict deletions.
+Applied on 2026-10-25, and listed here so everyone knows what to expect. GitHub enforces these on its own
+side, so they hold even where the local hooks don't run (the web UI, a clone without `setup_dev.py`, `--no-verify`).
+- **Pull requests:** merge commits only (squash and rebase are off); head branches are never auto-deleted.
+- **Ruleset on `main`:** changes only through a pull request (no approval count required; CODEOWNERS
+  still requests the owners). The CI checks `python`, `web` and `compose` must pass. Force-pushes and
+  deletion are blocked. Only an admin can merge a PR past a red check, for emergencies.
+- **Ruleset on `nishkal`, `namith`, `vihaan`, `vismay`:** force-pushes and deletion are blocked.
