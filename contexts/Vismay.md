@@ -286,3 +286,5 @@ the web client."*
   his `fssai_agents.dev_llm` wrapper is no longer needed.
 - For Namith and Nishkal: the stub LLM has no `classifier` fixture yet, so under load tests the classifier gets the
   default reply, retries once to repair it and falls back to rules (2 LLM calls per run instead of 1).
+- S2.4: Namith's PR #4 merged; `IMPL_PROMPTS` and `IMPL_CLASSIFIER` are now on in `.env.example` and in my `.env`.
+  Every package's tests pass on the merge (`scripts/test_all.py`).
