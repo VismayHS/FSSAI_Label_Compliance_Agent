@@ -16,12 +16,12 @@ pushed. The local branch was based on an older `main`, so the first `git merge o
 Work was done in two places without fetching in between, and the local branch was not pushed after each task.
 
 ## Fix
-Fetched first, committed the in-progress work and merged `origin/main` (merge, not rebase). The first resolution kept my
-local M1.1/M1.2; when `origin/namith` then gained its own M2.1 as well, the decision was made to keep the versions already
-on `main` for everything they cover (M1.1, M1.2, M2.1: store, classifier, researcher, tools, grounding, prompts). The
-local duplicates (claims, llmio, extra prompt files, their tests) were removed, and only the work `main` did not have was
-kept on top: the LangGraph pipeline, guardrails with their red-team fixtures, per-agent metrics, dashboard and runbook.
-The merged tree was checked by running the pipeline built through the `IMPL_*` registry switches.
+Fetched first, committed the in-progress work and merged `origin/main` (merge, not rebase). Twice more, while the merge was
+being finished, `origin/namith` gained its own versions of the same tasks (M2.1, then M2.2 and M3.1). The rule applied each
+time: keep the versions already pushed for everything they cover (store, classifier, researcher, tools, grounding, prompts,
+pipeline, guardrails), remove the local duplicates and their tests, and keep on top only the work the remote did not have:
+per-agent metrics, the `agents.json` dashboard and the runbook. The merged tree was checked with the full test suites and by
+running the pipeline built through the `IMPL_*` registry switches.
 
 ## Lesson
 `git fetch` before starting a session, and push the branch after every finished task: a branch is only safe once it is on
