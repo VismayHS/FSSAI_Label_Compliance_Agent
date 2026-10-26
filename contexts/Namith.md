@@ -153,7 +153,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 2: real end-to-end (by end of week 2)
 
-- [ ] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
+- [x] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
   - `corpus_search(query, regulation?)`
   - `clause_lookup(regulation, clause_id)`
   - `request_field_lookup(path)`, e.g. `nutrition.protein_g`
@@ -256,3 +256,4 @@ output-authorisation guardrails."*
 
 ## Notes / log
 - 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
+- 2026-10-26: M2.1 researcher built (LangGraph: plan, act, run_tool, coverage, draft). Prompts `researcher` and `researcher_draft` 1.0.0. Checked against the real index with a scripted LLM; not yet against a real LLM. RDA guard on by default (open team question).
