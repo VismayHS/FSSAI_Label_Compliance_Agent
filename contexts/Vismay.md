@@ -5,15 +5,14 @@
 
 ## Next steps to 30 October (2026-10-26)
 
-What is left of my part, and what each item waits on:
-1. **Merge my PR first thing** (README per folder, docs/course/, extras, the API test fix Vihaan's CI needs).
-2. **After Vihaan's PR merges:** switch on `IMPL_GATE`, `IMPL_VERIFIER`, `IMPL_ROUTER` in `.env.example`; add his
-   `deploy/compose/eval-scorer.yml` to the root `docker-compose.yml`; check the feedback form and the reviewer
-   console against his live endpoint (then tick S3.6); clean-clone test; that finishes S2.4.
-3. **S3.2 cost per 100 runs:** paced real runs at Groq's list prices (the model and its prices are in `.env` only),
-   then `python scripts/cost_report.py` into my report section. The eval run pair (Namith + Vihaan) gives the
-   larger sample.
-4. **S4.3:** `python scripts/build_report.py --strict` once all four sections exist; two rehearsals of all 10 demos.
+What is left of my part, and what each item waits on (updated 26 Oct evening, after PR #9):
+1. **Merge my PR** (Vihaan's parts switched on, `postgres-init`, `setup_dev.py` fix, console fixes). Done before it:
+   PR #8 merged; Vihaan's three switches, his eval scorer in Compose, and S3.6 checked live against his endpoint.
+2. **S3.2 re-measure** cost per 100 runs once Namith's researcher fix is on `main`: Vihaan's verifier adds about
+   1.8k tokens per run (his estimate, roughly $0.32-0.34 per 100 runs), and a run that searches every requirement
+   costs more. Take the numbers from the eval run pair (Namith + Vihaan).
+3. **S4.3:** `python scripts/build_report.py --strict` once all four sections exist (Namith's `agent-design.md` is
+   missing); two rehearsals of all 10 demos with the team.
 
 **If I do not:** Vihaan's parts stay switched off on a clean clone even after his merge, and the report has no cost
 section. Demo #1 (clean clone) and #3 (trace) and #8 (breaker) are mine and already work.
@@ -183,7 +182,7 @@ Summarise my current task in 3 lines, then wait for my go.
   highlighted, route as a coloured badge, escalation reason prominent, "not an approval" notice always
   visible. Include satisfactory/unsatisfactory feedback buttons that POST to /v1/runs/{id}/feedback.
   ```
-- [ ] **S2.4 Integrate the real implementations.** As teammates merge, switch the `IMPL_*` variables in your local `.env` (and in `.env.example` comments) and run `make smoke` plus the §4.1 request on the real stack.
+- [x] **S2.4 Integrate the real implementations.** As teammates merge, switch the `IMPL_*` variables in your local `.env` (and in `.env.example` comments) and run `make smoke` plus the §4.1 request on the real stack.
 
 ## Phase 3: all requirements
 
@@ -197,7 +196,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - Deployment boundaries (D3): why api, worker, indexer, redis, postgres and stub-llm are separate, considering scaling, failure isolation, independent release and resource profile.
 - [x] **S3.4 Audit for secrets (D4).** Add a CI check (or `make audit`) that greps for keys, URLs and model ids and fails on any hit.
 - [x] **S3.5 Keep the worker stateless (A7 support).** Nothing per-worker on disk, breaker state in Redis, and the index on a read-only volume. Support Nishkal's scaling runs.
-- [ ] **S3.6 Finish the web client.** Feedback buttons work, and the escalation path is clear.
+- [x] **S3.6 Finish the web client.** Feedback buttons work, and the escalation path is clear.
 
 ## Phase 4: hardening, extras, report
 
@@ -345,3 +344,19 @@ the web client."*
   `tool_use_failed` 400 and 429s inside one run; the gateway now retries `tool_use_failed` and, on a 429, waits for
   the token budget to refill (`x-ratelimit-reset-tokens`). PR #8 CI green including the Compose boot; local
   clean-clone test passed in 4.8 min.
+- PR #8 merged. Vihaan's PR #9 merged; his gate, verifier and router switched on in `.env.example` and the opt-in
+  `eval-scorer` included in the root Compose file. With all 11 parts real and Groq, `/readyz` shows no stand-ins and
+  `smoke.py` passes (the §4.1 request goes to `regulatory-review`: no protein RDA in the corpus, and the researcher
+  still under-searches, Namith's fix).
+- Found while switching him on: Postgres runs `deploy/postgres/init/` only on an empty volume, so every existing stack
+  lacked his three tables and the gate and feedback route quietly used memory. New one-shot `postgres-init`
+  re-applies every init file on each `up` (all are `IF NOT EXISTS`); the API and worker wait for it. Checked: tables
+  created on the old volume, quarantine backend `postgres`, feedback survives an API restart.
+- S3.6 done, checked live through the web proxy against his endpoint: empty reason 422, reviewer accept 201, unknown
+  run 404, summary aggregates. Fixed two of my console bugs only visible once his endpoint existed: the choice
+  buttons reused the findings filter style and looked struck through before a pick, and the escalation reason
+  printed twice when the router repeats it in its own reason (now one helper, used in four places, tested).
+- `setup_dev.py` now installs `libs/observability` for everyone: the API and worker import it, so a fresh setup for
+  anyone but Nishkal failed at the install step (Vihaan reported it).
+- Told Vihaan: three of his eval tests read files without `encoding="utf-8"` and fail on Windows only.
+- S2.4 done: all 11 parts real in the shared configuration; clean-clone test of this branch passed in 4.9 min (`postgres-init` ran on the empty volume).

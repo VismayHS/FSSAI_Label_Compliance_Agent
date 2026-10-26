@@ -477,7 +477,7 @@ What this means in practice:
 
 | Waiting on | What is blocked until then |
 |---|---|
-| Vihaan's PR into `main` | Gate, verifier, router, feedback, quarantine and the eval runner on `main`; demos #4, #5, #6; the feedback form and reviewer console; every measured eval number |
+| ~~Vihaan's PR into `main`~~ Done 26 Oct (PR #9); switched on for everyone in `.env.example` | (Was: gate, verifier, router, feedback, quarantine, eval runner; demos #4-#6; feedback form and reviewer console) |
 | Namith: the researcher searches for every requirement it reports | Meaningful findings with a real LLM (demo #2); the prompt comparison (L2) and before/after (L3) numbers; cost per 100 runs |
 | One eval run pair with the Groq key (researcher 1.0.0 vs 1.1.0), after both of the above | Namith's L2 comparison, Vihaan's L3 before/after, Vismay's cost per 100 runs (L5) |
 | Nishkal's Locust runs | Demo #9 and the D6, A7 and D7 numbers; nobody else can produce them |

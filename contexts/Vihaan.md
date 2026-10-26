@@ -10,21 +10,26 @@ the gate, verification and eval tests pass; with all 11 parts real, `check_gate`
 and `check_pipeline` pass, and demos #4, #5 and #7 behave correctly; all 54 supporting quotes in
 `eval/scenarios.jsonl` and the quote in your §4.1 test values are verbatim PDF text.
 
-Do next, in this order:
-1. **Open your PR (`main` ← `vihaan`) now.** Your branch shows 1 of 3 checks only because of one of Vismay's API tests,
-   which hard-coded the list of routes and so failed once yours existed. The fix is in Vismay's next PR; once that
-   is merged, re-run your PR's checks and they pass. Until your PR merges, none of your work is live: the gate,
-   verifier, router, feedback and quarantine endpoints and the eval runner are all stand-ins on `main`.
-2. **V3.3 before/after (L3), with Namith:** `researcher` 1.0.0 against 1.1.0 (or the change decision 205 settles on),
-   all four metrics with deltas, the numbers in `docs/report/verification-and-evaluation.md`. It needs the Groq key
-   and your runner on `main`; the same pair serves Namith's M3.2 comparison.
-3. **V4.1** rehearse demos #4, #5 and #6. Settle the RDA question with Nishkal (your test values, "What changes when
-   the team adopts an RDA").
-4. Tick V0.1 (it is done).
+**Update, 26 Oct evening (Vismay):** PR #9 is merged. Vismay's next PR (after #9) switches `IMPL_GATE`,
+`IMPL_VERIFIER` and `IMPL_ROUTER` on in `.env.example`; `deploy/compose/eval-scorer.yml` is in the root `docker-compose.yml` (still opt-in,
+`--profile quality`); and `setup_dev.py` installs `libs/observability` for everyone (the API and worker import it).
 
-**If this does not happen:** demos #4, #5 and #6 and requirements F2, F6, A3, D1, L3, L6 and the D7 rate limit are
-missing from `main`, and the web client's feedback form and reviewer console stay hidden. Your PR is the biggest
-single blocker in the team right now.
+Do next, in this order:
+1. **Three test reads fail on Windows** (they pass on Linux CI): `read_text()` without `encoding="utf-8"` meets a
+   non-ASCII character and Windows decodes it as cp1252. Fix `eval/tests/test_tools.py:48`, `eval/tests/test_postgres.py:99`
+   and `eval/tests/test_runner.py:35` (and its `write_text` on line 76). Your non-test code already sets the encoding.
+2. **V3.3 before/after (L3), with Namith:** agree decision 205 with him (then mark it Accepted). Run it only after
+   his researcher fix is on `main` (otherwise most scenarios end `cannot_determine` and the comparison means
+   nothing), with your own Groq key and `--pause-s 60` or more. All four metrics with deltas go in
+   `docs/report/verification-and-evaluation.md`; the same pair serves Namith's M3.2.
+3. **Redo demos #5 and #6 with the real LLM.** Your V4.1 rehearsal used the fake LLM, so #5 escalated as "could not
+   be drafted" rather than for the missing RDA. Add the 429 step to demo #4 (D7 live).
+4. **Settle the RDA question with Nishkal** and write the outcome into your test values doc. It decides whether
+   demo #10 can ever be `met`/`unmet`.
+5. Extras left: RAGAS cross-check with judge calibration, and the eval regression gate in CI.
+
+**If this does not happen:** the L3 before/after has no numbers (and neither does Namith's L2 comparison), and
+demos #5, #6 and #10 are shown only on the fake LLM.
 
 ## Your mission
 You make the system **trustworthy at both ends**:
