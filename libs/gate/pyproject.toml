@@ -7,11 +7,16 @@ name = "fssai-gate"
 version = "0.1.0"
 description = "Ingestion gate: per-client rate limit, validation, quarantine"
 requires-python = ">=3.11"
-# Add each real dependency with bounds as a task needs it, e.g. "faiss-cpu>=1.8,<2".
-dependencies = ["fssai-contracts"]
+dependencies = [
+    "fssai-contracts",
+    "redis>=5,<9",                 # shared token bucket across API replicas (D7)
+    "psycopg[binary]>=3.2,<4",     # Postgres quarantine (D1)
+    "psycopg-pool>=3.2,<4",
+    "prometheus-client>=0.20,<1",  # fssai_gate_* counters on the API's /metrics
+]
 
 [project.optional-dependencies]
-test = ["pytest>=9"]
+test = ["pytest>=9", "fakeredis[lua]>=2.40,<3", "hypothesis>=6.100,<7"]
 
 [tool.setuptools.packages.find]
 include = ["fssai_gate*"]

@@ -1,0 +1,429 @@
+{
+  "$defs": {
+    "LabelText": {
+      "description": "Everything printed on the pack, as text. Free-text fields are untrusted (L4).",
+      "properties": {
+        "product_name": {
+          "title": "Product Name",
+          "type": "string",
+          "maxLength": 200,
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "brand_name": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Brand Name"
+        },
+        "front_of_pack_text": {
+          "default": "",
+          "title": "Front Of Pack Text",
+          "type": "string",
+          "maxLength": 4000
+        },
+        "claims": {
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200,
+            "pattern": "\\S"
+          },
+          "title": "Claims",
+          "type": "array",
+          "maxItems": 20
+        },
+        "ingredients": {
+          "default": "",
+          "title": "Ingredients",
+          "type": "string",
+          "maxLength": 4000
+        },
+        "allergen_statement": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Allergen Statement"
+        },
+        "veg_status": {
+          "default": "not_declared",
+          "enum": [
+            "veg",
+            "non_veg",
+            "not_declared"
+          ],
+          "title": "Veg Status",
+          "type": "string"
+        },
+        "fssai_licence_number": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^\\s*(\\d\\s*){14}$"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fssai Licence Number"
+        },
+        "manufacturer_name_address": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manufacturer Name Address"
+        },
+        "date_marking": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 200
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Date Marking"
+        },
+        "batch_or_lot": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Batch Or Lot"
+        },
+        "other_text": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 4000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Other Text"
+        }
+      },
+      "required": [
+        "product_name"
+      ],
+      "title": "LabelText",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "NutritionPanel": {
+      "properties": {
+        "basis": {
+          "enum": [
+            "per_100g",
+            "per_100ml"
+          ],
+          "title": "Basis",
+          "type": "string"
+        },
+        "serving_size": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 1000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serving Size"
+        },
+        "serving_unit": {
+          "anyOf": [
+            {
+              "enum": [
+                "g",
+                "ml"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Serving Unit"
+        },
+        "energy_kcal": {
+          "title": "Energy Kcal",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 900
+        },
+        "protein_g": {
+          "title": "Protein G",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "carbohydrate_g": {
+          "title": "Carbohydrate G",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "total_sugars_g": {
+          "title": "Total Sugars G",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "added_sugars_g": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Added Sugars G"
+        },
+        "total_fat_g": {
+          "title": "Total Fat G",
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100
+        },
+        "saturated_fat_g": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Saturated Fat G"
+        },
+        "trans_fat_g": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 100
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Trans Fat G"
+        },
+        "sodium_mg": {
+          "anyOf": [
+            {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 40000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sodium Mg"
+        },
+        "other": {
+          "additionalProperties": {
+            "type": "number",
+            "minimum": 0
+          },
+          "title": "Other",
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]{0,47}_(g|mg|mcg|kcal)$"
+          },
+          "description": "Further nutrients; each key ends in its unit, e.g. dietary_fibre_g, iron_mg."
+        }
+      },
+      "required": [
+        "basis",
+        "energy_kcal",
+        "protein_g",
+        "carbohydrate_g",
+        "total_sugars_g",
+        "total_fat_g"
+      ],
+      "title": "NutritionPanel",
+      "type": "object",
+      "additionalProperties": false
+    },
+    "PackageSpec": {
+      "properties": {
+        "net_quantity": {
+          "title": "Net Quantity",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 100000,
+          "description": "Upper bound depends on the unit: g <= 100000, ml <= 100000, kg <= 100, l <= 100"
+        },
+        "net_quantity_unit": {
+          "enum": [
+            "g",
+            "kg",
+            "ml",
+            "l"
+          ],
+          "title": "Net Quantity Unit",
+          "type": "string"
+        },
+        "principal_display_panel_cm2": {
+          "title": "Principal Display Panel Cm2",
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 10000
+        },
+        "total_surface_area_cm2": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 50000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Total Surface Area Cm2"
+        },
+        "pack_type": {
+          "anyOf": [
+            {
+              "type": "string",
+              "enum": [
+                "single",
+                "multipack",
+                "institutional",
+                "non-retail"
+              ]
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pack Type"
+        }
+      },
+      "required": [
+        "net_quantity",
+        "net_quantity_unit",
+        "principal_display_panel_cm2"
+      ],
+      "title": "PackageSpec",
+      "type": "object",
+      "additionalProperties": false
+    }
+  },
+  "properties": {
+    "schema_version": {
+      "default": "1.0",
+      "title": "Schema Version",
+      "type": "string",
+      "pattern": "^1\\.\\d+$"
+    },
+    "client_reference": {
+      "anyOf": [
+        {
+          "type": "string",
+          "maxLength": 128
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Client Reference"
+    },
+    "declared_category": {
+      "title": "Declared Category",
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+      "minLength": 2,
+      "maxLength": 64,
+      "examples": [
+        "breakfast-cereals"
+      ],
+      "description": "Supported: breakfast-cereals. Any other well-formed id is accepted and the run escalates to regulatory-review (F7)."
+    },
+    "package": {
+      "$ref": "#/$defs/PackageSpec"
+    },
+    "label": {
+      "$ref": "#/$defs/LabelText"
+    },
+    "nutrition": {
+      "$ref": "#/$defs/NutritionPanel"
+    }
+  },
+  "required": [
+    "declared_category",
+    "package",
+    "label",
+    "nutrition"
+  ],
+  "title": "LabelCheckRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/VismayHS/FSSAI_Label_Compliance_Agent/docs/data-contract.schema.json",
+  "description": "FSSAI Label Compliance Agent: POST /v1/runs request body, data contract v1.0. Human-readable contract: docs/data-contract.md.",
+  "additionalProperties": false,
+  "x-cross-field-rules": {
+    "XF-01": "A per_100ml nutrition panel needs a net quantity in ml or l.",
+    "XF-02": "serving_size and serving_unit are given together or not at all.",
+    "XF-03": "serving_unit is g for a per_100g panel and ml for a per_100ml panel.",
+    "XF-04": "added_sugars_g <= total_sugars_g.",
+    "XF-05": "total_sugars_g <= carbohydrate_g.",
+    "XF-06": "saturated_fat_g + trans_fat_g <= total_fat_g.",
+    "XF-07": "On a per_100g panel, protein_g + carbohydrate_g + total_fat_g <= 100 g (+1 g rounding).",
+    "XF-08": "energy_kcal is within \u00b120 % (at least \u00b110 kcal) of 4\u00b7protein + 4\u00b7carbohydrate + 9\u00b7fat.",
+    "XF-09": "principal_display_panel_cm2 <= total_surface_area_cm2 when both are given.",
+    "XF-10": "A claim about a nutrient that is optional on the panel needs that nutrient declared."
+  }
+}
