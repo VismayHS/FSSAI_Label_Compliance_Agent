@@ -135,6 +135,49 @@ describe("the analyst workspace", () => {
     expect(await screen.findByText(/did not complete, so it carries no confident answer/)).toBeInTheDocument();
     expect(screen.getByText("regulatory-review")).toBeInTheDocument();
     expect(screen.getByText("ProviderUnavailable: primary: circuit open")).toBeInTheDocument();
+    expect(screen.getByText(/The check did not finish, so a regulatory affairs professional decides/)).toBeInTheDocument();
+  });
+
+  it("explains an escalation in plain words and copies a hand-off for the reviewer", async () => {
+    const run = completedRun();
+    run.result!.routing = { route: "regulatory-review", reason: "Input failed guardrail screening.",
+                            escalation_reason: "prompt_injection:label.other_text" };
+    run.result!.guardrails = [{ stage: "input", allowed: false, flags: ["prompt_injection:label.other_text"], detail: "" }];
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(/Some label text reads like instructions to the system, so a regulatory/)).toBeInTheDocument();
+    expect(screen.getByText("What happens next")).toBeInTheDocument();
+    expect(screen.getByText(/did not act on it and checked nothing further/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy details for the reviewer" }));
+    expect(await screen.findByText("Copied: run id, reason and trace link.")).toBeInTheDocument();
+    const text = writeText.mock.calls[0]![0] as string;
+    expect(text).toContain(`Run: ${RUN_ID}`);
+    expect(text).toContain(`#/runs/${RUN_ID}/trace`);
+    expect(text).toContain("System reason: Input failed guardrail screening. (prompt_injection:label.other_text)");
+  });
+
+  it("says how to hand off by hand when the browser blocks copying", async () => {
+    const run = completedRun();
+    run.result!.routing = { route: "regulatory-review", reason: "Could not verify the finding.", escalation_reason: "unverified" };
+    Object.defineProperty(navigator, "clipboard", { value: { writeText: vi.fn().mockRejectedValue(new Error("denied")) },
+                                                    configurable: true });
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await userEvent.click(await screen.findByRole("button", { name: "Copy details for the reviewer" }));
+    expect(await screen.findByText(/Copy is blocked in this browser/)).toBeInTheDocument();
+  });
+
+  it("shows no hand-off for a result the label owner can act on", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await screen.findByText(/needs attention/);
+    expect(screen.queryByText("What happens next")).not.toBeInTheDocument();
   });
 
   it("opens the trace with totals, agents and every step, passages included", async () => {

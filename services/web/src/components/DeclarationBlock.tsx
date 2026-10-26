@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
 import type { RunResult, RunStatus } from "../api/types";
+import { escalation, handoffText } from "../lib/escalation";
 import { ms, usd } from "../lib/format";
 import { Mark } from "./Mark";
 
@@ -19,9 +20,32 @@ export function whatItMeans(result: RunResult): string {
         + `${plural(attention.length, "needs", "need")} attention: ${attention.map((f) => f.requirement).join("; ")}. `
         + `Fix ${plural(attention.length, "it", "them")} on the label, then check again.`;
     default:
-      return "The system could not answer with confidence, so a regulatory affairs professional decides. "
-        + "It does not guess; the reason is below.";
+      return `${escalation(result)?.title ?? "The system could not answer with confidence"}, so a regulatory affairs `
+        + "professional decides. It does not guess.";
   }
+}
+
+/** Copies a plain-text hand-off (run id, reason, trace link) for the person who takes over an escalated label. */
+function CopyHandoff({ status, result }: { status: RunStatus; result: RunResult }) {
+  const [state, setState] = useState<"idle" | "copied" | "failed">("idle");
+  const copy = async () => {
+    const traceUrl = `${window.location.origin}${window.location.pathname}#/runs/${status.run_id}/trace`;
+    try {
+      await navigator.clipboard.writeText(handoffText(status, result, traceUrl));
+      setState("copied");
+    } catch {
+      setState("failed");
+    }
+  };
+  return (
+    <span className="handoff__copy">
+      <button type="button" className="button" onClick={copy}>Copy details for the reviewer</button>
+      <span role="status" className="handoff__status">
+        {state === "copied" ? "Copied: run id, reason and trace link." : state === "failed"
+          ? "Copy is blocked in this browser. Select the run id below instead." : ""}
+      </span>
+    </span>
+  );
 }
 
 /** The result opens like a pack's declaration block: a ruled table of label / value rows. */
@@ -29,6 +53,7 @@ export function DeclarationBlock({ status, result }: { status: RunStatus; result
   const { routing, classification, totals } = result;
   const claims = classification?.claims ?? [];
   const flags = result.guardrails.flatMap((g) => g.flags);
+  const esc = escalation(result);
   const row = (label: string, value: ReactNode, className?: string) => (
     <tr className={className}>
       <th scope="row">{label}</th>
@@ -51,6 +76,13 @@ export function DeclarationBlock({ status, result }: { status: RunStatus; result
         ), "decl__route-row")}
         {row("Reason given", routing.reason)}
         {routing.escalation_reason && row("Escalation", <strong>{routing.escalation_reason}</strong>)}
+        {esc && row("What happens next", (
+          <div className="handoff">
+            <p>{esc.detail}</p>
+            <p>A regulatory affairs professional reviews this label. Send them the details:</p>
+            <CopyHandoff status={status} result={result} />
+          </div>
+        ))}
         {flags.length > 0 && row("Guardrails", <ul className="plain">{flags.map((f) => <li key={f} className="mono">{f}</li>)}</ul>)}
         {row("Category", classification
           ? `${classification.category} · ${classification.in_scope ? "in scope" : "outside our corpus"}`

@@ -654,6 +654,24 @@ legend {
 .decl__claim {
   display: block;
 }
+/* Escalated runs: what the reviewer needs to know and a one-click hand-off */
+.handoff p {
+  max-width: 68ch;
+}
+.handoff p + p {
+  margin-top: var(--s-2);
+}
+.handoff__copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+  margin-top: var(--s-3);
+}
+.handoff__status {
+  color: var(--ink-2);
+  font-size: var(--t-sm);
+}
 .decl__claim-type,
 .decl__run {
   color: var(--ink-2);
