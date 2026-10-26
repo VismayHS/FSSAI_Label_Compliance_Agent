@@ -25,6 +25,8 @@ services:
     depends_on:
       redis: {condition: service_healthy}
       postgres: {condition: service_healthy}
+      # required: false -> a failed table update never stops the stack from booting (the stores fall back to memory)
+      postgres-init: {condition: service_completed_successfully, required: false}
       # required: false -> if the index build fails (e.g. EMBEDDING_MODEL unset) the worker still starts and
       # runs on the fake retriever, or degrades honestly with the real one, instead of the stack not booting.
       indexer: {condition: service_completed_successfully, required: false}
