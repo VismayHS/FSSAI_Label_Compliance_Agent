@@ -291,3 +291,13 @@ the web client."*
 - Deadline moved: the whole project is due by Fri 30 Oct (the first review). LLM_Context §9 now states the one
   deadline; phases are only the order of work. Dropped the week numbers from every person's phase headings (with a
   dated note in each file's log) and updated the project plan.
+- S2.4: PR #5 merged. Switched on Nishkal's `FaissRetriever` (merged since PR #2; the index now builds on a clean
+  clone) and Namith's `LangGraphResearcher` (PR #6) in `.env.example`. With both on, the reference pipeline passes
+  `check_pipeline`; against the real index the researcher retrieves FSS-AC-2018 Schedule I item 11 and FSS-LD-2020
+  5(14) for the §4.1 request. Without an LLM key it cannot draft findings, so it escalates to `regulatory-review`.
+- Reviewed Namith's PR #7 branch on Python 3.11 (worker image): 192 tests pass after his f-string fix; with all his
+  parts on, `check_pipeline` and `check_guardrails` pass, and both injections tried (front of pack, other text)
+  are blocked. His dashboard queries only metrics his code exports.
+- Reviewed Nishkal's work on main on Python 3.11: ingest 32, retrieval 43 (+3 real-model quality tests), observability 9,
+  stub 10 pass. All 12 regulation quotes in `section-4.1-passages.md` are verbatim in the PDFs (P3's table is on
+  PDF page 16, not 15). SLO committed 2026-10-25 before any measurement.
