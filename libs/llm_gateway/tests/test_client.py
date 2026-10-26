@@ -183,10 +183,13 @@ def test_both_providers_down_raises_with_both_reasons():
 
 
 @respx.mock
-def test_timeout_is_capped_by_the_run_deadline_and_no_retry_crosses_it():
+def test_timeout_is_capped_by_the_run_deadline_and_no_retry_crosses_it(monkeypatch):
+    # Freeze the run's clock: on a busy machine the real 0.5 s could pass before the first call (flaky).
+    monkeypatch.setattr("fssai_contracts.context.time.monotonic", lambda: 1_000.0)
     route = respx.post("https://primary.test/v1/chat/completions").mock(return_value=httpx.Response(503))
     sleeps: list[float] = []
     c = ctx(max_wall_s=0.5)
+    c.started = 1_000.0  # the field's default_factory captured the real clock
     with pytest.raises(ProviderUnavailable):
         call(make(retries=3, sleeps=sleeps), c)
     assert route.call_count == 1 and sleeps == []  # a 0.5 s backoff would cross the 0.5 s deadline
