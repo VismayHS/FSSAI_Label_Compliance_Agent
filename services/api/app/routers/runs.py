@@ -20,6 +20,7 @@ from fssai_observability import span
 from prometheus_client import Counter
 
 from fssai_contracts.schemas import FieldError, RunState, RunStatus, utcnow
+from fssai_worker import webhook
 from fssai_worker.jobs import payload_for
 
 from ..models import AgentRollup, Problem, RateLimited, RunAccepted, RunRejected, RunSummary, RunTrace
@@ -69,11 +70,15 @@ def _parse(body: bytes) -> tuple[dict, list[FieldError]]:
     openapi_extra={"requestBody": {"required": True, "content": {"application/json": {
         "schema": {"$ref": "#/components/schemas/LabelCheckRequest"}}}}},
 )
-async def submit_run(request: Request, x_client_id: str | None = Header(None, description="Caller id, used for rate limiting")):
+async def submit_run(request: Request, x_client_id: str | None = Header(None, description="Caller id, used for rate limiting"),
+                     x_callback_url: str | None = Header(None, description="Optional: POSTed a run-finished notice "
+                                                         "when the run ends. Only hosts in WEBHOOK_ALLOWED_HOSTS.")):
     state = request.app.state
     cid = request.state.correlation_id
     if not x_client_id or not _CLIENT_ID.match(x_client_id):
         return _problem(400, "Header X-Client-Id is required: 1-64 letters, digits or . _ : -", request)
+    if x_callback_url is not None and (problem := webhook.check_url(x_callback_url)):
+        return _problem(400, problem, request)  # before the gate: a bad callback is the caller's setup, not data
 
     limit = state.settings.max_request_bytes
     declared = request.headers.get("content-length", "")
@@ -109,7 +114,8 @@ async def submit_run(request: Request, x_client_id: str | None = Header(None, de
     await run_in_threadpool(state.run_store.save, status)
     try:
         with span("api.submit_run", run_id=run_id, correlation_id=cid, client_id=x_client_id):
-            payload = payload_for(run_id, cid, decision.request)  # carries this span's context to the worker
+            payload = payload_for(run_id, cid, decision.request,  # carries this span's context to the worker
+                                  callback_url=x_callback_url)
         await run_in_threadpool(state.dispatcher.submit, payload)
     except Exception as exc:  # noqa: BLE001 - the queue being down must end as an honest error
         failed = status.model_copy(update={"state": RunState.FAILED, "updated_at": utcnow(),

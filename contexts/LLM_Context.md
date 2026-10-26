@@ -313,7 +313,7 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
 
 | Method + path | Body / headers | Returns |
 |---|---|---|
-| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id` (optional) | `202 {run_id, status_url, trace_url, correlation_id}` + `Location` · `400` bad/missing client id · `413` body over `API_MAX_REQUEST_BYTES` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` + `Retry-After` · `503` queue down |
+| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id`, `X-Callback-Url` (optional) | `202 {run_id, status_url, trace_url, correlation_id}` + `Location` · `400` bad/missing client id or a callback host not allowed · `413` body over `API_MAX_REQUEST_BYTES` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` + `Retry-After` · `503` queue down |
 | `GET /v1/runs?limit=` | | Recent runs, newest first: id, state, product name, route |
 | `GET /v1/runs/{run_id}` | | `RunStatus`: state, the accepted `request`, `correlation_id`, and the `result` when done |
 | `GET /v1/runs/{run_id}/trace` | | Full reconstruction (D5): the request, every step in order with inputs and outputs (queries, full passages, LLM messages and text), prompt versions, per-step and per-agent latency, tokens and cost, queue wait, verdict, route |
@@ -327,6 +327,9 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
   every log line.
 - Submission order: client id → size limit → gate (rate limit, validate, quarantine) → save `queued`
   → enqueue. A reject never creates a run or a job (D1, demo #4). Non-JSON bodies are quarantined too.
+- `X-Callback-Url` (extra): when the run ends, the worker POSTs `{event: "run.finished", run_id, state, route, complete,
+  status_url, trace_url}` to it, signed with `WEBHOOK_SECRET` (`X-FSSAI-Signature`). Off unless the host is in
+  `WEBHOOK_ALLOWED_HOSTS`; a failed callback never changes the run.
 - Runs are executed per `RUN_DISPATCH` (decision 302): `queue` (RQ on Redis, `python -m fssai_worker`)
   in Compose, `inline` (a thread pool in the API) for local development.
 

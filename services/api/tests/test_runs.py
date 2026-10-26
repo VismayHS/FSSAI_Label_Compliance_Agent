@@ -173,3 +173,24 @@ def test_trace_links_to_jaeger_only_when_tracing_is_on(env, monkeypatch):
     monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://jaeger:4318")
     url = env.client.get(f"/v1/runs/{run_id}/trace").json()["jaeger_url"]
     assert url.startswith("http://localhost:16686/search?service=worker") and run_id in url
+
+
+def test_a_callback_url_is_refused_unless_its_host_is_allowed_and_nothing_runs(env, monkeypatch):
+    monkeypatch.delenv("WEBHOOK_ALLOWED_HOSTS", raising=False)
+    r = env.submit(**{"X-Callback-Url": "https://hooks.example.test/x"})
+    assert r.status_code == 400 and "not enabled" in r.json()["detail"]
+    monkeypatch.setenv("WEBHOOK_ALLOWED_HOSTS", "hooks.example.test")
+    r = env.submit(**{"X-Callback-Url": "http://169.254.169.254/latest/meta-data"})
+    assert r.status_code == 400 and "not in WEBHOOK_ALLOWED_HOSTS" in r.json()["detail"]
+    assert env.store.recent() == [] and env.dispatcher.submitted == []
+
+
+def test_an_allowed_callback_url_travels_with_the_job(env, monkeypatch):
+    monkeypatch.setenv("WEBHOOK_ALLOWED_HOSTS", "hooks.example.test")
+    from fssai_worker import jobs
+    sent = []
+    monkeypatch.setattr(jobs.webhook, "notify", lambda url, status, *a, **k: sent.append((url, status.state.value)) or True)
+    r = env.submit(**{"X-Callback-Url": "https://hooks.example.test/x"})
+    assert r.status_code == 202
+    assert env.dispatcher.submitted[0]["callback_url"] == "https://hooks.example.test/x"
+    assert sent == [("https://hooks.example.test/x", "completed")]
