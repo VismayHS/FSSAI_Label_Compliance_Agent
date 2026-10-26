@@ -1,192 +1,282 @@
-"""Pluggable text detectors for the guardrails (L4). Each takes text and returns the names of what it found.
+"""Pluggable input detectors (L4). Each one looks at every free-text field and returns flags.
 
-Injection: heuristics over normalised text (case, width, zero-width characters and look-alike letters folded), in
-several languages, covering instruction override, role-play, prompt exfiltration, delimiter escape, tool abuse and
-attempts to dictate the verdict. Heuristics are a first layer, not a proof: the agents also keep label text inside
-data delimiters, validate every tool argument against an allowlist and verify every citation (docs/decisions/101).
+Enable with GUARDRAIL_DETECTORS (comma list, default "control,length,injection,toxicity"):
+    control     control and invisible characters
+    length      fields longer than GUARDRAIL_MAX_FIELD_CHARS
+    injection   pattern heuristics, multilingual, plus base64 payloads decoded and rescanned
+    toxicity    GUARDRAIL_TOXICITY_MODEL (a transformers text-classifier) if set, else a small lexicon
+    judge       an LLM asks which fields try to instruct the system (opt-in: costs one LLM step per run)
+    pkg.mod:Class   any class with scan(fields, ctx) -> list[Flag]
 
-Toxicity: a small lexicon by default (no download, no network). Set GUARDRAIL_TOXICITY_MODEL to a local
-text-classification model name to add a model on top; if it cannot be loaded the lexicon keeps working and the
-fallback is logged.
+Heuristics are a first layer and are honest about it: they catch known phrasings, not every paraphrase.
+decision 101 explains why this is the default and how the judge adds a second layer.
 """
 from __future__ import annotations
 
-import logging
+import base64
+import binascii
+import importlib
+import json
 import os
 import re
-import unicodedata
+from dataclasses import dataclass
 from typing import Protocol
 
-log = logging.getLogger("fssai.guardrails")
+from fssai_contracts.context import BudgetExceeded, RunContext
+from fssai_contracts.interfaces import ProviderUnavailable
 
-_ZERO_WIDTH = dict.fromkeys(map(ord, "​‌‍⁠﻿­"), None)
-_HOMOGLYPHS = str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "7": "t", "@": "a", "$": "s", "!": "i",
-                             "а": "a", "е": "e", "о": "o", "р": "p", "с": "c", "х": "x",
-                             "і": "i", "ѕ": "s"})
+from .text import fold
 
 
-def normalise(text: str, fold_digits: bool = False, keep_symbols: bool = False) -> str:
-    """Fold case, width and invisible characters. keep_symbols leaves _ | * ` ~ in place, because delimiters
-    (<|im_start|>, </label_data>) and tool names (corpus_search) are made of them."""
-    text = unicodedata.normalize("NFKC", text).translate(_ZERO_WIDTH).lower()
-    if fold_digits:
-        text = text.translate(_HOMOGLYPHS)
-    if not keep_symbols:
-        text = re.sub(r"[_*`~|\\]+", " ", text)
-    return " ".join(text.split())
+@dataclass(frozen=True)
+class Flag:
+    field: str
+    kind: str      # prompt_injection | toxicity | too_long | control_characters
+    rule: str      # which rule fired; never the attacker's text
+
+    @property
+    def label(self) -> str:
+        return f"{self.kind}:{self.field}"
 
 
 class Detector(Protocol):
     name: str
 
-    def scan(self, text: str) -> list[str]: ...
+    def scan(self, fields: dict[str, str], ctx: RunContext) -> list[Flag]: ...
 
 
-_W = r"[\w'’]+"
-_INJECTION: dict[str, list[str]] = {
-    "instruction_override": [
-        r"\b(?:ignore|disregard|forget|override|bypass|skip)\b[^.\n]{0,40}\b(?:previous|prior|above|earlier|all|any|your|the|these|those)\b[^.\n]{0,30}\b(?:instructions?|prompts?|rules?|guidelines?|directions?|polic(?:y|ies)|constraints?)\b",
-        r"\b(?:ignore|disregard)\s+(?:everything|all)\b(?:\s+(?:above|before|else))?",
-        r"\bdo not follow\b[^.\n]{0,30}\b(?:instructions?|rules?|guidelines?)\b",
-        r"\bnew instructions?\s*:", r"\binstead,? (?:you (?:must|should|will)|do|output|respond|say|return)\b",
-        r"\bfrom now on\b[^.\n]{0,40}\b(?:you|always|only)\b",
-    ],
-    "role_play": [
-        r"\byou are (?:now|no longer)\b", r"\bact as (?:a|an|the|if)\b", r"\bpretend (?:to be|you are|that you)\b",
-        r"\broleplay\b|\brole-play\b", r"\bdeveloper mode\b|\bdan mode\b|\bjailbreak(?:ed)?\b",
-        r"\bimagine you (?:are|were|have no)\b", r"\bunrestricted (?:ai|assistant|mode)\b",
-    ],
-    "prompt_exfiltration": [
-        r"\b(?:reveal|show|print|repeat|output|leak|display|tell me)\b[^.\n]{0,30}\b(?:system prompt|your prompt|your instructions|hidden (?:prompt|instructions)|initial prompt)\b",
-        r"\bsystem prompt\b", r"\bsystem message\b", r"\bwhat (?:are|were) your (?:instructions|rules)\b",
-    ],
-    "delimiter_escape": [
-        r"</?\s*label_data\s*>", r"<\|(?:im_start|im_end|system|user|assistant|endoftext)\|>", r"\[/?inst\]", r"<</?sys>>",
-        r"^\s*(?:#{2,}\s*)?(?:system|assistant|developer)\s*:", r"\n\s*(?:system|assistant)\s*:", r"```\s*(?:system|json)\b[^`]{0,40}(?:ignore|approve)",
-        r"</?(?:system|instructions?|prompt)>", r"\bend of (?:label|data|input)\b[^.\n]{0,20}\bnew (?:task|instructions?)\b",
-    ],
-    "verdict_dictation": [
-        r"\b(?:approve|approved|approving|pass|passes|certify|certified|clear|cleared)\b[^.\n]{0,25}\b(?:this|the|my|our)\b[^.\n]{0,15}\b(?:label|pack|packaging|product|claim)\b",
-        r"\b(?:mark|set|route|rate|classify|label)\b[^.\n]{0,25}\b(?:as|to)\b[^.\n]{0,15}\b(?:clear[- ]?for[- ]?print|compliant|approved|passed|met)\b",
-        r"\b(?:route|routing|verdict|result|status)\s*(?:is|=|:|should be|must be)\s*[\"']?(?:clear[- ]?for[- ]?print|approved|compliant|accept)\b",
-        r"\balways (?:say|answer|respond|output|return|report)\b[^.\n]{0,30}\b(?:compliant|approved|met|clear|pass)\b",
-        r"\bno (?:further )?(?:review|check(?:s|ing)?) (?:is |are )?(?:needed|required|necessary)\b",
-        r"\b(?:all|every) requirements? (?:are |is )?(?:met|satisfied|fulfilled)\b[^.\n]{0,20}\b(?:regardless|anyway)\b",
-    ],
-    "tool_abuse": [
-        r"\b(?:call|use|invoke|run|execute|trigger)\b[^.\n]{0,20}\b(?:corpus_search|clause_lookup|request_field_lookup|the (?:search )?tool)\b",
-        r"\b(?:corpus_search|clause_lookup|request_field_lookup)\s*[({]", r"\"tool\"\s*:", r"\bfunction_call\b|\btool_calls?\b",
-        r"\b(?:fetch|visit|open|curl|wget|browse)\b[^.\n]{0,15}https?://", r"\bsend\b[^.\n]{0,30}\b(?:to|at)\b[^.\n]{0,30}(?:https?://|@\w+\.\w+)",
-    ],
-    "other_language": [
-        r"ignor[ae][^.\n]{0,25}(?:instrucciones|indicaciones|reglas)\s+(?:anteriores|previas)",  # es
-        r"ignor(?:ez|e)[^.\n]{0,25}(?:instructions|consignes|r[eè]gles)\s+(?:pr[eé]c[eé]dentes|ci-dessus|ant[eé]rieures)",  # fr
-        r"ignorier(?:e|en)?[^.\n]{0,25}(?:vorherigen|obigen|bisherigen)\s+(?:anweisungen|instruktionen|regeln)",  # de
-        r"ignora[^.\n]{0,25}(?:istruzioni|regole)\s+(?:precedenti|sopra)",  # it
-        r"ignore[^.\n]{0,25}(?:instru[cç][oõ]es|regras)\s+(?:anteriores|acima)",  # pt
-        r"(?:पिछले|ऊपर के|पहले के)\s*(?:सभी\s*)?(?:निर्देश|आदेश|नियम)[^.\n]{0,20}(?:अनदेखा|नज़रअंदाज़|नजरअंदाज|भूल)",  # hi
-        r"(?:निर्देशों|आदेशों|नियमों)\s*(?:को)?\s*(?:अनदेखा|नज़रअंदाज़|नजरअंदाज|भूल)",  # hi
-        r"(?:忽略|无视|忘记)[^.\n]{0,10}(?:之前|以上|先前|所有)[^.\n]{0,10}(?:指示|指令|规则|说明)",  # zh
-        r"(?:以前|前|上記)の(?:指示|命令|ルール)を(?:無視|忘れ)",  # ja
-        r"(?:игнорируй|игнорируйте|забудь)[^.\n]{0,30}(?:предыдущие|прежние|все)\s+(?:инструкции|указания|правила)",  # ru
-        r"تجاهل[^.\n]{0,20}(?:التعليمات|الأوامر)\s+(?:السابقة|أعلاه)",  # ar
-    ],
-}
-_INJECTION_RE = {cat: [re.compile(p, re.I | re.M) for p in pats] for cat, pats in _INJECTION.items()}
-_ENCODED = re.compile(r"(?:[A-Za-z0-9+/]{60,}={0,2})")
-_NEGATION = re.compile(r"\b(?:not|never|no|cannot|can't|without|isn't|aren't|does not|do not)\s+(?:\w+\s+){0,2}$")
+# ---------------------------------------------------------------- control characters and length
+
+_CONTROL = re.compile(r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\x9f\u200b-\u200f\u2028\u2029\u202a-\u202e\u2060-\u2064\u2066-\u2069\ufeff]")
+
+
+class ControlCharDetector:
+    name = "control"
+
+    def scan(self, fields, ctx):
+        return [Flag(f, "control_characters", "control_or_invisible") for f, t in fields.items() if _CONTROL.search(t)]
+
+
+class LengthDetector:
+    name = "length"
+
+    def __init__(self, limit: int | None = None) -> None:
+        self.limit = limit if limit is not None else int(os.environ.get("GUARDRAIL_MAX_FIELD_CHARS", "4000") or 4000)
+
+    def scan(self, fields, ctx):
+        return [Flag(f, "too_long", f"over_{self.limit}_chars") for f, t in fields.items() if len(t) > self.limit]
+
+
+# ---------------------------------------------------------------- injection heuristics
+
+def _rx(p: str) -> re.Pattern:
+    return re.compile(p, re.IGNORECASE)
+
+
+_W = r"[^.\n]"
+INJECTION_RULES: list[tuple[str, re.Pattern]] = [
+    # override the instructions
+    ("instruction_override", _rx(rf"\b(ignore|disregard|forget|override|bypass|neglect|discard|skip)\b{_W}{{0,40}}\b(previous|prior|above|earlier|preceding|all|any|your|these|those|system)\b{_W}{{0,30}}\b(instructions?|prompts?|rules?|directions?|guidelines?|constraints?|commands?|programming)\b")),
+    ("instruction_override", _rx(r"\b(do not|don'?t|never)\s+follow\s+(the|your|any)\s+(\w+\s+)?(instructions?|rules?)\b")),
+    ("new_instructions", _rx(r"\b(new|updated|real|actual|secret|hidden)\s+(instructions?|task|system prompt|rules)\s*(is|are|:|follow)")),
+    # role-play and mode switches
+    ("role_play", _rx(r"\byou\s+are\s+now\s+(a|an|the|my|in|free|unrestricted|dan|going\s+to|to\s+act)\b|\byou\s+are\s+no\s+longer\b")),
+    ("role_play", _rx(r"\b(act|behave|respond|function|operate)\s+as\s+(if\s+you\s+(are|were)\s+)?(an?\s+|the\s+)?(unrestricted|jailbroken|different|new|evil|dan|developer|admin|administrator|system|root|compliance officer|regulator|auditor|assistant|ai|chatbot)\b")),
+    ("role_play", _rx(r"\bpretend\s+(to be|you\s+are|that\s+you)\b")),
+    ("role_play", _rx(r"\b(developer|debug|god|dan|jailbreak|sudo|admin|maintenance)\s+mode\b")),
+    ("role_play", _rx(rf"\bfrom\s+now\s+on\b{_W}{{0,20}}\byou\s+(will|must|should|shall|are|only|always|never|have\s+to|need\s+to)\b")),
+    # fake system / chat-template markers
+    ("system_impersonation", _rx(r"(?:^|\n|[.!?;]\s)\s*(system|assistant|developer|admin)\s*:")),
+    ("system_impersonation", _rx(r"<\|im_(start|end)\|>|<\|system\|>|\[/?inst\]|<<\s*sys\s*>>|###\s*(system|instruction)s?\b|\[\s*system\s*\]|<\s*system\s*>")),
+    # break out of the data block
+    ("delimiter_escape", _rx(r"</?\s*label_data\b")),
+    ("delimiter_escape", _rx(r"</?\s*(system|assistant|instructions?|prompt|tool|tool_call|function_call)\b[^>]*>")),
+    ("delimiter_escape", re.compile(r"```")),
+    # try to set the outcome
+    ("approval_coercion", _rx(r"\bapprove\s+(this|the|my|our)\s+(label|pack|packaging|product|artwork|submission)\b")),
+    ("approval_coercion", _rx(rf"\b(mark|set|rate|declare|certify|output|return|report|say|state)\b{_W}{{0,30}}\b(compliant|approved|clear[- ]for[- ]print|passes|passed)\b")),
+    ("route_override", _rx(rf"\b(set|force|change|route|send|override)\b{_W}{{0,30}}\b(clear[- ]for[- ]print|regulatory[- ]review|revise[- ]and[- ]recheck)\b")),
+    # leak or abuse
+    ("exfiltration", _rx(rf"\b(reveal|show|print|repeat|output|display|leak|disclose|tell me)\b{_W}{{0,40}}\b(system prompt|your (instructions|prompt|rules)|hidden (instructions|prompt)|api[- ]?key|secrets?|credentials?|passwords?|tokens?)\b")),
+    ("tool_abuse", _rx(r"\b(execute|run)\s+(the\s+following\s+)?(command|code|script|shell|sql)\b")),
+    ("tool_abuse", _rx(r"\b(clause_lookup|corpus_search|request_field_lookup)\s*\(|\btool_call\b|\bfunction_call\b")),
+    # other languages (the same ideas; coverage is partial by nature)
+    ("instruction_override_es", _rx(r"\b(ignora|olvida|omite|descarta)\b[^.\n]{0,30}\b(instrucciones|indicaciones|reglas)\b")),
+    ("approval_coercion_es", _rx(r"\b(aprueba|aprobar|apruebe)\s+(esta|la)\s+etiqueta\b")),
+    ("instruction_override_fr", _rx(r"\b(ignorez|ignorer|ignore\s+(les|toutes|vos|mes)|oubliez|oublier|oublie\s+(les|toutes|vos)|négligez|négliger)\b[^.\n]{0,30}\b(instructions?|consignes?|règles)\b")),
+    ("approval_coercion_fr", _rx(r"\b(approuve[zr]?|valide[zr]?)\s+(cette|l')\s*étiquette\b")),
+    ("instruction_override_de", _rx(r"\b(ignoriere|vergiss|missachte)\b[^.\n]{0,30}\b(anweisungen|instruktionen|regeln)\b")),
+    ("approval_coercion_de", _rx(r"\b(genehmige|bestätige)\s+(dieses|das)\s+etikett\b")),
+    ("instruction_override_hi", re.compile(r"(पिछले|पिछली|ऊपर\s*के|पहले\s*के)\s*(सभी\s*)?(निर्देश|निर्देशों|आदेश|आदेशों|नियमों)\s*(को\s*)?(अनदेखा|नज़रअंदाज़|नजरअंदाज|भूल)")),
+    ("approval_coercion_hi", re.compile(r"(इस|इस\s*पैक\s*के)\s*लेबल\s*को\s*(मंज़ूर|मंजूर|स्वीकृत|अनुमोदित|पास)")),
+    ("instruction_override_hi_latin", _rx(r"\b(pichhle|pichle|purane|upar\s+ke)\b[^.\n]{0,25}\b(nirdesh|instructions?|aadesh|niyam)\b[^.\n]{0,25}\b(ignore|bhool|andekha|nazarandaz)\b")),
+    ("approval_coercion_hi_latin", _rx(r"\bis\s+label\s+ko\s+(approve|pass|manzoor|sahi)\b")),
+    ("instruction_override_ta", re.compile(r"முந்தைய\s*(அனைத்து\s*)?(அறிவுறுத்தல்களை|கட்டளைகளை|வழிமுறைகளை|விதிகளை)\s*(புறக்கணி|மறந்து|கண்டுகொள்ள)")),
+    ("approval_coercion_ta", re.compile(r"இந்த\s*லேபிளை\s*(அங்கீகரி|ஏற்று|அனுமதி)")),
+    ("instruction_override_zh", re.compile(r"忽略(之前|以上|先前|所有|上面)[^。\n]{0,10}(指令|指示|规则|说明)")),
+]
+
+_B64 = re.compile(r"(?<![A-Za-z0-9+/])[A-Za-z0-9+/]{40,}={0,2}(?![A-Za-z0-9+/])")
+
+
+def injection_rules_hit(text: str) -> list[str]:
+    """Names of the rules that match this text (plain, folded, and digit-folded variants)."""
+    hits: list[str] = []
+    for variant in (text, fold(text), fold(text, leet=True)):
+        for name, rx in INJECTION_RULES:
+            if name not in hits and rx.search(variant):
+                hits.append(name)
+    return hits
+
+
+def _decoded_payloads(text: str) -> list[str]:
+    out = []
+    for m in _B64.finditer(text):
+        try:
+            raw = base64.b64decode(m.group(0) + "=" * (-len(m.group(0)) % 4), validate=True)
+            decoded = raw.decode("utf-8")
+        except (binascii.Error, UnicodeDecodeError, ValueError):
+            continue
+        if decoded.isprintable() or "\n" in decoded:
+            out.append(decoded)
+    return out
 
 
 class InjectionHeuristics:
     name = "injection"
 
-    def scan(self, text: str) -> list[str]:
-        found: list[str] = []
-        for variant in dict.fromkeys((normalise(text), normalise(text, fold_digits=True),
-                                      normalise(text, keep_symbols=True))):
-            for category, patterns in _INJECTION_RE.items():
-                if category in found:
-                    continue
-                for pattern in patterns:
-                    m = pattern.search(variant)
-                    if m is None:
-                        continue
-                    if category == "verdict_dictation" and _NEGATION.search(variant[:m.start()]):
-                        continue
-                    found.append(category)
+    def scan(self, fields, ctx):
+        flags = []
+        for field, text in fields.items():
+            hits = injection_rules_hit(text)
+            for payload in _decoded_payloads(text):
+                if injection_rules_hit(payload):
+                    hits.append("encoded_payload")
                     break
-        if _ENCODED.search(text) and "encoded_payload" not in found:
-            found.append("encoded_payload")
-        return found
+            flags += [Flag(field, "prompt_injection", rule) for rule in hits]
+        return flags
 
 
-_TOXIC_WORDS = (
-    "idiot", "idiots", "stupid", "moron", "morons", "imbecile", "dumbass", "scum", "trash people", "bastard", "bastards",
-    "asshole", "assholes", "bitch", "bitches", "bullshit", "shithead", "dickhead", "fuck", "fucking", "fucker", "motherfucker",
-    "crap", "damn you", "piece of shit", "shut up", "retard", "retarded", "slut", "whore", "cunt", "nigger", "faggot",
-    "chutiya", "madarchod", "bhenchod", "behenchod", "gandu", "harami", "saala", "kutta",
-)
-_TOXIC_RE = [re.compile(rf"(?<![a-z]){re.escape(w)}(?![a-z])") for w in _TOXIC_WORDS]
-_THREAT_RE = [re.compile(p) for p in (
-    r"\bi (?:will|am going to|'ll) (?:kill|hurt|destroy|find|hunt|burn|attack)\b", r"\b(?:kill|hurt|murder) (?:you|him|her|them|yourself)\b",
-    r"\byou (?:should|deserve to) die\b", r"\bkys\b", r"\bblow (?:it|this|them|the \w+) up\b", r"\bbomb (?:the|this|their)\b")]
+# ---------------------------------------------------------------- toxicity
+
+_PROFANITY = ("fuck", "fucking", "fucker", "shit", "shitty", "bitch", "bastard", "asshole", "dickhead", "cunt",
+              "motherfucker", "bullshit", "piss off", "screw you")
+_THREATS = (r"\bi\s*(will|'ll|am going to|'m going to)\s+(kill|hurt|destroy|burn|shoot|stab|murder)\b",
+            r"\b(kill|hurt|murder)\s+(yourself|you|them|him|her|everyone)\b",
+            r"\byou\s+(deserve|should)\s+to\s+(die|suffer)\b", r"\b(go|just)\s+die\b")
+_TOX_RX = [re.compile(rf"\b{re.escape(w)}\b", re.IGNORECASE) for w in _PROFANITY] + [_rx(t) for t in _THREATS]
 
 
-class ToxicityLexicon:
+class LexiconToxicity:
+    """Small word-boundary lexicon. Cheap and offline; set GUARDRAIL_TOXICITY_MODEL for a real model."""
     name = "toxicity"
 
-    def scan(self, text: str) -> list[str]:
-        for variant in dict.fromkeys((normalise(text), normalise(text, fold_digits=True))):
-            if any(r.search(variant) for r in _TOXIC_RE):
-                return ["abusive_language"]
-            if any(r.search(variant) for r in _THREAT_RE):
-                return ["threat"]
-        return []
+    def scan(self, fields, ctx):
+        flags = []
+        for field, text in fields.items():
+            if any(rx.search(v) for v in (text, fold(text, leet=True)) for rx in _TOX_RX):
+                flags.append(Flag(field, "toxicity", "lexicon"))
+        return flags
 
 
-class ToxicityModel:
-    """Optional local classifier (GUARDRAIL_TOXICITY_MODEL), loaded once, lazily. Never makes a network call at scan time."""
+class ModelToxicity:
+    """A transformers text-classification model (for example unitary/toxic-bert), loaded on first use.
+    If it cannot load, the lexicon takes over and the run records a degraded event."""
+    name = "toxicity"
 
-    name = "toxicity_model"
-
-    def __init__(self, model: str, threshold: float = 0.8) -> None:
-        self.model, self.threshold, self._pipe, self._failed = model, threshold, None, False
+    def __init__(self, model: str, threshold: float = 0.8, classifier=None) -> None:
+        self.model, self.threshold, self._clf = model, threshold, classifier
+        self._fallback = LexiconToxicity()
+        self._failed = False
 
     def _load(self):
-        if self._pipe is None and not self._failed:
+        if self._clf is None and not self._failed:
             try:
-                from transformers import pipeline  # type: ignore
-                self._pipe = pipeline("text-classification", model=self.model, top_k=None, truncation=True)
-            except Exception as exc:  # noqa: BLE001
+                from transformers import pipeline  # optional dependency
+                self._clf = pipeline("text-classification", model=self.model, top_k=None, truncation=True)
+            except Exception:
                 self._failed = True
-                log.warning("toxicity model %s unavailable, lexicon only: %s", self.model, exc)
-        return self._pipe
+        return self._clf
 
-    def scan(self, text: str) -> list[str]:
-        pipe = self._load()
-        if pipe is None or not text.strip():
+    def scan(self, fields, ctx):
+        clf = self._load()
+        if clf is None:
+            ctx.event("guardrail_degraded", detector="toxicity", reason="model_unavailable")
+            return self._fallback.scan(fields, ctx)
+        flags = []
+        for field, text in fields.items():
+            scores = clf(text[:2000])
+            rows = scores[0] if scores and isinstance(scores[0], list) else scores
+            worst = max((r["score"] for r in rows if str(r["label"]).lower() not in ("non-toxic", "neutral", "label_0", "not_toxic")),
+                        default=0.0)
+            if worst >= self.threshold:
+                flags.append(Flag(field, "toxicity", f"model>={self.threshold}"))
+        return flags
+
+
+# ---------------------------------------------------------------- LLM judge (opt-in second layer)
+
+class LLMJudgeInjection:
+    """One LLM call per run: which fields try to instruct the system? Wrapped as data; output validated.
+    Needs an LLM step, so it is off by default. If the provider is down the heuristics still apply."""
+    name = "judge"
+
+    def __init__(self, llm, prompts) -> None:
+        self.llm, self.prompts = llm, prompts
+
+    def scan(self, fields, ctx):
+        names = list(fields)
+        if not names:
+            return []
+        blocks = "\n".join(f'<label_data field="{n}">\n{re.sub(r"</?\s*label_data[^>]*>", "[removed tag]", t)[:1500]}\n</label_data>'
+                           for n, t in fields.items())
+        prompt = self.prompts.get("guardrail_judge")
+        messages = prompt.render(fields=blocks, input=blocks)
+        ctx.check_budget()
+        try:
+            resp = self.llm.complete(messages, ctx, agent="guardrails", step="judge", prompt=prompt, json_mode=True)
+        except BudgetExceeded:
+            raise
+        except ProviderUnavailable:
+            ctx.event("guardrail_degraded", detector="judge", reason="provider_unavailable")
             return []
         try:
-            scores = pipe(text[:1000])
-            scores = scores[0] if scores and isinstance(scores[0], list) else scores
-            hit = [s for s in scores if str(s["label"]).lower() not in ("non-toxic", "neutral", "not_toxic", "label_0")
-                   and float(s["score"]) >= self.threshold]
-            return ["toxic_model"] if hit else []
-        except Exception as exc:  # noqa: BLE001
-            self._failed = True
-            log.warning("toxicity model failed, lexicon only: %s", exc)
+            data = json.loads(resp.text)
+            flagged = data.get("flagged_fields", []) if isinstance(data, dict) else []
+        except ValueError:
             return []
+        return [Flag(f, "prompt_injection", "llm_judge") for f in flagged if f in fields]
 
 
-def build_detectors() -> dict[str, list[Detector]]:
-    """{'injection': [...], 'toxicity': [...]} from GUARDRAIL_DETECTORS (default both) and GUARDRAIL_TOXICITY_MODEL."""
-    enabled = {x.strip() for x in (os.environ.get("GUARDRAIL_DETECTORS", "injection,toxicity").split("#", 1)[0]).split(",") if x.strip()}
-    out: dict[str, list[Detector]] = {"injection": [], "toxicity": []}
-    if "injection" in enabled:
-        out["injection"].append(InjectionHeuristics())
-    if "toxicity" in enabled:
-        out["toxicity"].append(ToxicityLexicon())
-        model = os.environ.get("GUARDRAIL_TOXICITY_MODEL", "").split("#", 1)[0].strip()
-        if model:
-            out["toxicity"].append(ToxicityModel(model, float(os.environ.get("GUARDRAIL_TOXICITY_THRESHOLD", "0.8") or 0.8)))
+# ---------------------------------------------------------------- assembling the set
+
+DEFAULT_DETECTORS = "control,length,injection,toxicity,"
+
+
+def build_detectors(spec: str | None = None, *, llm=None, prompts=None) -> list[Detector]:
+    spec = (spec if spec is not None else os.environ.get("GUARDRAIL_DETECTORS", "")).split("#", 1)[0]
+    names = [n.strip() for n in (spec or DEFAULT_DETECTORS).split(",") if n.strip()]
+    out: list[Detector] = []
+    for name in names:
+        if name == "control":
+            out.append(ControlCharDetector())
+        elif name == "length":
+            out.append(LengthDetector())
+        elif name == "injection":
+            out.append(InjectionHeuristics())
+        elif name == "toxicity":
+            model = os.environ.get("GUARDRAIL_TOXICITY_MODEL", "").split("#", 1)[0].strip()
+            out.append(ModelToxicity(model, float(os.environ.get("GUARDRAIL_TOXICITY_THRESHOLD", "0.8") or 0.8)) if model
+                       else LexiconToxicity())
+        elif name == "judge":
+            if llm is None or prompts is None:
+                from fssai_contracts.registry import build
+                llm, prompts = llm or build("llm"), prompts or build("prompts")
+            out.append(LLMJudgeInjection(llm, prompts))
+        elif ":" in name:
+            module, _, attr = name.partition(":")
+            cls = getattr(importlib.import_module(module), attr)
+            out.append(cls())
+        else:
+            raise ValueError(f"unknown guardrail detector '{name}'")
     return out

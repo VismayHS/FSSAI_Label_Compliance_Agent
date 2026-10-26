@@ -12,6 +12,11 @@ from fssai_agents.researcher import LangGraphResearcher
 from fssai_contracts.conformance import check_classifier, check_pipeline, check_researcher
 
 
+def pending(task):
+    return pytest.mark.xfail(raises=NotImplementedError, strict=True,
+                             reason=f"{task} not built yet: delete this marker when it passes")
+
+
 def test_classifier_conforms():
     check_classifier(LLMClassifier.from_registry())
 
