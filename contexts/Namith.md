@@ -11,6 +11,13 @@ Everything is due by **Fri 30 Oct**. What was checked: all 11 ticked tasks match
 item 11. **M2.3 is done:** Vismay switched on `IMPL_PROMPTS`, `IMPL_CLASSIFIER`, `IMPL_RESEARCHER`, `IMPL_PIPELINE`
 and `IMPL_GUARDRAILS` in `.env.example`; tick it.
 
+**Update, 26 Oct evening (Vismay):** Vihaan's PR #9 is merged and his gate, verifier and router are switched on, so
+the eval runner is on `main` and nothing blocks step 2 except step 1. **Watch the step budget:** the verifier now runs
+inside every run (about 1 LLM call per attempt, up to 3 research attempts), and Vihaan measured a run that fails
+verification stopping at `RUN_MAX_STEPS=25`. A researcher that searches every requirement makes more tool calls, so
+check a full real run still completes inside 25 steps and 90 s (`RUN_MAX_WALL_S`); if not, search the labelling
+requirements in fewer, broader queries rather than raising the limits silently (and say which in your decision record).
+
 Do next, in this order:
 1. **The researcher must search for what it reports (highest priority; demo #2).** A live §4.1 run with the real LLM
    (Groq, researcher 1.1.0, run `a4702e8fcf3f4c44aa452896f171a129`) made only 2 searches, then drafted 11 findings;
@@ -19,7 +26,7 @@ Do next, in this order:
    example `coverage` also covering the labelling requirements, not only claims), or the draft leaves it out. As it
    is, every label ends in `regulatory-review`.
 2. **M3.2 prompt comparison (L2).** Run `researcher` 1.0.0 against 1.1.0 on Vihaan's eval set
-   (`python -m fssai_eval run --tag ...`) once his PR is on `main`. Vihaan's decision 205 plans one measured change
+   (`python -m fssai_eval run --tag ...`; it is on `main` now, use `--pause-s 60` for Groq). Vihaan's decision 205 plans one measured change
    with you, so this pair can serve his L3 before/after too. It needs the Groq key, and one run uses about 12,500
    tokens, so free-tier limits are tight: run in batches, or ask Vismay to run it. Fill the TODO table in
    `docs/report/agent-design.md` and write `docs/decisions/1xx-namith-prompt-comparison.md`.

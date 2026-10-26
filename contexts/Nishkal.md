@@ -18,7 +18,8 @@ Do next, in this order:
    and fill in the tables.
 2. **N3.6 caching effect (D7).** The same matrix with `CACHE_ENABLED=0` and `CACHE_ENABLED=1`, written up as decision 003 says.
 3. **Stub replies for every prompt.** The pipeline now sends the stub the `classifier`, `researcher` and
-   `researcher_draft` prompts (and `verifier_support` once Vihaan's verifier is on), and the stub answers them all
+   `researcher_draft` prompts (and `verifier_support`: Vihaan's verifier is on since 26 Oct; for a load test you can also set
+   `VERIFIER_SUPPORT_CHECK=off`, which skips that call), and the stub answers them all
    with its default reply, so a load test never reaches a finding. Add `services/stub_llm/fssai_stub_llm/fixtures/<prompt>.json` with a valid reply for each
    (ask Namith and Vihaan for one real reply each). Without this the load test measures a path the demo never takes.
 4. **N4.1 §4.1 rehearsal (demo #10).** Today's reference answer (Vihaan's test values) is `cannot_determine`, routed
