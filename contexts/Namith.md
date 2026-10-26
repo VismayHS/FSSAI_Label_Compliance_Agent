@@ -153,7 +153,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 2: real end-to-end
 
-- [ ] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
+- [x] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
   - `corpus_search(query, regulation?)`
   - `clause_lookup(regulation, clause_id)`
   - `request_field_lookup(path)`, e.g. `nutrition.protein_g`
@@ -256,7 +256,11 @@ output-authorisation guardrails."*
 
 ## Notes / log
 - 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
+ vismay
 - 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).
 - 2026-10-26 (Vismay): `IMPL_PROMPTS` and `IMPL_CLASSIFIER` are switched on in `.env.example` (after your PR #4), so
   that half of M2.3 is done; only `IMPL_RESEARCHER` and `IMPL_PIPELINE` remain. M0.2 and M1.3 are committed but
   still unticked above: tick them if they're done.
+
+- 2026-10-26: M2.1 researcher built (LangGraph: plan, act, run_tool, coverage, draft). Prompts `researcher` and `researcher_draft` 1.0.0. Checked against the real index with a scripted LLM; not yet against a real LLM. RDA guard on by default (open team question).
+ main
