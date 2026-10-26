@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import os
 import random
+import re
 import time
 from dataclasses import dataclass
 from typing import Callable, Mapping
@@ -57,6 +58,17 @@ class _Retryable(Exception):
 def _num(env: Mapping[str, str], name: str, default: float) -> float:
     raw = env.get(name, "").split("#", 1)[0].strip()
     return float(raw) if raw else default
+
+
+def _error_code(response: httpx.Response) -> str:
+    """`type/code` from an OpenAI-style error body, or "". Only these two fields: the provider's message can echo the
+    prompt (label text) or name the model id, and neither may reach a trace (D4)."""
+    try:
+        error = response.json().get("error") or {}
+    except ValueError:
+        return ""
+    safe = [re.sub(r"[^A-Za-z0-9_.-]", "", str(error.get(k) or ""))[:40] for k in ("type", "code")]
+    return "/".join(safe) if any(safe) else ""
 
 
 def _retry_after(response: httpx.Response) -> float | None:
@@ -207,7 +219,10 @@ class GatewayLLMClient:
         if r.status_code == 429 or r.status_code >= 500:
             raise _Retryable(f"HTTP {r.status_code}", _retry_after(r))
         if r.status_code != 200:
-            raise ProviderUnavailable(f"HTTP {r.status_code} (not retried)")
+            code = _error_code(r)
+            if code.endswith("/json_validate_failed"):  # the model's output was not JSON: same as a malformed reply
+                raise _Retryable(f"HTTP {r.status_code} {code}")
+            raise ProviderUnavailable(f"HTTP {r.status_code} {code} (not retried)".replace("  ", " "))
         try:
             data = r.json()
             data["choices"][0]["message"]
