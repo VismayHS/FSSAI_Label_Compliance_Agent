@@ -1218,3 +1218,62 @@ tbody th {
   margin-top: var(--s-6);
   font-weight: 600;
 }
+
+/* ---------------------------------------------------------------- PDF export (print) */
+/* The printable report is rendered beside #root only while printing, and printed alone. Without it (no result yet)
+   the page prints as it is. */
+.print-report {
+  display: none;
+}
+@media print {
+  body:has(> .print-report) > :not(.print-report) {
+    display: none !important;
+  }
+  body {
+    background: none;
+  }
+  .print-report {
+    display: block;
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 11pt;
+    line-height: 1.45;
+  }
+  .print-report h1 {
+    font-size: 18pt;
+  }
+  .print-report h2 {
+    margin-top: 14pt;
+    font-size: 13pt;
+  }
+  .print-report p + p,
+  .print-report h1 + p {
+    margin-top: 4pt;
+  }
+  .print-report__meta {
+    color: var(--ink-2);
+    font-size: 9pt;
+  }
+  .print-report__notice {
+    margin: 8pt 0;
+    padding: 6pt 8pt;
+    border: 1pt solid var(--ink);
+    font-weight: 700;
+  }
+  .print-report__findings + .print-report__meta {
+    margin-top: 14pt;
+  }
+  .print-report__findings > li {
+    margin-top: 10pt;
+    break-inside: avoid;
+  }
+  .print-report blockquote {
+    margin: 4pt 0 0 12pt;
+    padding-left: 8pt;
+    border-left: 1.5pt solid var(--ink-2);
+  }
+  .print-report blockquote footer {
+    font-size: 9pt;
+    color: var(--ink-2);
+  }
+}

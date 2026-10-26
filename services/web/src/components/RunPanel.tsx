@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 
 import { submitRun } from "../api/client";
 
@@ -13,6 +14,7 @@ import { DemoNotice } from "./DemoNotice";
 import { Feedback } from "./Feedback";
 import { Findings } from "./Findings";
 import { Mark } from "./Mark";
+import { PrintReport } from "./PrintReport";
 import LatticeLoader from "./reactbits/LatticeLoader/LatticeLoader";
 import { Trace } from "./Trace";
 
@@ -107,6 +109,23 @@ function RunView({ runId, focus, initialTab, onRequest, ready }: {
     // Keep the address shareable without a navigation: #/runs/<id>/trace opens straight on the trace.
     history.replaceState(null, "", `#/runs/${runId}${next === "trace" ? "/trace" : ""}`);
   };
+  // The printable report exists only while printing (the button, or the browser's own print), so the findings
+  // are never on the page twice for screen readers.
+  const [printing, setPrinting] = useState(false);
+  useEffect(() => {
+    const before = () => flushSync(() => setPrinting(true));
+    const after = () => setPrinting(false);
+    window.addEventListener("beforeprint", before);
+    window.addEventListener("afterprint", after);
+    return () => {
+      window.removeEventListener("beforeprint", before);
+      window.removeEventListener("afterprint", after);
+    };
+  }, []);
+  const savePdf = () => {
+    flushSync(() => setPrinting(true));
+    window.print();
+  };
   const heading = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     if (!focus) return;
@@ -134,7 +153,11 @@ function RunView({ runId, focus, initialTab, onRequest, ready }: {
           {status && <> · submitted {time(status.submitted_at)}</>}
           {status?.correlation_id && <> · correlation <code>{status.correlation_id}</code></>}
         </p>
+        {result && status && (
+          <button type="button" className="button-link" onClick={savePdf}>Save findings as PDF</button>
+        )}
       </div>
+      {printing && result && status && <PrintReport status={status} result={result} />}
 
       <DemoNotice ready={ready} />
       {reconnecting && <p className="banner" data-tone="warn" role="status">Connection lost. Retrying…</p>}

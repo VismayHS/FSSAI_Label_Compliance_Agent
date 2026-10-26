@@ -172,6 +172,31 @@ describe("the analyst workspace", () => {
     expect(await screen.findByText(/Copy is blocked in this browser/)).toBeInTheDocument();
   });
 
+  it("saves the findings as a PDF: every finding, verbatim quotes, the notice, and only while printing", async () => {
+    const run = completedRun();
+    run.request!.label.product_name = "<img src=x onerror=alert(1)> Flakes";
+    const print = vi.spyOn(window, "print").mockImplementation(() => {});
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await userEvent.click(await screen.findByRole("button", { name: "Save findings as PDF" }));
+    expect(print).toHaveBeenCalledOnce();
+    const report = document.querySelector(".print-report") as HTMLElement;
+    expect(report).not.toBeNull();
+    expect(report.parentElement).toBe(document.body);
+    const text = report.textContent ?? "";
+    expect(text).toContain("Recommendation: revise-and-recheck");
+    expect(text).toContain("not an approval for print");
+    expect(text).toContain("Findings (2)");
+    expect(text.indexOf("Condition for claim")).toBeLessThan(text.indexOf("Allergen declaration"));  // unmet first
+    expect(text).toContain("FSS-AC-2018 FAKE-AC-PROTEIN");
+    expect(text).toContain("<img src=x onerror=alert(1)> Flakes");  // label text stays text
+    expect(report.querySelector("img")).toBeNull();
+    window.dispatchEvent(new Event("afterprint"));
+    await waitFor(() => expect(document.querySelector(".print-report")).toBeNull());
+    print.mockRestore();
+  });
+
   it("shows no hand-off for a result the label owner can act on", async () => {
     mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
     window.location.hash = `#/runs/${RUN_ID}`;
