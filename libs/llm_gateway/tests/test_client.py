@@ -254,3 +254,23 @@ def test_other_client_errors_are_not_retried_and_name_only_the_providers_error_c
     assert route.call_count == 1
     dumped = c.steps[-1].model_dump_json()
     assert "model-a" not in dumped and "secret label text" not in dumped  # the provider's message never reaches the trace
+
+
+@respx.mock
+@pytest.mark.parametrize("reset, wait", [("4.11s", 4.11), ("592ms", 0.592), ("1m2.5s", 62.5)])
+def test_a_rate_limit_without_retry_after_waits_for_the_token_budget_to_refill(reset, wait):
+    # Groq sends x-ratelimit-reset-tokens (time until the per-minute token budget refills) on a 429.
+    limited = httpx.Response(429, headers={"x-ratelimit-reset-tokens": reset})
+    respx.post("https://primary.test/v1/chat/completions").mock(side_effect=[limited, ok()])
+    sleeps: list[float] = []
+    c = ctx(max_wall_s=120)
+    call(make(sleeps=sleeps), c)
+    assert sleeps == [pytest.approx(wait)]
+
+
+@respx.mock
+def test_a_provider_tool_use_failure_is_retried_like_a_malformed_reply():
+    # Some open models emit a tool call nobody offered; Groq answers 400 tool_use_failed. It is the model's output.
+    bad = httpx.Response(400, json={"error": {"type": "invalid_request_error", "code": "tool_use_failed"}})
+    route = respx.post("https://primary.test/v1/chat/completions").mock(side_effect=[bad, ok()])
+    assert call(make()).text == "answer" and route.call_count == 2

@@ -71,11 +71,28 @@ def _error_code(response: httpx.Response) -> str:
     return "/".join(safe) if any(safe) else ""
 
 
+_DURATION = re.compile(r"(\d+(?:\.\d+)?)(ms|h|m|s)")
+_UNIT_S = {"ms": 0.001, "s": 1.0, "m": 60.0, "h": 3600.0}
+
+# A model output problem the provider reports as a 400: retried like a malformed reply, not treated as an outage.
+_RETRYABLE_400 = ("/json_validate_failed", "/tool_use_failed")
+
+
+def _duration_s(text: str) -> float | None:
+    """'4.11s', '592ms', '1m2.5s' -> seconds (the format of the x-ratelimit-reset-* headers)."""
+    parts = _DURATION.findall(text.strip())
+    return sum(float(n) * _UNIT_S[u] for n, u in parts) if parts else None
+
+
 def _retry_after(response: httpx.Response) -> float | None:
+    """How long the provider says to wait: Retry-After, else (on a 429) the time until its token budget refills."""
     try:
         return max(0.0, float(response.headers["retry-after"]))
     except (KeyError, ValueError):
-        return None  # absent, or an HTTP date we don't bother parsing
+        pass  # absent, or an HTTP date we don't bother parsing
+    if response.status_code == 429 and "x-ratelimit-reset-tokens" in response.headers:
+        return _duration_s(response.headers["x-ratelimit-reset-tokens"])
+    return None
 
 
 class GatewayLLMClient:
@@ -220,7 +237,7 @@ class GatewayLLMClient:
             raise _Retryable(f"HTTP {r.status_code}", _retry_after(r))
         if r.status_code != 200:
             code = _error_code(r)
-            if code.endswith("/json_validate_failed"):  # the model's output was not JSON: same as a malformed reply
+            if code.endswith(_RETRYABLE_400):  # the model's own output was unusable: same as a malformed reply
                 raise _Retryable(f"HTTP {r.status_code} {code}")
             raise ProviderUnavailable(f"HTTP {r.status_code} {code} (not retried)".replace("  ", " "))
         try:
