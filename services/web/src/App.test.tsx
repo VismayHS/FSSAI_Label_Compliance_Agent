@@ -326,7 +326,11 @@ describe("the analyst workspace", () => {
     const send = screen.getByRole("button", { name: "Send feedback" });
     expect(send).toBeDisabled();
     await user.click(within(group).getByRole("button", { name: "No, not satisfactory" }));
-    await user.type(screen.getByLabelText("Why (optional)"), "  Missed the <b>RDA</b> basis  ");
+    expect(send).toBeDisabled();  // the endpoint requires a reason, so a blank one is never sent
+    await user.type(screen.getByLabelText("Why? One sentence is enough"), "   ");
+    expect(send).toBeDisabled();
+    await user.clear(screen.getByLabelText("Why? One sentence is enough"));
+    await user.type(screen.getByLabelText("Why? One sentence is enough"), "  Missed the <b>RDA</b> basis  ");
     await user.click(send);
     expect(await screen.findByRole("alert")).toHaveTextContent("reason too short");
     await user.click(send);
