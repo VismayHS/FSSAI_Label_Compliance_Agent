@@ -173,3 +173,81 @@ def test_trace_links_to_jaeger_only_when_tracing_is_on(env, monkeypatch):
     monkeypatch.setenv("OTEL_EXPORTER_OTLP_ENDPOINT", "http://jaeger:4318")
     url = env.client.get(f"/v1/runs/{run_id}/trace").json()["jaeger_url"]
     assert url.startswith("http://localhost:16686/search?service=worker") and run_id in url
+
+
+def test_a_callback_url_is_refused_unless_its_host_is_allowed_and_nothing_runs(env, monkeypatch):
+    monkeypatch.delenv("WEBHOOK_ALLOWED_HOSTS", raising=False)
+    r = env.submit(**{"X-Callback-Url": "https://hooks.example.test/x"})
+    assert r.status_code == 400 and "not enabled" in r.json()["detail"]
+    monkeypatch.setenv("WEBHOOK_ALLOWED_HOSTS", "hooks.example.test")
+    r = env.submit(**{"X-Callback-Url": "http://169.254.169.254/latest/meta-data"})
+    assert r.status_code == 400 and "not in WEBHOOK_ALLOWED_HOSTS" in r.json()["detail"]
+    assert env.store.recent() == [] and env.dispatcher.submitted == []
+
+
+def test_an_allowed_callback_url_travels_with_the_job(env, monkeypatch):
+    monkeypatch.setenv("WEBHOOK_ALLOWED_HOSTS", "hooks.example.test")
+    from fssai_worker import jobs
+    sent = []
+    monkeypatch.setattr(jobs.webhook, "notify", lambda url, status, *a, **k: sent.append((url, status.state.value)) or True)
+    r = env.submit(**{"X-Callback-Url": "https://hooks.example.test/x"})
+    assert r.status_code == 202
+    assert env.dispatcher.submitted[0]["callback_url"] == "https://hooks.example.test/x"
+    assert sent == [("https://hooks.example.test/x", "completed")]
+
+
+def _sse(text: str) -> list[tuple[str, str]]:
+    """(event, data) pairs from a server-sent-events body; comments (keep-alives) are skipped."""
+    out = []
+    for block in text.strip().split("\n\n"):
+        lines = [ln for ln in block.splitlines() if not ln.startswith(":")]
+        if lines:
+            fields = dict(ln.split(": ", 1) for ln in lines)
+            out.append((fields.get("event", "message"), fields.get("data", "")))
+    return out
+
+
+def test_events_stream_a_finished_run_once_then_end(env):
+    import json
+    run_id = env.submit().json()["run_id"]
+    r = env.client.get(f"/v1/runs/{run_id}/events")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/event-stream")
+    assert r.headers["cache-control"] == "no-cache" and r.headers["x-accel-buffering"] == "no"
+    events = _sse(r.text)
+    assert [e for e, _ in events] == ["status", "end"]
+    assert json.loads(events[0][1])["state"] == "completed"
+
+
+def test_events_for_an_unknown_run_are_404(env):
+    assert env.client.get(f"/v1/runs/{'0' * 32}/events").status_code == 404
+
+
+def test_events_push_each_state_change_of_a_live_run(env, monkeypatch):
+    import json
+    from fssai_contracts.schemas import RunState, RunStatus, utcnow
+    monkeypatch.setenv("SSE_POLL_S", "0.01")
+    run_id = "a" * 32
+    t0 = utcnow()
+    states = iter([RunState.QUEUED, RunState.QUEUED, RunState.RUNNING, RunState.COMPLETED])
+    saved_at = {RunState.QUEUED: 1, RunState.RUNNING: 2, RunState.COMPLETED: 3}  # a save is what moves updated_at
+
+    def get(rid):
+        state = next(states, RunState.COMPLETED)
+        return RunStatus(run_id=rid, state=state, submitted_at=t0, updated_at=t0.replace(microsecond=saved_at[state]))
+
+    monkeypatch.setattr(env.store, "get", get)
+    events = _sse(env.client.get(f"/v1/runs/{run_id}/events").text)
+    assert [json.loads(d)["state"] for e, d in events if e == "status"] == ["queued", "running", "completed"]
+    assert events[-1][0] == "end"
+
+
+def test_recent_runs_can_be_filtered_to_one_route_for_the_review_queue(env):
+    from fssai_contracts.conformance import INJECTION
+    env.submit()                                                        # revise-and-recheck on the fakes
+    bad = section_41()
+    bad["label"]["front_of_pack_text"] = INJECTION                      # regulatory-review
+    escalated = env.submit(bad).json()["run_id"]
+    r = env.client.get("/v1/runs", params={"route": "regulatory-review"})
+    assert r.status_code == 200 and [x["run_id"] for x in r.json()] == [escalated]
+    assert len(env.client.get("/v1/runs").json()) == 2
+    assert env.client.get("/v1/runs", params={"route": "approved"}).status_code == 422  # only the three routes

@@ -14,7 +14,7 @@ import csv
 import io
 import subprocess
 import sys
-from datetime import date
+from datetime import date, datetime
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -75,13 +75,15 @@ def report(since: str) -> str:
 
 def main() -> int:
     p = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    p.add_argument("--since", default="1970-01-01", help="only runs updated on or after this date (YYYY-MM-DD)")
+    p.add_argument("--since", default="1970-01-01",
+                   help="only runs updated on or after this date or UTC time (2026-11-01 or 2026-11-01T16:45)")
     p.add_argument("--out", type=Path, help="also write the report to this Markdown file")
     args = p.parse_args()
     try:
-        since = date.fromisoformat(args.since).isoformat()  # validated: it is placed into the SQL text
+        # validated (it is placed into the SQL text): a date, or a UTC date and time
+        since = (datetime.fromisoformat(args.since) if "T" in args.since else date.fromisoformat(args.since)).isoformat()
     except ValueError:
-        p.error(f"--since must be a date like 2026-11-01, not {args.since!r}")
+        p.error(f"--since must be a date like 2026-11-01 or a UTC time like 2026-11-01T16:45, not {args.since!r}")
     text = report(since)
     print(text)
     if args.out:

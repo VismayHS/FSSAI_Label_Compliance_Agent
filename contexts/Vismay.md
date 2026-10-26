@@ -3,6 +3,21 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file** (and `LLM_Context.md`). Tick
 > boxes as you go, and add notes at the bottom.
 
+## Next steps to 30 October (2026-10-26)
+
+What is left of my part, and what each item waits on:
+1. **Merge my PR first thing** (README per folder, docs/course/, extras, the API test fix Vihaan's CI needs).
+2. **After Vihaan's PR merges:** switch on `IMPL_GATE`, `IMPL_VERIFIER`, `IMPL_ROUTER` in `.env.example`; add his
+   `deploy/compose/eval-scorer.yml` to the root `docker-compose.yml`; check the feedback form and the reviewer
+   console against his live endpoint (then tick S3.6); clean-clone test; that finishes S2.4.
+3. **S3.2 cost per 100 runs:** paced real runs at Groq's list prices (the model and its prices are in `.env` only),
+   then `python scripts/cost_report.py` into my report section. The eval run pair (Namith + Vihaan) gives the
+   larger sample.
+4. **S4.3:** `python scripts/build_report.py --strict` once all four sections exist; two rehearsals of all 10 demos.
+
+**If I do not:** Vihaan's parts stay switched off on a clean clone even after his merge, and the report has no cost
+section. Demo #1 (clean clone) and #3 (trace) and #8 (breaker) are mine and already work.
+
 ## Your mission
 You make it **a production service, not a notebook**:
 - the API and async run model, the queue and the workers,
@@ -173,7 +188,7 @@ Summarise my current task in 3 lines, then wait for my go.
 ## Phase 3: all requirements
 
 - [x] **S3.1 Make the circuit breaker demonstrable (A5).** Add a `make demo-breaker` target that points the gateway at the stub with `STUB_DOWN=1` (or a dead URL), submits runs, shows the breaker opening (metric and log), shows runs completing as `regulatory-review` with `complete=false` and an honest reason, then recovers.
-- [ ] **S3.2 Report cost (L5).**
+- [x] **S3.2 Report cost (L5).**
   - Build the `cost.json` dashboard: cost per run, cost per step name, tokens by agent.
   - Write a script that computes **cost per 100 runs** and the **largest single cost driver** (the step with the highest total cost) from the `run_steps` table, after a batch of real-provider runs. You can use Vihaan's eval set run 4–5 times.
 - [x] **S3.3 Write decision records.**
@@ -197,10 +212,10 @@ Summarise my current task in 3 lines, then wait for my go.
 - [x] **S4.4 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [x] **GitHub Actions CI:** contract tests, each package's tests, `docker compose build`, and smoke on PRs
-  - [ ] **Reviewer console:** a page listing `regulatory-review` runs, showing citations next to the retrieved passages, with accept/override actions → feedback
-  - [ ] **Live progress over SSE** instead of polling
-  - [ ] **PDF export** of a finding
-  - [ ] **Webhook callback** option for A4
+  - [x] **Reviewer console:** a page listing `regulatory-review` runs, showing citations next to the retrieved passages, with accept/override actions → feedback
+  - [x] **Live progress over SSE** instead of polling
+  - [x] **PDF export** of a finding
+  - [x] **Webhook callback** option for A4
 
 ## CV line you'll be able to write
 *"Built the production platform for a multi-agent LLM compliance service: FastAPI with async job
@@ -291,3 +306,42 @@ the web client."*
 - Deadline moved: the whole project is due by Fri 30 Oct (the first review). LLM_Context §9 now states the one
   deadline; phases are only the order of work. Dropped the week numbers from every person's phase headings (with a
   dated note in each file's log) and updated the project plan.
+- S2.4: PR #5 merged. Switched on Nishkal's `FaissRetriever` (merged since PR #2; the index now builds on a clean
+  clone) and Namith's `LangGraphResearcher` (PR #6) in `.env.example`. With both on, the reference pipeline passes
+  `check_pipeline`; against the real index the researcher retrieves FSS-AC-2018 Schedule I item 11 and FSS-LD-2020
+  5(14) for the §4.1 request. Without an LLM key it cannot draft findings, so it escalates to `regulatory-review`.
+- Reviewed Namith's PR #7 branch on Python 3.11 (worker image): 192 tests pass after his f-string fix; with all his
+  parts on, `check_pipeline` and `check_guardrails` pass, and both injections tried (front of pack, other text)
+  are blocked. His dashboard queries only metrics his code exports.
+- Reviewed Nishkal's work on main on Python 3.11: ingest 32, retrieval 43 (+3 real-model quality tests), observability 9,
+  stub 10 pass. All 12 regulation quotes in `section-4.1-passages.md` are verbatim in the PDFs (P3's table is on
+  PDF page 16, not 15). SLO committed 2026-10-25 before any measurement.
+- S2.4: Namith's PR #7 merged; `IMPL_PIPELINE` (LangGraphPipeline) and `IMPL_GUARDRAILS` are on in `.env.example`.
+  Every package passes on the merge (guardrails 99, agents 61). Fixed a flaky gateway test: it used a real 0.5 s
+  deadline, which a busy machine could use up before the first call.
+- S3.6 (part): escalated runs say in plain words why, and copy a hand-off (run id, reasons, trace link) for the reviewer.
+- My local `.env` now uses Groq through the gateway (`IMPL_LLM`), with a smaller fallback model on the same key;
+  live JSON-mode calls to both succeeded.
+
+- Organised the repo for a stranger: a README in every folder (owners, what is where), a repository map in the root
+  README, the course PDFs moved to `docs/course/` (all references updated). No code folder moved: three days before
+  the review, moving packages would break Compose, CI and Vihaan's unmerged 70-file branch for no gain.
+- Extras done and verified in the running stack: live progress over SSE (through nginx: running at 0 s, completed at
+  15 s, end), webhook callback (allowlisted hosts, HMAC-signed; the cloud-metadata address is refused with 400; a
+  signed notice reached a receiver container and verified), PDF export (a real two-page PDF checked by eye), reviewer
+  console (the regulatory-review queue, each quote marked inside its source passage, accept or override recorded as
+  feedback; checked at 1280 and 390 px).
+- Fixed: my feedback form sent an empty reason, which Vihaan's endpoint rejects (422); the reason is now required.
+  My API test hard-coded the router list and failed Vihaan's CI; it now compares with the routers package.
+- Found and fixed with the real LLM: Groq's free tier allows 8,000 tokens per minute per model, one run uses
+  8,000 to 12,500, so back-to-back runs were rate-limited into an incomplete run. The gateway now names the provider's
+  error code and retries `json_validate_failed`; incident `2026-10-26-vismay-groq-free-tier-rate-limit`.
+  The D4 audit missed `gpt-oss` and `publisher/model` ids; fixed and tested.
+- S4.3 started: `scripts/build_report.py` assembles the report from the sections, decisions and incidents.
+- Every teammate's file starts with *Next steps to 30 October*; LLM_Context §9 has the critical path.
+- S3.2 done (first measurement): 8 paced real runs at Groq's list price, $0.28 per 100 runs, the researcher's `act`
+  step is 64% of spend (report section updated; `cost_report.py --since` now takes a UTC time). Re-measure on the eval
+  set once Namith's researcher searches every requirement (it will cost more). The same runs exposed Groq's
+  `tool_use_failed` 400 and 429s inside one run; the gateway now retries `tool_use_failed` and, on a 429, waits for
+  the token budget to refill (`x-ratelimit-reset-tokens`). PR #8 CI green including the Compose boot; local
+  clean-clone test passed in 4.8 min.

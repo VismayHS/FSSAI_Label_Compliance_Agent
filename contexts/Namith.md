@@ -3,6 +3,33 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `contexts/LLM_Context.md` first.
 
+## Next steps to 30 October (written by Vismay, 2026-10-26)
+
+Everything is due by **Fri 30 Oct**. What was checked: all 11 ticked tasks match the code; 192 tests pass on Python
+3.11; with all your parts switched on, `check_pipeline` and `check_guardrails` pass, both injection attempts tried
+(front of pack, other text) are blocked, and against the real index the researcher reaches FSS-AC-2018 Schedule I
+item 11. **M2.3 is done:** Vismay switched on `IMPL_PROMPTS`, `IMPL_CLASSIFIER`, `IMPL_RESEARCHER`, `IMPL_PIPELINE`
+and `IMPL_GUARDRAILS` in `.env.example`; tick it.
+
+Do next, in this order:
+1. **The researcher must search for what it reports (highest priority; demo #2).** A live §4.1 run with the real LLM
+   (Groq, researcher 1.1.0, run `a4702e8fcf3f4c44aa452896f171a129`) made only 2 searches, then drafted 11 findings;
+   9 of them are `cannot_determine` with "no passage was provided" (allergen, ingredients, veg mark, licence,
+   manufacturer, date marking, batch, whole grains). Either every requirement in the draft is searched first (for
+   example `coverage` also covering the labelling requirements, not only claims), or the draft leaves it out. As it
+   is, every label ends in `regulatory-review`.
+2. **M3.2 prompt comparison (L2).** Run `researcher` 1.0.0 against 1.1.0 on Vihaan's eval set
+   (`python -m fssai_eval run --tag ...`) once his PR is on `main`. Vihaan's decision 205 plans one measured change
+   with you, so this pair can serve his L3 before/after too. It needs the Groq key, and one run uses about 12,500
+   tokens, so free-tier limits are tight: run in batches, or ask Vismay to run it. Fill the TODO table in
+   `docs/report/agent-design.md` and write `docs/decisions/1xx-namith-prompt-comparison.md`.
+3. **M4.1** rehearse demos #2 and #7. **M4.2** finish the TODOs in your report section.
+4. Delete the three stray lines " vismay" / " main" in *Notes / log* below (left over from a merge).
+
+**If this does not happen:** demo #2 (a valid request routed, with citations that resolve) only ever shows
+escalations, and L2 has no comparison. The researcher fix is on the critical path: the eval numbers (Vihaan) and the
+cost per 100 runs (Vismay) are only meaningful once it searches properly.
+
 ## Your mission
 You build the **thinking part**: the classifier and the research agent, and the LangGraph graph
 that runs them with the verifier. It does the loop the spec calls agentic:

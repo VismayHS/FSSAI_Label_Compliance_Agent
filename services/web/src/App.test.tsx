@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -135,6 +135,161 @@ describe("the analyst workspace", () => {
     expect(await screen.findByText(/did not complete, so it carries no confident answer/)).toBeInTheDocument();
     expect(screen.getByText("regulatory-review")).toBeInTheDocument();
     expect(screen.getByText("ProviderUnavailable: primary: circuit open")).toBeInTheDocument();
+    expect(screen.getByText(/The check did not finish, so a regulatory affairs professional decides/)).toBeInTheDocument();
+  });
+
+  it("explains an escalation in plain words and copies a hand-off for the reviewer", async () => {
+    const run = completedRun();
+    run.result!.routing = { route: "regulatory-review", reason: "Input failed guardrail screening.",
+                            escalation_reason: "prompt_injection:label.other_text" };
+    run.result!.guardrails = [{ stage: "input", allowed: false, flags: ["prompt_injection:label.other_text"], detail: "" }];
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(navigator, "clipboard", { value: { writeText }, configurable: true });
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(/Some label text reads like instructions to the system, so a regulatory/)).toBeInTheDocument();
+    expect(screen.getByText("What happens next")).toBeInTheDocument();
+    expect(screen.getByText(/did not act on it and checked nothing further/)).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Copy details for the reviewer" }));
+    expect(await screen.findByText("Copied: run id, reason and trace link.")).toBeInTheDocument();
+    const text = writeText.mock.calls[0]![0] as string;
+    expect(text).toContain(`Run: ${RUN_ID}`);
+    expect(text).toContain(`#/runs/${RUN_ID}/trace`);
+    expect(text).toContain("System reason: Input failed guardrail screening. (prompt_injection:label.other_text)");
+  });
+
+  it("says how to hand off by hand when the browser blocks copying", async () => {
+    const run = completedRun();
+    run.result!.routing = { route: "regulatory-review", reason: "Could not verify the finding.", escalation_reason: "unverified" };
+    Object.defineProperty(navigator, "clipboard", { value: { writeText: vi.fn().mockRejectedValue(new Error("denied")) },
+                                                    configurable: true });
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await userEvent.click(await screen.findByRole("button", { name: "Copy details for the reviewer" }));
+    expect(await screen.findByText(/Copy is blocked in this browser/)).toBeInTheDocument();
+  });
+
+  it("saves the findings as a PDF: every finding, verbatim quotes, the notice, and only while printing", async () => {
+    const run = completedRun();
+    run.request!.label.product_name = "<img src=x onerror=alert(1)> Flakes";
+    const print = vi.spyOn(window, "print").mockImplementation(() => {});
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(run) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await userEvent.click(await screen.findByRole("button", { name: "Save findings as PDF" }));
+    expect(print).toHaveBeenCalledOnce();
+    const report = document.querySelector(".print-report") as HTMLElement;
+    expect(report).not.toBeNull();
+    expect(report.parentElement).toBe(document.body);
+    const text = report.textContent ?? "";
+    expect(text).toContain("Recommendation: revise-and-recheck");
+    expect(text).toContain("not an approval for print");
+    expect(text).toContain("Findings (2)");
+    expect(text.indexOf("Condition for claim")).toBeLessThan(text.indexOf("Allergen declaration"));  // unmet first
+    expect(text).toContain("FSS-AC-2018 FAKE-AC-PROTEIN");
+    expect(text).toContain("<img src=x onerror=alert(1)> Flakes");  // label text stays text
+    expect(report.querySelector("img")).toBeNull();
+    window.dispatchEvent(new Event("afterprint"));
+    await waitFor(() => expect(document.querySelector(".print-report")).toBeNull());
+    print.mockRestore();
+  });
+
+  it("follows a run over server-sent events without polling, and polls if the stream fails", async () => {
+    class FakeSource {
+      static made: FakeSource[] = [];
+      listeners: Record<string, ((e: { data: string }) => void)[]> = {};
+      onerror: (() => void) | null = null;
+      closed = false;
+      constructor(readonly url: string) { FakeSource.made.push(this); }
+      addEventListener(type: string, fn: (e: { data: string }) => void) { (this.listeners[type] ??= []).push(fn); }
+      emit(type: string, data: string) { for (const fn of this.listeners[type] ?? []) fn({ data }); }
+      close() { this.closed = true; }
+    }
+    vi.stubGlobal("EventSource", FakeSource);
+    try {
+      const { calls } = mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+      window.location.hash = `#/runs/${RUN_ID}`;
+      const { unmount } = render(<App />);
+      await waitFor(() => expect(FakeSource.made).toHaveLength(1));
+      const live = FakeSource.made[0]!;
+      expect(live.url).toBe(`/v1/runs/${RUN_ID}/events`);
+      act(() => live.emit("status", JSON.stringify(queued())));
+      expect(await screen.findByText("Queued for a worker")).toBeInTheDocument();
+      act(() => live.emit("status", JSON.stringify(completedRun())));
+      expect(await screen.findByText(/needs attention/)).toBeInTheDocument();
+      act(() => live.emit("end", "{}"));
+      expect(live.closed).toBe(true);
+      expect(calls.filter((c) => c.url.endsWith(`/v1/runs/${RUN_ID}`))).toHaveLength(0);
+      unmount();
+
+      // A stream that fails (an old proxy, a restart) falls back to polling GET /v1/runs/{id}.
+      render(<App />);
+      await waitFor(() => expect(FakeSource.made).toHaveLength(2));
+      act(() => FakeSource.made[1]!.onerror?.());
+      expect(await screen.findByText(/needs attention/)).toBeInTheDocument();
+      expect(FakeSource.made[1]!.closed).toBe(true);
+      expect(calls.filter((c) => c.url.endsWith(`/v1/runs/${RUN_ID}`)).length).toBeGreaterThan(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
+  it("reviews an escalated run: each citation beside its passage, the decision recorded as feedback", async () => {
+    const user = userEvent.setup();
+    const trace = fullTrace();
+    trace.routing = { route: "regulatory-review", reason: "Could not verify the finding.", escalation_reason: "possible exemption" };
+    const { calls } = mockApi({
+      "GET /readyz": readyz,
+      "GET /v1/runs": () => json([{ run_id: RUN_ID, state: "completed", submitted_at: trace.submitted_at,
+                                    updated_at: trace.updated_at, product_name: "Roasted chana",
+                                    route: "regulatory-review", complete: true }]),
+      [`GET /v1/runs/${RUN_ID}/trace`]: () => json(trace),
+      "GET /openapi.json": () => json({ paths: { "/v1/runs/{run_id}/feedback": { post: {} } } }),
+      [`POST /v1/runs/${RUN_ID}/feedback`]: () => json({}, 201),
+    });
+    window.location.hash = "#/review";
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Review queue" })).toBeInTheDocument();
+    expect(calls.some((c) => c.url.includes("route=regulatory-review"))).toBe(true);
+    await user.click(await screen.findByRole("link", { name: /Roasted chana/ }));
+    expect(await screen.findByText("possible exemption")).toBeInTheDocument();
+    const marked = [...document.querySelectorAll(".review__passage mark")].map((m) => m.textContent);
+    expect(marked).toContain("o cause allergies shall be declared separately on the label.");  // the quote, in place
+
+    const record = await screen.findByRole("button", { name: "Record decision" });
+    expect(record).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Escalating was right" }));
+    expect(record).toBeDisabled();  // a decision needs a reason
+    await user.type(screen.getByLabelText(/What did you find/), "Small pack: the exemption needs a person.");
+    await user.click(record);
+    expect(await screen.findByText(/Decision recorded as feedback. It does not approve the label/)).toBeInTheDocument();
+    const post = calls.find((c) => c.method === "POST")!;
+    expect(JSON.parse(String(post.init!.body))).toEqual({
+      satisfactory: true, reason: "[reviewer] accepted the escalation: Small pack: the exemption needs a person." });
+  });
+
+  it("shows an empty review queue, and no decision form without the feedback endpoint", async () => {
+    mockApi({ "GET /readyz": readyz, "GET /v1/runs": () => json([]),
+              [`GET /v1/runs/${RUN_ID}/trace`]: () => json(fullTrace()), "GET /openapi.json": () => json({ paths: {} }) });
+    window.location.hash = "#/review";
+    const { unmount } = render(<App />);
+    expect(await screen.findByText(/Nothing to review/)).toBeInTheDocument();
+    unmount();
+    window.location.hash = `#/review/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(/needs the feedback endpoint/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Record decision" })).not.toBeInTheDocument();
+  });
+
+  it("shows no hand-off for a result the label owner can act on", async () => {
+    mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    await screen.findByText(/needs attention/);
+    expect(screen.queryByText("What happens next")).not.toBeInTheDocument();
   });
 
   it("opens the trace with totals, agents and every step, passages included", async () => {
@@ -283,7 +438,11 @@ describe("the analyst workspace", () => {
     const send = screen.getByRole("button", { name: "Send feedback" });
     expect(send).toBeDisabled();
     await user.click(within(group).getByRole("button", { name: "No, not satisfactory" }));
-    await user.type(screen.getByLabelText("Why (optional)"), "  Missed the <b>RDA</b> basis  ");
+    expect(send).toBeDisabled();  // the endpoint requires a reason, so a blank one is never sent
+    await user.type(screen.getByLabelText("Why? One sentence is enough"), "   ");
+    expect(send).toBeDisabled();
+    await user.clear(screen.getByLabelText("Why? One sentence is enough"));
+    await user.type(screen.getByLabelText("Why? One sentence is enough"), "  Missed the <b>RDA</b> basis  ");
     await user.click(send);
     expect(await screen.findByRole("alert")).toHaveTextContent("reason too short");
     await user.click(send);

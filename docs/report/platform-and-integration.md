@@ -90,14 +90,30 @@ Cost is computed at call time from the provider's token counts and `LLM_PRICE_*_
 dashboard show cost per 100 runs, cost by step and agent, and the largest single driver, all from the same
 table.
 
+First measurement, 26 Oct 2026: 8 real runs on the Compose stack (the three load-test payloads, run one at a time),
+priced at the provider's published list price for the primary model, $0.15 per million prompt tokens and $0.60 per
+million completion tokens (Groq's model documentation). On the free tier we actually pay $0.
+
 | | Value |
 |---|---|
-| Runs measured | *pending: Vihaan's eval set run 4–5 times against the real provider* |
-| Mean cost per run | *pending* |
-| **Cost per 100 runs** | *pending* |
-| Largest single cost driver (step) | *pending* |
+| Runs measured | 8 (`python scripts/cost_report.py --since 2026-10-26T16:00`) |
+| Mean cost per run | $0.002759 (p95 $0.003539) |
+| **Cost per 100 runs** | **$0.28** at list price |
+| Largest single cost driver (step) | the researcher's `act` step: 64% of spend (23 calls, 49,367 tokens); the researcher as a whole is 91% |
 
-On the fakes and the stub every recorded cost is $0, and the report says so instead of inventing a number.
+| LLM step | Calls | Prompt tokens | Completion tokens | Cost | Share |
+|---|---|---|---|---|---|
+| `act` (researcher) | 23 | 34,266 | 15,101 | $0.0142 | 64% |
+| `draft` (researcher) | 5 | 7,717 | 7,868 | $0.0059 | 27% |
+| `classify` (classifier) | 8 | 3,586 | 2,431 | $0.0020 | 9% |
+
+What this does and does not show:
+- The sample is small, and in all 8 runs the researcher stopped after a few searches (Namith is fixing that), so a
+  run that searches every requirement will cost more. The number is re-measured on the eval set once that lands.
+- The driver is clear either way: the researcher's reasoning loop (`act`), whose prompt grows with every passage it
+  has read. Cheaper options, in order of effect: fewer `act` rounds (`RESEARCHER_MAX_ITERATIONS`), passing passage
+  ids instead of full text back into the loop, and the smaller fallback model for the classifier.
+- On the fakes and the stub every recorded cost is $0, and the report says so instead of inventing a number.
 
 ## What did not work, and what we changed
 - **The indexer crashed in its container.** The tests ran on Python 3.13 locally, while the containers

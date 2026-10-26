@@ -183,10 +183,13 @@ def test_both_providers_down_raises_with_both_reasons():
 
 
 @respx.mock
-def test_timeout_is_capped_by_the_run_deadline_and_no_retry_crosses_it():
+def test_timeout_is_capped_by_the_run_deadline_and_no_retry_crosses_it(monkeypatch):
+    # Freeze the run's clock: on a busy machine the real 0.5 s could pass before the first call (flaky).
+    monkeypatch.setattr("fssai_contracts.context.time.monotonic", lambda: 1_000.0)
     route = respx.post("https://primary.test/v1/chat/completions").mock(return_value=httpx.Response(503))
     sleeps: list[float] = []
     c = ctx(max_wall_s=0.5)
+    c.started = 1_000.0  # the field's default_factory captured the real clock
     with pytest.raises(ProviderUnavailable):
         call(make(retries=3, sleeps=sleeps), c)
     assert route.call_count == 1 and sleeps == []  # a 0.5 s backoff would cross the 0.5 s deadline
@@ -226,3 +229,48 @@ def test_from_env_reads_config_and_requires_base_url_and_model():
         GatewayLLMClient.from_env({"LLM_MODEL": "m"})
     with pytest.raises(RuntimeError, match="BREAKER_STORE"):
         GatewayLLMClient.from_env({"LLM_BASE_URL": "u", "LLM_MODEL": "m", "BREAKER_STORE": "disk"})
+
+
+@respx.mock
+def test_a_provider_json_validation_failure_is_retried_like_a_malformed_reply():
+    # Groq answers 400 json_validate_failed when the model's own output was not valid JSON in JSON mode.
+    bad = httpx.Response(400, json={"error": {"message": "Failed to generate JSON. Please adjust your prompt.",
+                                              "type": "invalid_request_error", "code": "json_validate_failed",
+                                              "failed_generation": "{not json"}})
+    route = respx.post("https://primary.test/v1/chat/completions").mock(side_effect=[bad, ok('{"a": 1}')])
+    c = ctx()
+    assert call(make(), c, json_mode=True).text == '{"a": 1}'
+    assert route.call_count == 2 and c.steps[-1].output["attempts"] == 2
+
+
+@respx.mock
+def test_other_client_errors_are_not_retried_and_name_only_the_providers_error_code():
+    body = {"error": {"message": "The model `model-a` does not support this. Prompt was: secret label text",
+                      "type": "invalid_request_error", "code": "model_not_supported"}}
+    route = respx.post("https://primary.test/v1/chat/completions").mock(return_value=httpx.Response(400, json=body))
+    c = ctx()
+    with pytest.raises(ProviderUnavailable, match=r"HTTP 400 invalid_request_error/model_not_supported \(not retried\)"):
+        call(make(), c)
+    assert route.call_count == 1
+    dumped = c.steps[-1].model_dump_json()
+    assert "model-a" not in dumped and "secret label text" not in dumped  # the provider's message never reaches the trace
+
+
+@respx.mock
+@pytest.mark.parametrize("reset, wait", [("4.11s", 4.11), ("592ms", 0.592), ("1m2.5s", 62.5)])
+def test_a_rate_limit_without_retry_after_waits_for_the_token_budget_to_refill(reset, wait):
+    # Groq sends x-ratelimit-reset-tokens (time until the per-minute token budget refills) on a 429.
+    limited = httpx.Response(429, headers={"x-ratelimit-reset-tokens": reset})
+    respx.post("https://primary.test/v1/chat/completions").mock(side_effect=[limited, ok()])
+    sleeps: list[float] = []
+    c = ctx(max_wall_s=120)
+    call(make(sleeps=sleeps), c)
+    assert sleeps == [pytest.approx(wait)]
+
+
+@respx.mock
+def test_a_provider_tool_use_failure_is_retried_like_a_malformed_reply():
+    # Some open models emit a tool call nobody offered; Groq answers 400 tool_use_failed. It is the model's output.
+    bad = httpx.Response(400, json={"error": {"type": "invalid_request_error", "code": "tool_use_failed"}})
+    route = respx.post("https://primary.test/v1/chat/completions").mock(side_effect=[bad, ok()])
+    assert call(make()).text == "answer" and route.call_count == 2

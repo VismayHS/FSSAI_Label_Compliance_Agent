@@ -3,6 +3,33 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `contexts/LLM_Context.md` first.
 
+## Next steps to 30 October (written by Vismay, 2026-10-26)
+
+Everything is due by **Fri 30 Oct**. What was checked: all 13 ticked tasks match the code; every package of yours
+passes on Python 3.11 (ingest 32, retrieval 43 plus the 3 real-model quality tests, observability 9, stub 10); all
+12 quotes in `section-4.1-passages.md` are verbatim PDF text; your SLO was committed before any measurement; your
+retriever is switched on for everyone in `.env.example`. Vismay also added `loadtest/README.md` and
+`observability/README.md` (folder guides only; nothing of yours changed).
+
+Do next, in this order:
+1. **N3.5 Locust load test (demo #9; D6, A7).** Nothing blocks it any more: the full Compose stack is on `main`.
+   Point the stack at the stub LLM (step 1 of `loadtest/results/README.md`), then run
+   `python loadtest/run_matrix.py --host http://localhost:8000 --compose --scales 1 3`, commit the results folder
+   and fill in the tables.
+2. **N3.6 caching effect (D7).** The same matrix with `CACHE_ENABLED=0` and `CACHE_ENABLED=1`, written up as decision 003 says.
+3. **Stub replies for every prompt.** The pipeline now sends the stub the `classifier`, `researcher` and
+   `researcher_draft` prompts (and `verifier_support` once Vihaan's verifier is on), and the stub answers them all
+   with its default reply, so a load test never reaches a finding. Add `services/stub_llm/fssai_stub_llm/fixtures/<prompt>.json` with a valid reply for each
+   (ask Namith and Vihaan for one real reply each). Without this the load test measures a path the demo never takes.
+4. **N4.1 §4.1 rehearsal (demo #10).** Today's reference answer (Vihaan's test values) is `cannot_determine`, routed
+   to `regulatory-review`, because no protein RDA value is in the corpus. Rehearse that, and settle the RDA
+   question with Vihaan (the open question in your passages doc).
+5. Small fixes: P3 in `section-4.1-passages.md` cites p. 15, but the substituted Schedule II table is on PDF page 16
+   (only its heading is on 15). `loadtest/results/README.md` still says Compose is not on `main`. Tick N0.1.
+
+**If this does not happen:** demo #9 and the measured half of your report section have no numbers, and nobody else
+can produce them. You are the only one who can deliver D6, A7 and the D7 cache measurement.
+
 ## Your mission
 You own **what the system knows** and **how fast it runs**:
 - the regulation corpus, the index and retrieval,

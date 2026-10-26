@@ -3,6 +3,29 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `contexts/LLM_Context.md` first.
 
+## Next steps to 30 October (written by Vismay, 2026-10-26)
+
+Everything is due by **Fri 30 Oct**. What was checked on your branch: you stayed in your own paths; on Python 3.11
+the gate, verification and eval tests pass; with all 11 parts real, `check_gate`, `check_verifier`, `check_router`
+and `check_pipeline` pass, and demos #4, #5 and #7 behave correctly; all 54 supporting quotes in
+`eval/scenarios.jsonl` and the quote in your §4.1 test values are verbatim PDF text.
+
+Do next, in this order:
+1. **Open your PR (`main` ← `vihaan`) now.** Your branch shows 1 of 3 checks only because of one of Vismay's API tests,
+   which hard-coded the list of routes and so failed once yours existed. The fix is in Vismay's next PR; once that
+   is merged, re-run your PR's checks and they pass. Until your PR merges, none of your work is live: the gate,
+   verifier, router, feedback and quarantine endpoints and the eval runner are all stand-ins on `main`.
+2. **V3.3 before/after (L3), with Namith:** `researcher` 1.0.0 against 1.1.0 (or the change decision 205 settles on),
+   all four metrics with deltas, the numbers in `docs/report/verification-and-evaluation.md`. It needs the Groq key
+   and your runner on `main`; the same pair serves Namith's M3.2 comparison.
+3. **V4.1** rehearse demos #4, #5 and #6. Settle the RDA question with Nishkal (your test values, "What changes when
+   the team adopts an RDA").
+4. Tick V0.1 (it is done).
+
+**If this does not happen:** demos #4, #5 and #6 and requirements F2, F6, A3, D1, L3, L6 and the D7 rate limit are
+missing from `main`, and the web client's feedback form and reviewer console stay hidden. Your PR is the biggest
+single blocker in the team right now.
+
 ## Your mission
 You make the system **trustworthy at both ends**:
 - **On the way in:** nothing malformed gets in (the data contract, validation, quarantine, rate limiting).

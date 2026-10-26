@@ -2,7 +2,7 @@
 # is printed next to each target below and in the README.
 PYTHON ?= python3
 
-.PHONY: help env up down logs ps smoke test audit demo-breaker clean-clone cost
+.PHONY: help env up down logs ps smoke test audit demo-breaker clean-clone cost report
 
 help:            ## list the targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | sed -E 's/:.*## /\t/'
@@ -39,3 +39,6 @@ clean-clone:     ## fresh clone -> compose up -> smoke (demo #1)      (python sc
 
 cost:            ## cost per 100 runs and the biggest driver (L5)     (python scripts/cost_report.py)
 	$(PYTHON) scripts/cost_report.py
+
+report:          ## assemble docs/report/REPORT.md from every section (S4.3) (python scripts/build_report.py)
+	$(PYTHON) scripts/build_report.py

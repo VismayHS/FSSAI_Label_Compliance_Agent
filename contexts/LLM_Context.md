@@ -12,7 +12,7 @@
 4. [`CONTRIBUTING.md`](../CONTRIBUTING.md) before your first commit: one branch per person, PRs into `main`
 5. [`skills/project/fssai-workflow/SKILL.md`](../skills/project/fssai-workflow/SKILL.md) before writing code: how every change is built, tested and reviewed ([`skills/README.md`](../skills/README.md) lists all skills)
 
-The original course documents are in `docs/`:
+The original course documents are in `docs/course/`:
 - `MiniProject_10_Food_Label_Compliance.pdf`: the spec
 - `00_GLOSSARY.pdf`: official definitions, summarised in §13
 - `00_INDEX.pdf`: all 15 course projects
@@ -194,6 +194,11 @@ what happens if any of them fails mid-run.
 Studio, OpenRouter's free models). The base URL, key and model id live **only** in `.env`. Set a
 spending limit on the account.
 
+**We use Groq's free tier.** It allows **8,000 tokens per minute per model** and 1,000 requests a day (read from its
+response headers), and one real run uses about 8,000 to 12,500 tokens. So run real-LLM checks **one at a time, about
+a minute apart**, and plan the eval set as at least half an hour per prompt variant. The fallback model has its own
+token budget. Load tests always use the stub LLM. See incident `2026-10-26-vismay-groq-free-tier-rate-limit`.
+
 **Out of scope:** model training, cloud deployment, and images (labels arrive as text only).
 
 ---
@@ -207,7 +212,7 @@ spending limit on the account.
 | `contracts/` | shared, steward Vismay | Schemas, interfaces, fakes, reference pipeline, registry (§6) |
 | `contexts/LLM_Context.md` | Vismay | This file |
 | `contexts/<Name>.md` | that person | Your plan, checklist, prompts, notes |
-| `docs/*.pdf` | none | Course documents. Never edit. |
+| `docs/course/*.pdf` | none | Course documents. Never edit. |
 | `docs/eval1/` | Nishkal (`*-passages.md`), Vihaan (`*-test-values.md`), Vismay (`project-plan.md`) | Evaluation 1 deliverables |
 | `docs/decisions/` | author of each file | Decision records (ADRs), one file each: `NNN-<name>-<slug>.md`. Number blocks so parallel branches never clash: Nishkal `001–099`, Namith `100–199`, Vihaan `200–299`, Vismay `300–399`; take the next free number in your block. Index: `docs/decisions/README.md` |
 | `docs/incidents/` | author of each file | Incident log (D8), one file each: `YYYY-MM-DD-<name>-<slug>.md` |
@@ -313,7 +318,7 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
 
 | Method + path | Body / headers | Returns |
 |---|---|---|
-| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id` (optional) | `202 {run_id, status_url, trace_url, correlation_id}` + `Location` · `400` bad/missing client id · `413` body over `API_MAX_REQUEST_BYTES` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` + `Retry-After` · `503` queue down |
+| `POST /v1/runs` | `LabelCheckRequest`; header `X-Client-Id` (required), `X-Correlation-Id`, `X-Callback-Url` (optional) | `202 {run_id, status_url, trace_url, correlation_id}` + `Location` · `400` bad/missing client id or a callback host not allowed · `413` body over `API_MAX_REQUEST_BYTES` · `422 {errors[], quarantine_id}` · `429 {retry_after_s}` + `Retry-After` · `503` queue down |
 | `GET /v1/runs?limit=` | | Recent runs, newest first: id, state, product name, route |
 | `GET /v1/runs/{run_id}` | | `RunStatus`: state, the accepted `request`, `correlation_id`, and the `result` when done |
 | `GET /v1/runs/{run_id}/trace` | | Full reconstruction (D5): the request, every step in order with inputs and outputs (queries, full passages, LLM messages and text), prompt versions, per-step and per-agent latency, tokens and cost, queue wait, verdict, route |
@@ -327,6 +332,9 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
   every log line.
 - Submission order: client id → size limit → gate (rate limit, validate, quarantine) → save `queued`
   → enqueue. A reject never creates a run or a job (D1, demo #4). Non-JSON bodies are quarantined too.
+- `X-Callback-Url` (extra): when the run ends, the worker POSTs `{event: "run.finished", run_id, state, route, complete,
+  status_url, trace_url}` to it, signed with `WEBHOOK_SECRET` (`X-FSSAI-Signature`). Off unless the host is in
+  `WEBHOOK_ALLOWED_HOSTS`; a failed callback never changes the run.
 - Runs are executed per `RUN_DISPATCH` (decision 302): `queue` (RQ on Redis, `python -m fssai_worker`)
   in Compose, `inline` (a thread pool in the API) for local development.
 
@@ -465,6 +473,16 @@ What this means in practice:
 - **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
 - **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
 
+**Critical path (checked 2026-10-26).** Each person's file starts with *Next steps to 30 October*. What blocks the most:
+
+| Waiting on | What is blocked until then |
+|---|---|
+| Vihaan's PR into `main` | Gate, verifier, router, feedback, quarantine and the eval runner on `main`; demos #4, #5, #6; the feedback form and reviewer console; every measured eval number |
+| Namith: the researcher searches for every requirement it reports | Meaningful findings with a real LLM (demo #2); the prompt comparison (L2) and before/after (L3) numbers; cost per 100 runs |
+| One eval run pair with the Groq key (researcher 1.0.0 vs 1.1.0), after both of the above | Namith's L2 comparison, Vihaan's L3 before/after, Vismay's cost per 100 runs (L5) |
+| Nishkal's Locust runs | Demo #9 and the D6, A7 and D7 numbers; nobody else can produce them |
+| The team's RDA decision (Nishkal + Vihaan) | Whether §4.1 (demo #10) can ever be `met`/`unmet`; until then the correct answer is `cannot_determine` |
+
 ---
 
 ## 10. Demo and report responsibilities
@@ -532,7 +550,7 @@ These start only after that owner's required work for Phase 3 is done. Each pers
 
 ---
 
-## 13. Glossary (from `docs/00_GLOSSARY.pdf`), with what each means for us
+## 13. Glossary (from `docs/course/00_GLOSSARY.pdf`), with what each means for us
 
 - **Chunking:** splitting documents into passages before embedding. **For us:** keep the regulation, clause id and heading path in each chunk's metadata.
 - **Groundedness:** the share of an answer's statements that the retrieved passages support.

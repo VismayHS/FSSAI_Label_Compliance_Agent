@@ -1,9 +1,11 @@
 import { describe, expect, it } from "vitest";
 
 import { stageStates } from "../components/AgentStrip";
-import type { StepRecord } from "../api/types";
-import { completedRun } from "../test/api";
+import type { RunResult, StepRecord } from "../api/types";
+import { completedRun, fullTrace } from "../test/api";
+import { escalation, handoffText } from "./escalation";
 import { ms, usd } from "./format";
+import { retrievedPassages, splitAround } from "./review";
 import { hrefFor, parse } from "./useHashRoute";
 
 const step = (agent: string, name: string, error: string | null = null) =>
@@ -46,5 +48,60 @@ describe("formatting", () => {
     expect(usd(0)).toBe("$0.0000");
     expect(usd(0.00042)).toBe("$0.000420");
     expect(ms(null)).toBe("—");
+  });
+});
+
+describe("escalation in plain words", () => {
+  const escalated = (edit: (r: RunResult) => void) => {
+    const result = completedRun().result!;
+    result.routing = { route: "regulatory-review", reason: "Could not verify the finding.", escalation_reason: "x" };
+    edit(result);
+    return result;
+  };
+
+  it("says nothing for routes a person does not have to take over", () => {
+    expect(escalation(completedRun().result!)).toBeNull();
+  });
+
+  it("names the cause from the structured fields, most fundamental first", () => {
+    expect(escalation(escalated((r) => { r.complete = false; }))?.kind).toBe("incomplete");
+    expect(escalation(escalated((r) => {
+      r.guardrails = [{ stage: "input", allowed: false, flags: ["prompt_injection:label.other_text"], detail: "" }];
+    }))?.kind).toBe("guardrail");
+    expect(escalation(escalated((r) => { r.classification!.in_scope = false; r.classification!.category = "spirits"; }))
+      ).toMatchObject({ kind: "out_of_scope", detail: expect.stringContaining('"spirits"') });
+    expect(escalation(escalated(() => {}))?.kind).toBe("unverified");
+  });
+
+  it("builds a plain-text hand-off with the run id, both reasons and the trace link", () => {
+    const status = completedRun();
+    const result = escalated((r) => { r.complete = false; });
+    const text = handoffText(status, result, "http://localhost:8080/#/runs/abc/trace");
+    expect(text).toContain(`Run: ${status.run_id}`);
+    expect(text).toContain("Why: The check did not finish");
+    expect(text).toContain("System reason: Could not verify the finding. (x)");
+    expect(text).toContain("Trace: http://localhost:8080/#/runs/abc/trace");
+    expect(text).toContain("Product: Roasted chana");
+  });
+});
+
+describe("reviewer console helpers", () => {
+  it("routes the review queue and one review", () => {
+    const id = "a".repeat(32);
+    expect(parse("#/review")).toEqual({ name: "review", runId: null });
+    expect(parse(`#/review/${id}`)).toEqual({ name: "review", runId: id });
+    expect(hrefFor({ name: "review", runId: id })).toBe(`#/review/${id}`);
+    expect(hrefFor({ name: "review", runId: null })).toBe("#/review");
+  });
+
+  it("collects every passage the run retrieved, from its tool steps", () => {
+    const passages = retrievedPassages(fullTrace());
+    expect([...passages.keys()].sort()).toEqual(["fake-ac-protein", "fake-ld-allergen", "fake-ld-nutrition"]);
+  });
+
+  it("marks the quote inside its passage, and says when it is not verbatim", () => {
+    expect(splitAround("one two three", "two")).toEqual(["one ", "two", " three"]);
+    expect(splitAround("one two three", "TWO")).toBeNull();
+    expect(splitAround("one two three", "")).toBeNull();
   });
 });
