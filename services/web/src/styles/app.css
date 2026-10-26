@@ -1125,6 +1125,14 @@ tbody th {
     gap: var(--s-1) var(--s-5);
     padding: var(--s-2) var(--s-4);
   }
+  .shell nav {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 0 var(--s-4);
+  }
+  .shell nav a {
+    white-space: nowrap;  /* whole items wrap, never a label split over two lines */
+  }
   .shell__api {
     margin-left: 0;
     width: 100%;
