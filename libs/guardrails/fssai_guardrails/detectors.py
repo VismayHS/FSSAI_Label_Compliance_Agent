@@ -25,11 +25,15 @@ _HOMOGLYPHS = str.maketrans({"0": "o", "1": "i", "3": "e", "4": "a", "5": "s", "
                              "і": "i", "ѕ": "s"})
 
 
-def normalise(text: str, fold_digits: bool = False) -> str:
+def normalise(text: str, fold_digits: bool = False, keep_symbols: bool = False) -> str:
+    """Fold case, width and invisible characters. keep_symbols leaves _ | * ` ~ in place, because delimiters
+    (<|im_start|>, </label_data>) and tool names (corpus_search) are made of them."""
     text = unicodedata.normalize("NFKC", text).translate(_ZERO_WIDTH).lower()
     if fold_digits:
         text = text.translate(_HOMOGLYPHS)
-    return " ".join(re.sub(r"[_*`~|\\]+", " ", text).split())
+    if not keep_symbols:
+        text = re.sub(r"[_*`~|\\]+", " ", text)
+    return " ".join(text.split())
 
 
 class Detector(Protocol):
@@ -98,7 +102,8 @@ class InjectionHeuristics:
 
     def scan(self, text: str) -> list[str]:
         found: list[str] = []
-        for variant in dict.fromkeys((normalise(text), normalise(text, fold_digits=True))):
+        for variant in dict.fromkeys((normalise(text), normalise(text, fold_digits=True),
+                                      normalise(text, keep_symbols=True))):
             for category, patterns in _INJECTION_RE.items():
                 if category in found:
                     continue

@@ -196,7 +196,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 3: all requirements (weeks 3–4)
 
-- [ ] **M3.1 Build the guardrails (L4).** `fssai_guardrails.Guardrails` has two halves.
+- [x] **M3.1 Build the guardrails (L4).** `fssai_guardrails.Guardrails` has two halves.
 
   **`screen_input`** checks every free-text field for:
   - injection, using heuristics *and* a local classifier model or an LLM-judge, whichever you justify in a decision record,
@@ -223,20 +223,20 @@ Each package README lists its files and commands. `conformance.sample_request()`
   - Run both on Vihaan's eval set (`PROMPT_RESEARCHER_VERSION=...`, same scenarios).
   - Report which was better, on which metric, and by how much, in `docs/decisions/1xx-namith-prompt-comparison.md`.
   - If the runner isn't ready yet, compare route accuracy on the scenarios with your own script, then redo it with the full metrics later.
-- [ ] **M3.3 Add per-agent metrics (A6)** using `prometheus_client`, labelled by `agent`:
+- [x] **M3.3 Add per-agent metrics (A6)** using `prometheus_client`, labelled by `agent`:
   - runs and successes (task success rate),
   - steps and tool calls per run (histograms),
   - per-step latency (histogram), end-to-end latency,
   - retries (counter).
 
   Build the `agents.json` dashboard, plus container uptime from cAdvisor or `process_start_time_seconds`. Nishkal's stack scrapes it.
-- [ ] **M3.4 Write the runbook (D8)** in `docs/runbook.md` for the two most likely failure modes, probably "LLM provider rate-limited or down → breaker open" and "index missing or stale → empty retrieval". For each, give the symptom (which dashboard or log), how to confirm it (exact command or query) and how to recover (exact steps). Use the incident entries everyone writes.
+- [x] **M3.4 Write the runbook (D8)** in `docs/runbook.md` for the two most likely failure modes, probably "LLM provider rate-limited or down → breaker open" and "index missing or stale → empty retrieval". For each, give the symptom (which dashboard or log), how to confirm it (exact command or query) and how to recover (exact steps). Use the incident entries everyone writes.
 
 ## Phase 4: hardening, extras, report
 
 - [ ] **M4.1 Rehearse demo items 2 and 7.** For #2, show a valid request whose citations resolve in the trace. For #7, show an injection in `front_of_pack_text` with the guardrail report visible in the result and the trace.
 - [ ] **M4.2 Write your report section** in `docs/report/agent-design.md`.
-- [ ] **M4.3 Write at least one incident entry** in `docs/incidents/`.
+- [x] **M4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [ ] LangGraph checkpointing (Postgres or Redis saver) so a run interrupted mid-graph can resume, and add this to the A2 failure doc
   - [ ] a red-team suite of 30+ attacks run in CI, reporting the block rate
@@ -257,3 +257,4 @@ output-authorisation guardrails."*
 ## Notes / log
 - 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
 - 2026-10-26: M2.1 research agent (LangGraphResearcher: corpus_search / clause_lookup / request_field_lookup, grounding, retry strategy) and M2.2 LangGraphPipeline (contract-parity tests) done. Merged origin/main into namith; kept the fuller M1.1/M1.2 versions (category cross-check via `category_matches_label`; a provider outage propagates to the pipeline, which returns complete=False regulatory-review). Guardrails (M3.1) implemented but the red-team fixture file `attacks.yaml` is still to do.
+- 2026-10-26: M3.1 guardrails done: `attacks.yaml` (24 attacks), behaviour tests, decision 101; three detector gaps found by the fixtures and fixed. M3.3 per-agent metrics (`fssai_agents.metrics`, derived from the step trace) and `agents.json` dashboard done. M3.4 runbook done. M4.3 incident entry written. Still open: M2.3 (needs Vismay to flip the `IMPL_*` switches in the shared `.env`), M3.2 prompt comparison (needs a real LLM key and Vihaan's eval set), M4.1, M4.2.

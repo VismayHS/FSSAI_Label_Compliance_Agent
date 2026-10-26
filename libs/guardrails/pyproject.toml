@@ -11,7 +11,7 @@ requires-python = ">=3.11"
 dependencies = ["fssai-contracts"]
 
 [project.optional-dependencies]
-test = ["pytest>=9"]
+test = ["pytest>=9", "pyyaml>=6"]
 
 [tool.setuptools.packages.find]
 include = ["fssai_guardrails*"]

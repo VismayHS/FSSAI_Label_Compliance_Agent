@@ -25,6 +25,8 @@ from typing import TypedDict
 
 from langgraph.graph import END, START, StateGraph
 
+from . import metrics
+
 from fssai_contracts.context import BudgetExceeded, RunContext
 from fssai_contracts.interfaces import ProviderUnavailable
 from fssai_contracts.schemas import (
@@ -140,6 +142,7 @@ class LangGraphPipeline:
         if state.get("attempts", 0) < st.ctx.limits.max_research_attempts:
             st.hint = st.verdict.retry_hint
             st.ctx.event("research_retry", attempt=state.get("attempts", 0), hint=st.hint)
+            metrics.record_retry("researcher")
             return "research"
         st.verdict = Verdict(action=VerifyAction.ESCALATE, checks=st.verdict.checks,
                              escalation_reason="still unverified after "
@@ -161,5 +164,7 @@ class LangGraphPipeline:
             verdict=st.verdict, guardrails=list(st.reports))
         if complete:
             result = self.guardrails.filter_output(result, ctx)
-        return result.model_copy(update={"steps": list(ctx.steps), "totals": ctx.totals(),
-                                         "prompt_versions": dict(ctx.prompt_versions)})
+        result = result.model_copy(update={"steps": list(ctx.steps), "totals": ctx.totals(),
+                                           "prompt_versions": dict(ctx.prompt_versions)})
+        metrics.observe_run(result, ctx)
+        return result
