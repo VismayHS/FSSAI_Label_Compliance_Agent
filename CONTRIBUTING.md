@@ -84,8 +84,9 @@ Commit messages: `<area>: <what changed>`, for example `gateway: add circuit bre
      one approval from an affected owner.
 5. Keep working on the same branch. **Don't delete it** when GitHub offers to.
 
-Merge into `main` **at most once per day per person**: batch the day's work into one PR. Commit and
-push to your own branch as often as you like, because that affects nobody.
+Open a PR whenever a piece of work is finished, as often as you like: CI (tests, the Compose build and the smoke
+test) checks every one, so `main` keeps booting. Commit and push to your own branch as often as you like, because
+that affects nobody.
 
 ## 5. Working alongside each other
 
