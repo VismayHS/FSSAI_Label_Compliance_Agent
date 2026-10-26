@@ -1,10 +1,13 @@
 """Health, readiness, metrics, router auto-mounting and the published OpenAPI contract."""
 from __future__ import annotations
 
+import pkgutil
+
 from fastapi.testclient import TestClient
 
 from fssai_contracts.fakes import InMemoryRunStore
 
+from app import routers
 from app.main import create_app
 
 from .conftest import Env
@@ -61,7 +64,9 @@ def test_metrics_expose_http_and_run_counters(env):
 
 
 def test_every_router_module_is_mounted(env):
-    assert env.app.state.routers == ["health", "runs"]
+    # Teammates' routers (feedback, quarantine) are picked up without editing main.py, so compare with the package.
+    modules = sorted(m.name for m in pkgutil.iter_modules(routers.__path__))
+    assert env.app.state.routers == modules and {"health", "runs"} <= set(modules)
 
 
 def test_openapi_publishes_the_request_contract(env):
