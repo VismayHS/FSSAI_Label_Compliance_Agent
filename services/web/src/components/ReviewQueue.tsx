@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent } from "react";
 
 import { feedbackAvailable, getTrace, listRuns, sendFeedback } from "../api/client";
 import type { Citation, Passage, RunSummary, RunTrace } from "../api/types";
+import { extraEscalationReason } from "../lib/escalation";
 import { shortId, STATUS_WORD, time } from "../lib/format";
 import { retrievedPassages, splitAround } from "../lib/review";
 import { Mark } from "./Mark";
@@ -81,7 +82,9 @@ function ReviewItem({ runId }: { runId: string }) {
       <dl className="review__why">
         <dt>Why it is here</dt>
         <dd>{trace.routing?.reason ?? "No route recorded."}</dd>
-        {trace.routing?.escalation_reason && <><dt>Escalation</dt><dd>{trace.routing.escalation_reason}</dd></>}
+        {trace.routing && extraEscalationReason(trace.routing) && (
+          <><dt>Escalation</dt><dd>{extraEscalationReason(trace.routing)}</dd></>
+        )}
       </dl>
       {trace.findings.length === 0 ? (
         <p className="empty">No findings: the run stopped before research. The reason above says why.</p>

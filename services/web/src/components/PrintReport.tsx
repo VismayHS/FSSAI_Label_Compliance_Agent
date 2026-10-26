@@ -1,7 +1,7 @@
 import { createPortal } from "react-dom";
 
 import type { RunResult, RunStatus } from "../api/types";
-import { escalation } from "../lib/escalation";
+import { escalation, extraEscalationReason } from "../lib/escalation";
 import { STATUS_WORD, time } from "../lib/format";
 import { whatItMeans } from "./DeclarationBlock";
 import { SEVERITY } from "./Findings";
@@ -26,7 +26,7 @@ export function PrintReport({ status, result }: { status: RunStatus; result: Run
       <h2>Recommendation: {routing.route}</h2>
       <p>{whatItMeans(result)}</p>
       <p><strong>Reason given:</strong> {routing.reason}</p>
-      {routing.escalation_reason && <p><strong>Escalation:</strong> {routing.escalation_reason}</p>}
+      {extraEscalationReason(routing) && <p><strong>Escalation:</strong> {extraEscalationReason(routing)}</p>}
       {esc && <p>{esc.detail}</p>}
       {!result.complete && <p><strong>This run did not complete, so it carries no confident answer.</strong></p>}
       <h2>Findings ({findings.length})</h2>

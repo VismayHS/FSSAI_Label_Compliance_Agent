@@ -1,4 +1,10 @@
-import type { RunResult, RunStatus } from "../api/types";
+import type { Routing, RunResult, RunStatus } from "../api/types";
+
+/** The escalation reason, only when it adds something: the router often repeats it inside its own reason. */
+export function extraEscalationReason(routing: Pick<Routing, "reason" | "escalation_reason">): string | null {
+  const extra = routing.escalation_reason?.trim();
+  return extra && !routing.reason.includes(extra) ? extra : null;
+}
 
 export type EscalationKind = "incomplete" | "guardrail" | "out_of_scope" | "unverified";
 
@@ -48,11 +54,12 @@ export function escalation(result: RunResult): Escalation | null {
 /** Plain-text hand-off for the reviewer: what to open and why. Pasted into chat or email, never rendered as HTML. */
 export function handoffText(status: RunStatus, result: RunResult, traceUrl: string): string {
   const esc = escalation(result);
+  const extra = extraEscalationReason(result.routing);
   return [
     "FSSAI label check: needs regulatory review",
     `Product: ${status.request?.label.product_name ?? "(not recorded)"}`,
     `Why: ${esc?.title ?? result.routing.reason}`,
-    `System reason: ${result.routing.reason}${result.routing.escalation_reason ? ` (${result.routing.escalation_reason})` : ""}`,
+    `System reason: ${result.routing.reason}${extra ? ` (${extra})` : ""}`,
     `Run: ${status.run_id}`,
     `Correlation id: ${status.correlation_id ?? result.correlation_id}`,
     `Trace: ${traceUrl}`,

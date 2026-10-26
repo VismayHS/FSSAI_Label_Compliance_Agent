@@ -1219,6 +1219,19 @@ tbody th {
   gap: var(--s-2);
   margin-top: var(--s-2);
 }
+/* A choice, not a filter: unpicked options are plain (not struck through like a filter that is off) and the
+   picked one carries the selection tint, so "nothing chosen yet" never reads as "both switched off". */
+.feedback__choice .findings__count[aria-pressed="false"] {
+  color: var(--ink);
+  border-style: solid;
+  border-color: var(--ink);
+  text-decoration: none;
+}
+.feedback__choice .findings__count[aria-pressed="true"] {
+  background: var(--path-wash);
+  border-color: var(--path);
+  color: var(--path);
+}
 .feedback .button {
   margin-top: var(--s-3);
 }

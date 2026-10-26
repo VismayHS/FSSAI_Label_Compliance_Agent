@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 
 import type { RunResult, RunStatus } from "../api/types";
-import { escalation, handoffText } from "../lib/escalation";
+import { escalation, extraEscalationReason, handoffText } from "../lib/escalation";
 import { ms, usd } from "../lib/format";
 import { Mark } from "./Mark";
 
@@ -75,7 +75,7 @@ export function DeclarationBlock({ status, result }: { status: RunStatus; result
           </span>
         ), "decl__route-row")}
         {row("Reason given", routing.reason)}
-        {routing.escalation_reason && row("Escalation", <strong>{routing.escalation_reason}</strong>)}
+        {extraEscalationReason(routing) && row("Escalation", <strong>{extraEscalationReason(routing)}</strong>)}
         {esc && row("What happens next", (
           <div className="handoff">
             <p>{esc.detail}</p>

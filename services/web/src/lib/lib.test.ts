@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { stageStates } from "../components/AgentStrip";
 import type { RunResult, StepRecord } from "../api/types";
 import { completedRun, fullTrace } from "../test/api";
-import { escalation, handoffText } from "./escalation";
+import { escalation, extraEscalationReason, handoffText } from "./escalation";
 import { ms, usd } from "./format";
 import { retrievedPassages, splitAround } from "./review";
 import { hrefFor, parse } from "./useHashRoute";
@@ -82,6 +82,13 @@ describe("escalation in plain words", () => {
     expect(text).toContain("System reason: Could not verify the finding. (x)");
     expect(text).toContain("Trace: http://localhost:8080/#/runs/abc/trace");
     expect(text).toContain("Product: Roasted chana");
+  });
+
+  it("shows the escalation reason only when the route reason does not already say it", () => {
+    expect(extraEscalationReason({ reason: "Could not verify.", escalation_reason: "possible exemption" })).toBe("possible exemption");
+    expect(extraEscalationReason({ reason: "[R1] Not verified: Missing RDA value", escalation_reason: "Missing RDA value" })).toBeNull();
+    expect(extraEscalationReason({ reason: "Clear.", escalation_reason: null })).toBeNull();
+    expect(extraEscalationReason({ reason: "Clear.", escalation_reason: "  " })).toBeNull();
   });
 });
 
