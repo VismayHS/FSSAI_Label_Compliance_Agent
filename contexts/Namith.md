@@ -113,15 +113,15 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 0: setup (days 1–2)
 
-- [ ] **M0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py namith` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
+- [x] **M0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py namith` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_prompt_store`, `check_guardrails`, `check_classifier`, `check_researcher`, `check_pipeline`).
   3. Make one small commit of your own on `namith` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `namith`), so you've done the whole loop once.
-- [ ] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
+- [x] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
 
 ## Phase 1: Evaluation 1 (week 1)
 
-- [ ] **M1.1 Build the prompt registry (L2).**
+- [x] **M1.1 Build the prompt registry (L2).**
   - Store prompts as files: `libs/prompts/prompts/<name>/<version>.yaml` with fields `name`, `version`, `system`, `user_template`, `notes`.
   - `FilePromptStore.get(name, version=None)` returns the version pinned in env (`PROMPT_<NAME>_VERSION`) or the latest one.
   - The version reaches every response through `ctx.record(prompt_name=..., prompt_version=...)`. `RunResult.prompt_versions` already collects it.
@@ -132,7 +132,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   matching the file, and fail loudly otherwise. Add a CLI `python -m fssai_prompts list` that prints
   name/version/pinned. Tests: pinning, latest, tag validation, render().
   ```
-- [ ] **M1.2 Build the classifier (F3).**
+- [x] **M1.2 Build the classifier (F3).**
   - **Product category:** use the declared category, cross-checked against the label text. Set `in_scope=False` if the category isn't in `CORPUS_CATEGORIES`.
   - **Claims:** detect them from `label.claims` *and* from the front-of-pack text (claims are often hidden in marketing copy). Each `DetectedClaim` gets a `claim_type` and a `nutrient`.
   - Use the LLM with JSON output, plus a rule-based fallback if the LLM fails.
@@ -145,7 +145,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   category in CORPUS_CATEGORIES (env). Record a "classification" step. Tests with a scripted fake LLM:
   claim hidden in front_of_pack_text is detected; malformed LLM JSON triggers fallback; out-of-scope.
   ```
-- [ ] **M1.3 Draft the topology document** (`docs/agent-topology.md`) for the Evaluation 1 plan. Include:
+- [x] **M1.3 Draft the topology document** (`docs/agent-topology.md`) for the Evaluation 1 plan. Include:
   - a diagram of guardrails → classifier → researcher ⇄ verifier → router → output filter,
   - each agent's tools and state, and the hand-off schemas,
   - the loop bounds,
@@ -153,7 +153,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 2: real end-to-end (by end of week 2)
 
-- [ ] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
+- [x] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
   - `corpus_search(query, regulation?)`
   - `clause_lookup(regulation, clause_id)`
   - `request_field_lookup(path)`, e.g. `nutrition.protein_g`
@@ -179,7 +179,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   Tests: with FakeRetriever + scripted fake LLM, a "source of protein" claim leads to a search
   restricted to FSS-AC-2018 after the labelling search; quotes are substrings; budget stops the loop.
   ```
-- [ ] **M2.2 Build the LangGraph pipeline (A2).** `fssai_agents.graph:LangGraphPipeline` implements `Pipeline`. It does what `ReferencePipeline` does, as a graph:
+- [x] **M2.2 Build the LangGraph pipeline (A2).** `fssai_agents.graph:LangGraphPipeline` implements `Pipeline`. It does what `ReferencePipeline` does, as a graph:
   - guardrails → classifier → researcher ⇄ verifier (retry edge) → router → output filter.
   - Its behaviour at the edges must be identical, which you prove by running the **contracts test-suite against your pipeline**.
   - The verifier and router come from the registry (Vihaan's, or fakes until then).
@@ -255,4 +255,5 @@ output-authorisation guardrails."*
 - Unit tests must not hit the real LLM. Use a scripted fake, and mark real-LLM tests `slow`.
 
 ## Notes / log
-(your notes here)
+- 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
+- 2026-10-26: M2.1 research agent (LangGraphResearcher: corpus_search / clause_lookup / request_field_lookup, grounding, retry strategy) and M2.2 LangGraphPipeline (contract-parity tests) done. Merged origin/main into namith; kept the fuller M1.1/M1.2 versions (category cross-check via `category_matches_label`; a provider outage propagates to the pipeline, which returns complete=False regulatory-review). Guardrails (M3.1) implemented but the red-team fixture file `attacks.yaml` is still to do.

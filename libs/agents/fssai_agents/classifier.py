@@ -92,6 +92,12 @@ def _json_object(text: str) -> dict:
     return value
 
 
+def detect_claims_by_rules(request: LabelCheckRequest) -> list[DetectedClaim]:
+    """Rule-based claim detection (the no-LLM fallback), kept as a public helper."""
+    label = request.label
+    return rules.detect_all(label.claims, label.front_of_pack_text, label.other_text or "", label.product_name)
+
+
 class LLMClassifier:
     def __init__(self, llm, prompts) -> None:
         self.llm = llm
