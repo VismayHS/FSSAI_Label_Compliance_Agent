@@ -179,7 +179,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   Tests: with FakeRetriever + scripted fake LLM, a "source of protein" claim leads to a search
   restricted to FSS-AC-2018 after the labelling search; quotes are substrings; budget stops the loop.
   ```
-- [ ] **M2.2 Build the LangGraph pipeline (A2).** `fssai_agents.graph:LangGraphPipeline` implements `Pipeline`. It does what `ReferencePipeline` does, as a graph:
+- [x] **M2.2 Build the LangGraph pipeline (A2).** `fssai_agents.graph:LangGraphPipeline` implements `Pipeline`. It does what `ReferencePipeline` does, as a graph:
   - guardrails → classifier → researcher ⇄ verifier (retry edge) → router → output filter.
   - Its behaviour at the edges must be identical, which you prove by running the **contracts test-suite against your pipeline**.
   - The verifier and router come from the registry (Vihaan's, or fakes until then).
@@ -257,3 +257,4 @@ output-authorisation guardrails."*
 ## Notes / log
 - 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
 - 2026-10-26: M2.1 researcher built (LangGraph: plan, act, run_tool, coverage, draft). Prompts `researcher` and `researcher_draft` 1.0.0. Checked against the real index with a scripted LLM; not yet against a real LLM. RDA guard on by default (open team question).
+- 2026-10-26: M2.2 LangGraphPipeline built (screen, classify, research, verify with retry edge, route, finish). Parity tests run the reference pipeline's scenarios through both pipelines and compare route, verdict, findings and step sequence. Opt-in slow e2e test for section 4.1 (real LLM + real index). M2.3: IMPL_* examples added to .env.example; still to tell Vismay to flip them in the shared .env.
