@@ -21,7 +21,7 @@ from fastapi.responses import JSONResponse, StreamingResponse
 from fssai_observability import span
 from prometheus_client import Counter
 
-from fssai_contracts.schemas import FieldError, RunState, RunStatus, utcnow
+from fssai_contracts.schemas import FieldError, Route, RunState, RunStatus, utcnow
 from fssai_worker import webhook
 from fssai_worker.jobs import payload_for
 
@@ -135,8 +135,14 @@ async def submit_run(request: Request, x_client_id: str | None = Header(None, de
 
 
 @router.get("/runs", response_model=list[RunSummary], summary="Recent runs, newest first")
-async def list_runs(request: Request, limit: int = Query(20, ge=1, le=100)) -> list[RunSummary]:
-    runs = await run_in_threadpool(request.app.state.run_store.recent, limit)
+async def list_runs(request: Request, limit: int = Query(20, ge=1, le=100),
+                    route: Route | None = Query(None, description="Only runs routed here, e.g. the "
+                                                "regulatory-review queue for the reviewer console")) -> list[RunSummary]:
+    if route is None:
+        runs = await run_in_threadpool(request.app.state.run_store.recent, limit)
+    else:  # the RunStore seam has no route filter, so look further back and filter here
+        recent = await run_in_threadpool(request.app.state.run_store.recent, min(limit * 10, 500))
+        runs = [r for r in recent if r.result and r.result.routing.route == route][:limit]
     return [RunSummary(run_id=r.run_id, state=r.state, submitted_at=r.submitted_at, updated_at=r.updated_at,
                        product_name=r.request.label.product_name if r.request else None,
                        route=r.result.routing.route if r.result else None,

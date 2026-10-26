@@ -237,6 +237,53 @@ describe("the analyst workspace", () => {
     }
   });
 
+  it("reviews an escalated run: each citation beside its passage, the decision recorded as feedback", async () => {
+    const user = userEvent.setup();
+    const trace = fullTrace();
+    trace.routing = { route: "regulatory-review", reason: "Could not verify the finding.", escalation_reason: "possible exemption" };
+    const { calls } = mockApi({
+      "GET /readyz": readyz,
+      "GET /v1/runs": () => json([{ run_id: RUN_ID, state: "completed", submitted_at: trace.submitted_at,
+                                    updated_at: trace.updated_at, product_name: "Roasted chana",
+                                    route: "regulatory-review", complete: true }]),
+      [`GET /v1/runs/${RUN_ID}/trace`]: () => json(trace),
+      "GET /openapi.json": () => json({ paths: { "/v1/runs/{run_id}/feedback": { post: {} } } }),
+      [`POST /v1/runs/${RUN_ID}/feedback`]: () => json({}, 201),
+    });
+    window.location.hash = "#/review";
+    render(<App />);
+    expect(await screen.findByRole("heading", { name: "Review queue" })).toBeInTheDocument();
+    expect(calls.some((c) => c.url.includes("route=regulatory-review"))).toBe(true);
+    await user.click(await screen.findByRole("link", { name: /Roasted chana/ }));
+    expect(await screen.findByText("possible exemption")).toBeInTheDocument();
+    const marked = [...document.querySelectorAll(".review__passage mark")].map((m) => m.textContent);
+    expect(marked).toContain("o cause allergies shall be declared separately on the label.");  // the quote, in place
+
+    const record = await screen.findByRole("button", { name: "Record decision" });
+    expect(record).toBeDisabled();
+    await user.click(screen.getByRole("button", { name: "Escalating was right" }));
+    expect(record).toBeDisabled();  // a decision needs a reason
+    await user.type(screen.getByLabelText(/What did you find/), "Small pack: the exemption needs a person.");
+    await user.click(record);
+    expect(await screen.findByText(/Decision recorded as feedback. It does not approve the label/)).toBeInTheDocument();
+    const post = calls.find((c) => c.method === "POST")!;
+    expect(JSON.parse(String(post.init!.body))).toEqual({
+      satisfactory: true, reason: "[reviewer] accepted the escalation: Small pack: the exemption needs a person." });
+  });
+
+  it("shows an empty review queue, and no decision form without the feedback endpoint", async () => {
+    mockApi({ "GET /readyz": readyz, "GET /v1/runs": () => json([]),
+              [`GET /v1/runs/${RUN_ID}/trace`]: () => json(fullTrace()), "GET /openapi.json": () => json({ paths: {} }) });
+    window.location.hash = "#/review";
+    const { unmount } = render(<App />);
+    expect(await screen.findByText(/Nothing to review/)).toBeInTheDocument();
+    unmount();
+    window.location.hash = `#/review/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(/needs the feedback endpoint/)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Record decision" })).not.toBeInTheDocument();
+  });
+
   it("shows no hand-off for a result the label owner can act on", async () => {
     mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
     window.location.hash = `#/runs/${RUN_ID}`;

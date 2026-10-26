@@ -2,9 +2,10 @@ import { describe, expect, it } from "vitest";
 
 import { stageStates } from "../components/AgentStrip";
 import type { RunResult, StepRecord } from "../api/types";
-import { completedRun } from "../test/api";
+import { completedRun, fullTrace } from "../test/api";
 import { escalation, handoffText } from "./escalation";
 import { ms, usd } from "./format";
+import { retrievedPassages, splitAround } from "./review";
 import { hrefFor, parse } from "./useHashRoute";
 
 const step = (agent: string, name: string, error: string | null = null) =>
@@ -81,5 +82,26 @@ describe("escalation in plain words", () => {
     expect(text).toContain("System reason: Could not verify the finding. (x)");
     expect(text).toContain("Trace: http://localhost:8080/#/runs/abc/trace");
     expect(text).toContain("Product: Roasted chana");
+  });
+});
+
+describe("reviewer console helpers", () => {
+  it("routes the review queue and one review", () => {
+    const id = "a".repeat(32);
+    expect(parse("#/review")).toEqual({ name: "review", runId: null });
+    expect(parse(`#/review/${id}`)).toEqual({ name: "review", runId: id });
+    expect(hrefFor({ name: "review", runId: id })).toBe(`#/review/${id}`);
+    expect(hrefFor({ name: "review", runId: null })).toBe("#/review");
+  });
+
+  it("collects every passage the run retrieved, from its tool steps", () => {
+    const passages = retrievedPassages(fullTrace());
+    expect([...passages.keys()].sort()).toEqual(["fake-ac-protein", "fake-ld-allergen", "fake-ld-nutrition"]);
+  });
+
+  it("marks the quote inside its passage, and says when it is not verbatim", () => {
+    expect(splitAround("one two three", "two")).toEqual(["one ", "two", " three"]);
+    expect(splitAround("one two three", "TWO")).toBeNull();
+    expect(splitAround("one two three", "")).toBeNull();
   });
 });

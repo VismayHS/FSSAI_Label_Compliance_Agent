@@ -15,6 +15,7 @@ export function Header({ view, ready }: { view: View; ready: Readiness | null | 
       <nav aria-label="Main">
         <a href="#/" aria-current={view.name === "check" ? "page" : undefined}>New check</a>
         <a href="#/runs" aria-current={view.name === "runs" ? "page" : undefined}>Recent runs</a>
+        <a href="#/review" aria-current={view.name === "review" ? "page" : undefined}>Review queue</a>
         <a href="/docs" target="_blank" rel="noreferrer">API docs</a>
       </nav>
       <p className="shell__api" role="status" title={detail || label}>

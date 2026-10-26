@@ -239,3 +239,15 @@ def test_events_push_each_state_change_of_a_live_run(env, monkeypatch):
     events = _sse(env.client.get(f"/v1/runs/{run_id}/events").text)
     assert [json.loads(d)["state"] for e, d in events if e == "status"] == ["queued", "running", "completed"]
     assert events[-1][0] == "end"
+
+
+def test_recent_runs_can_be_filtered_to_one_route_for_the_review_queue(env):
+    from fssai_contracts.conformance import INJECTION
+    env.submit()                                                        # revise-and-recheck on the fakes
+    bad = section_41()
+    bad["label"]["front_of_pack_text"] = INJECTION                      # regulatory-review
+    escalated = env.submit(bad).json()["run_id"]
+    r = env.client.get("/v1/runs", params={"route": "regulatory-review"})
+    assert r.status_code == 200 and [x["run_id"] for x in r.json()] == [escalated]
+    assert len(env.client.get("/v1/runs").json()) == 2
+    assert env.client.get("/v1/runs", params={"route": "approved"}).status_code == 422  # only the three routes
