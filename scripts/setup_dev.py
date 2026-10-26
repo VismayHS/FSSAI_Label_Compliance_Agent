@@ -25,7 +25,9 @@ PACKAGES = {
     "vihaan": ("libs/gate", "libs/verification", "eval"),
     "vismay": ("libs/llm_gateway", "services/worker", "services/api"),
 }
-RUNTIME = ("services/worker", "services/api")  # everyone can run the API locally (LLM_Context §7)
+# Everyone can run the API locally (LLM_Context §7). The worker and API import fssai_observability, which is not on
+# PyPI, so it is installed editable for everyone, before them.
+RUNTIME = ("libs/observability", "services/worker", "services/api")
 
 
 def run(*args: str) -> None:
