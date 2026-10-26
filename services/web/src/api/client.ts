@@ -65,6 +65,8 @@ export async function submitRun(body: unknown, clientId: string): Promise<Submit
 
 export const getRun = (id: string, signal?: AbortSignal) => getJson<RunStatus>(`/v1/runs/${encodeURIComponent(id)}`, signal);
 export const getTrace = (id: string, signal?: AbortSignal) => getJson<RunTrace>(`/v1/runs/${encodeURIComponent(id)}/trace`, signal);
+/** Server-sent events for one run (GET /v1/runs/{id}/events): `status` on every change, then `end`. */
+export const runEventsUrl = (id: string) => `${base()}/v1/runs/${encodeURIComponent(id)}/events`;
 export const listRuns = (limit = 20, signal?: AbortSignal) => getJson<RunSummary[]>(`/v1/runs?limit=${limit}`, signal);
 
 export async function getReadiness(signal?: AbortSignal): Promise<Readiness | null> {

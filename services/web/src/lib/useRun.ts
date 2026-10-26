@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { ApiError, getRun } from "../api/client";
+import { ApiError, getRun, runEventsUrl } from "../api/client";
 import { TERMINAL_STATES, type RunStatus } from "../api/types";
 
 export interface RunPoll {
@@ -15,9 +15,10 @@ const FIRST_MS = 500;
 const MAX_MS = 2000;
 const MAX_ERROR_MS = 8000;
 
-/** Polls GET /v1/runs/{id} until the run is completed or failed (decision 301). Backs off from 0.5 s to
- * 2 s while it runs, and further on errors. Stops on unmount. Mount it under `key={runId}` so a new run
- * starts from a clean state. */
+/** Follows a run until it is completed or failed. Where the browser has EventSource it listens to
+ * GET /v1/runs/{id}/events, so each change arrives at once; if the stream fails it falls back to polling
+ * GET /v1/runs/{id} (decision 301), backing off from 0.5 s to 2 s while it runs and further on errors.
+ * Stops on unmount. Mount it under `key={runId}` so a new run starts from a clean state. */
 export function useRun(runId: string | null): RunPoll {
   const [poll, setPoll] = useState<RunPoll>({ status: null, error: null, reconnecting: false });
 
@@ -46,10 +47,25 @@ export function useRun(runId: string | null): RunPoll {
         timer = setTimeout(tick, errorDelay);
       }
     };
-    void tick();
+    let source: EventSource | null = null;
+    if (typeof EventSource === "undefined") {
+      void tick();
+    } else {
+      source = new EventSource(runEventsUrl(runId));
+      source.addEventListener("status", (e) => {
+        setPoll({ status: JSON.parse((e as MessageEvent<string>).data) as RunStatus, error: null, reconnecting: false });
+      });
+      source.addEventListener("end", () => source?.close());
+      source.onerror = () => {  // unknown run, a proxy that drops streams, a restart: poll instead
+        source?.close();
+        source = null;
+        if (!abort.signal.aborted) void tick();
+      };
+    }
     return () => {
       abort.abort();
       clearTimeout(timer);
+      source?.close();
     };
   }, [runId]);
 

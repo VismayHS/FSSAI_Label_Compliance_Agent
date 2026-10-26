@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
@@ -195,6 +195,46 @@ describe("the analyst workspace", () => {
     window.dispatchEvent(new Event("afterprint"));
     await waitFor(() => expect(document.querySelector(".print-report")).toBeNull());
     print.mockRestore();
+  });
+
+  it("follows a run over server-sent events without polling, and polls if the stream fails", async () => {
+    class FakeSource {
+      static made: FakeSource[] = [];
+      listeners: Record<string, ((e: { data: string }) => void)[]> = {};
+      onerror: (() => void) | null = null;
+      closed = false;
+      constructor(readonly url: string) { FakeSource.made.push(this); }
+      addEventListener(type: string, fn: (e: { data: string }) => void) { (this.listeners[type] ??= []).push(fn); }
+      emit(type: string, data: string) { for (const fn of this.listeners[type] ?? []) fn({ data }); }
+      close() { this.closed = true; }
+    }
+    vi.stubGlobal("EventSource", FakeSource);
+    try {
+      const { calls } = mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+      window.location.hash = `#/runs/${RUN_ID}`;
+      const { unmount } = render(<App />);
+      await waitFor(() => expect(FakeSource.made).toHaveLength(1));
+      const live = FakeSource.made[0]!;
+      expect(live.url).toBe(`/v1/runs/${RUN_ID}/events`);
+      act(() => live.emit("status", JSON.stringify(queued())));
+      expect(await screen.findByText("Queued for a worker")).toBeInTheDocument();
+      act(() => live.emit("status", JSON.stringify(completedRun())));
+      expect(await screen.findByText(/needs attention/)).toBeInTheDocument();
+      act(() => live.emit("end", "{}"));
+      expect(live.closed).toBe(true);
+      expect(calls.filter((c) => c.url.endsWith(`/v1/runs/${RUN_ID}`))).toHaveLength(0);
+      unmount();
+
+      // A stream that fails (an old proxy, a restart) falls back to polling GET /v1/runs/{id}.
+      render(<App />);
+      await waitFor(() => expect(FakeSource.made).toHaveLength(2));
+      act(() => FakeSource.made[1]!.onerror?.());
+      expect(await screen.findByText(/needs attention/)).toBeInTheDocument();
+      expect(FakeSource.made[1]!.closed).toBe(true);
+      expect(calls.filter((c) => c.url.endsWith(`/v1/runs/${RUN_ID}`)).length).toBeGreaterThan(0);
+    } finally {
+      vi.unstubAllGlobals();
+    }
   });
 
   it("shows no hand-off for a result the label owner can act on", async () => {

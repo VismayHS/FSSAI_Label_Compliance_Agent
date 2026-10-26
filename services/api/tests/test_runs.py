@@ -194,3 +194,48 @@ def test_an_allowed_callback_url_travels_with_the_job(env, monkeypatch):
     assert r.status_code == 202
     assert env.dispatcher.submitted[0]["callback_url"] == "https://hooks.example.test/x"
     assert sent == [("https://hooks.example.test/x", "completed")]
+
+
+def _sse(text: str) -> list[tuple[str, str]]:
+    """(event, data) pairs from a server-sent-events body; comments (keep-alives) are skipped."""
+    out = []
+    for block in text.strip().split("\n\n"):
+        lines = [ln for ln in block.splitlines() if not ln.startswith(":")]
+        if lines:
+            fields = dict(ln.split(": ", 1) for ln in lines)
+            out.append((fields.get("event", "message"), fields.get("data", "")))
+    return out
+
+
+def test_events_stream_a_finished_run_once_then_end(env):
+    import json
+    run_id = env.submit().json()["run_id"]
+    r = env.client.get(f"/v1/runs/{run_id}/events")
+    assert r.status_code == 200 and r.headers["content-type"].startswith("text/event-stream")
+    assert r.headers["cache-control"] == "no-cache" and r.headers["x-accel-buffering"] == "no"
+    events = _sse(r.text)
+    assert [e for e, _ in events] == ["status", "end"]
+    assert json.loads(events[0][1])["state"] == "completed"
+
+
+def test_events_for_an_unknown_run_are_404(env):
+    assert env.client.get(f"/v1/runs/{'0' * 32}/events").status_code == 404
+
+
+def test_events_push_each_state_change_of_a_live_run(env, monkeypatch):
+    import json
+    from fssai_contracts.schemas import RunState, RunStatus, utcnow
+    monkeypatch.setenv("SSE_POLL_S", "0.01")
+    run_id = "a" * 32
+    t0 = utcnow()
+    states = iter([RunState.QUEUED, RunState.QUEUED, RunState.RUNNING, RunState.COMPLETED])
+    saved_at = {RunState.QUEUED: 1, RunState.RUNNING: 2, RunState.COMPLETED: 3}  # a save is what moves updated_at
+
+    def get(rid):
+        state = next(states, RunState.COMPLETED)
+        return RunStatus(run_id=rid, state=state, submitted_at=t0, updated_at=t0.replace(microsecond=saved_at[state]))
+
+    monkeypatch.setattr(env.store, "get", get)
+    events = _sse(env.client.get(f"/v1/runs/{run_id}/events").text)
+    assert [json.loads(d)["state"] for e, d in events if e == "status"] == ["queued", "running", "completed"]
+    assert events[-1][0] == "end"
