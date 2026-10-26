@@ -188,7 +188,7 @@ Summarise my current task in 3 lines, then wait for my go.
 ## Phase 3: all requirements
 
 - [x] **S3.1 Make the circuit breaker demonstrable (A5).** Add a `make demo-breaker` target that points the gateway at the stub with `STUB_DOWN=1` (or a dead URL), submits runs, shows the breaker opening (metric and log), shows runs completing as `regulatory-review` with `complete=false` and an honest reason, then recovers.
-- [ ] **S3.2 Report cost (L5).**
+- [x] **S3.2 Report cost (L5).**
   - Build the `cost.json` dashboard: cost per run, cost per step name, tokens by agent.
   - Write a script that computes **cost per 100 runs** and the **largest single cost driver** (the step with the highest total cost) from the `run_steps` table, after a batch of real-provider runs. You can use Vihaan's eval set run 4–5 times.
 - [x] **S3.3 Write decision records.**
@@ -339,3 +339,9 @@ the web client."*
   The D4 audit missed `gpt-oss` and `publisher/model` ids; fixed and tested.
 - S4.3 started: `scripts/build_report.py` assembles the report from the sections, decisions and incidents.
 - Every teammate's file starts with *Next steps to 30 October*; LLM_Context §9 has the critical path.
+- S3.2 done (first measurement): 8 paced real runs at Groq's list price, $0.28 per 100 runs, the researcher's `act`
+  step is 64% of spend (report section updated; `cost_report.py --since` now takes a UTC time). Re-measure on the eval
+  set once Namith's researcher searches every requirement (it will cost more). The same runs exposed Groq's
+  `tool_use_failed` 400 and 429s inside one run; the gateway now retries `tool_use_failed` and, on a 429, waits for
+  the token budget to refill (`x-ratelimit-reset-tokens`). PR #8 CI green including the Compose boot; local
+  clean-clone test passed in 4.8 min.
