@@ -137,14 +137,14 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 0: setup
 
-- [ ] **V0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py vihaan` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
+- [x] **V0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py vihaan` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_gate`, `check_verifier`, `check_router`).
   3. Make one small commit of your own on `vihaan` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `vihaan`), so you've done the whole loop once.
 
 ## Phase 1: Evaluation 1 items
 
-- [ ] **V1.1 Publish the data contract (F1, D1).** Write `docs/data-contract.md` covering:
+- [x] **V1.1 Publish the data contract (F1, D1).** Write `docs/data-contract.md` covering:
   - **Fields:** every field of `LabelCheckRequest` with type, unit, whether required, range and permitted values.
   - **Permitted categories:** the one category we chose plus explicit "unsupported" handling.
   - **Cross-field rules**, for example:
@@ -166,7 +166,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   eval/tools/export_schema.py that writes docs/data-contract.schema.json from the pydantic model plus
   our extra constraints as JSON Schema keywords where possible.
   ```
-- [ ] **V1.2 Build the gate (F2, D1).** `fssai_gate.gate:RequestGate`:
+- [x] **V1.2 Build the gate (F2, D1).** `fssai_gate.gate:RequestGate`:
   - Order: rate limit → schema/type → ranges → categories → cross-field rules.
   - It collects **all** field errors, not just the first.
   - Rejects go to quarantine with the raw payload, client id, errors and timestamp. Start in memory, then use a Postgres table via `deploy/postgres/init/20-vihaan-quarantine.sql`.
@@ -181,18 +181,18 @@ Each package README lists its files and commands. `conformance.sample_request()`
   GateDecision(accepted=False, rate_limited=True, retry_after_s=...). from_registry() builds from env.
   Tests: each XF rule, multiple errors collected, quarantine row written, rate limit trips.
   ```
-- [ ] **V1.3 Write the §4.1 test values.** Write `docs/eval1/section-4.1-test-values.md` from the real condition Nishkal found (or that you read yourself):
+- [x] **V1.3 Write the §4.1 test values.** Write `docs/eval1/section-4.1-test-values.md` from the real condition Nishkal found (or that you read yourself):
   - a **pass** case (protein clearly above the condition),
   - a **fail** case (clearly below),
   - a **boundary** case (exactly at it),
   - a case where the **basis differs**, e.g. the condition is per 100 kcal or per serving but the panel is per 100 g. This should exercise unit conversion or escalation.
 
   For each, give the full request JSON, the expected route and the expected finding with citations to both regulations. This becomes the reference answer.
-- [ ] **V1.4 Write the first 5 eval scenarios** in `eval/scenarios.jsonl` (`EvalScenario` format): the 4 cases from V1.3 plus 1 out-of-scope category.
+- [x] **V1.4 Write the first 5 eval scenarios** in `eval/scenarios.jsonl` (`EvalScenario` format): the 4 cases from V1.3 plus 1 out-of-scope category.
 
 ## Phase 2: real end-to-end
 
-- [ ] **V2.1 Build the verifier agent (A3).** `fssai_verification.verifier:AgentVerifier` is the second agent. It has its own prompt, its own tools (`resolve_citation`, `clause_lookup`) and its own state. For each finding it checks:
+- [x] **V2.1 Build the verifier agent (A3).** `fssai_verification.verifier:AgentVerifier` is the second agent. It has its own prompt, its own tools (`resolve_citation`, `clause_lookup`) and its own state. For each finding it checks:
   1. **Citations resolve.** Each quote is a substring of a passage in `dossier.passages` (normalise whitespace and quotes). This check is deterministic, and it alone can fail a finding.
   2. **Numbers.** For claim conditions, re-read the threshold *from the cited passage* and compare it with the request field yourself, independently of the researcher.
   3. **Support.** An LLM check: "does this passage entail this statement?" This is NLI-style with its own versioned prompt, which you ask Namith to store in `fssai_prompts` (or keep under `libs/verification/prompts/` and note the version in `ctx.record`).
@@ -208,18 +208,18 @@ Each package README lists its files and commands. `conformance.sample_request()`
   numeric mismatch (finding says MET, passage threshold says otherwise) → not supported; escalation
   signal → escalate; all good → accept. Record a "verification" step with per-finding results.
   ```
-- [ ] **V2.2 Build the router (F6, F7).** `fssai_verification.router:RuleRouter` applies explicit, documented rules:
+- [x] **V2.2 Build the router (F6, F7).** `fssai_verification.router:RuleRouter` applies explicit, documented rules:
   - verdict not `accept` → `regulatory-review` with the reason,
   - any `unmet` → `revise-and-recheck`, listing what to fix,
   - any `cannot_determine` or possible exemption → `regulatory-review`,
   - all `met` → `clear-for-print`, with the reason and the not-an-approval notice.
 
   Every route gets a human-readable reason. Write the rules in `docs/decisions/2xx-vihaan-routing-rules.md`.
-- [ ] **V2.3 Switch them on.** Add `IMPL_GATE`, `IMPL_VERIFIER` and `IMPL_ROUTER` examples to your `.env.example` section, and tell Vismay to flip them.
+- [x] **V2.3 Switch them on.** Add `IMPL_GATE`, `IMPL_VERIFIER` and `IMPL_ROUTER` examples to your `.env.example` section, and tell Vismay to flip them.
 
 ## Phase 3: all requirements
 
-- [ ] **V3.1 Build the full eval set (L3).** It needs **≥20 scenarios** (aim for 25), each with an expected route, expected findings and a **supporting passage (real quote)**. Cover:
+- [x] **V3.1 Build the full eval set (L3).** It needs **≥20 scenarios** (aim for 25), each with an expected route, expected findings and a **supporting passage (real quote)**. Cover:
   - the §4.1 variants,
   - missing mandatory declarations,
   - allergen and veg-mark issues,
@@ -229,7 +229,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   - claims with no matching condition (→ escalate),
   - injection attempts (→ guardrail),
   - at least 2 "trap" cases where a single retrieval pass gives the wrong answer.
-- [ ] **V3.2 Build the eval runner and metrics (L3).** `python -m fssai_eval run --scenarios eval/scenarios.jsonl --tag <name>` runs every scenario through `build("pipeline")` in-process and writes `eval/results/<tag>.json`. It reports four metrics, and `docs/report/verification-and-evaluation.md` must say exactly how each is computed:
+- [x] **V3.2 Build the eval runner and metrics (L3).** `python -m fssai_eval run --scenarios eval/scenarios.jsonl --tag <name>` runs every scenario through `build("pipeline")` in-process and writes `eval/results/<tag>.json`. It reports four metrics, and `docs/report/verification-and-evaluation.md` must say exactly how each is computed:
   - **Groundedness** (TruLens): the share of answer statements supported by the retrieved context.
   - **Context relevance** (TruLens): how relevant the retrieved passages are to the scenario.
   - **Faithfulness:** defined *differently* from groundedness. For example: whether each finding's *status* follows from its cited passages plus the request values (claim-level entailment), or the RAGAS faithfulness score.
@@ -246,26 +246,26 @@ Each package README lists its files and commands. `conformance.sample_request()`
   before/after table with deltas. Cache LLM-judge calls to keep free-tier usage low.
   ```
 - [ ] **V3.3 Measure before and after one deliberate change (L3).** Pick **one** deliberate change (with Nishkal or Namith), e.g. chunk size, retrieval k, or researcher prompt v1 → v2. Run before and after, and report all four metrics with deltas. Record which change and why in a decision record.
-- [ ] **V3.4 Add feedback and live scoring (L6).**
+- [x] **V3.4 Add feedback and live scoring (L6).**
   - **Feedback endpoint:** `routers/feedback.py` provides `POST /v1/runs/{id}/feedback` (`Feedback` body, persisted in `deploy/postgres/init/21-vihaan-feedback.sql`) and `GET /v1/feedback/summary` (satisfactory rate, reasons grouped, by route, over time).
   - **Live scorer:** `python -m fssai_eval live --sample 10` reads recent completed runs (via `RunStore`), scores them with the same metrics and writes a `quality_scores` table.
   - **Dashboard:** `quality.json` charts quality over time and the feedback rate.
   - **Schedule:** the scorer can run as a periodic Compose service, which you define in `deploy/compose/` as your own fragment, e.g. `eval-scorer.yml`.
-- [ ] **V3.5 Add the quarantine endpoint.** `routers/quarantine.py` provides `GET /v1/quarantine?limit=` for demo item 4 evidence. Also show that no run row or queue job exists for the rejected request.
+- [x] **V3.5 Add the quarantine endpoint.** `routers/quarantine.py` provides `GET /v1/quarantine?limit=` for demo item 4 evidence. Also show that no run row or queue job exists for the rejected request.
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **V4.1 Rehearse demo items 4, 5 and 6.**
+- [x] **V4.1 Rehearse demo items 4, 5 and 6.**
   - **#4:** a malformed request → 422 with field errors, the quarantine row, and no run in the DB or queue.
   - **#5:** an out-of-scope category or a missing condition → escalation.
   - **#6:** a researcher answer with a bad citation → the verifier retries with a hint → re-search or escalate, all visible in the trace.
-- [ ] **V4.2 Write your report section** in `docs/report/verification-and-evaluation.md`.
-- [ ] **V4.3 Write at least one incident entry** in `docs/incidents/`.
+- [x] **V4.2 Write your report section** in `docs/report/verification-and-evaluation.md`.
+- [x] **V4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [ ] RAGAS cross-check, and calibrate the LLM judge against ~20 hand-labelled findings (report an agreement score such as Cohen's kappa)
   - [ ] an eval regression gate in CI (fails if hallucination rate rises)
-  - [ ] a feedback → candidate-scenario pipeline
-  - [ ] property-based tests for the gate (`hypothesis`)
+  - [x] a feedback → candidate-scenario pipeline
+  - [x] property-based tests for the gate (`hypothesis`)
 
 ## CV line you'll be able to write
 *"Owned trust and evaluation for a multi-agent compliance service: a published data contract with
@@ -285,3 +285,68 @@ experiments and live quality monitoring from user feedback."*
 - 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).
 - 2026-10-26 (Vismay): your GitHub collaborator invite is still pending, and you can't push until you accept it
   (github.com/VismayHS/FSSAI_Label_Compliance_Agent/invitations). Do that before V0.1.
+- 2026-10-26 (Vihaan): setup on a fresh clone. `setup_dev.py` failed twice: the old `origin/vihaan` predates the
+  skeletons, and `libs/observability` is missing from the script's runtime install list. Fixed by merging
+  `origin/main` and installing by hand (incident 2026-10-26-vihaan-setup-script-missing-dependency). V0.1 steps 1–2
+  done; step 3 (first commit, push, PR) is still to do. Accept the GitHub invite first.
+- 2026-10-26 (Vihaan): built V1.1–V3.5 except V3.3, plus V4.2, V4.3 and two extras. Conformance markers removed for
+  the gate, verifier and router; all three conform, and inside both pipelines (`check_pipeline` on
+  `ReferencePipeline` and `LangGraphPipeline`). Tests: gate 83, verification 77, eval 55 (Postgres tests included);
+  `pytest contracts` green.
+  - Gate: the strict contract (unknown fields, numeric strings, NaN/Infinity rejected), XF-01..10, a Redis token
+    bucket (fail open), Postgres/memory quarantine. Teammates' payloads (web example, API tests, load-test
+    payloads) all pass it.
+  - Verifier: citations resolve → numbers re-read from the cited passage → one LLM support check → retry hint or
+    escalate. Router: rules R1–R9 (decision 201).
+  - Eval: 30 scenarios; every quote checked verbatim against the built index by `eval/tools/check_scenarios.py`.
+    Runner with reference/llm/trulens judges, compare, gate, live scorer, candidates, calibrate.
+  - API routes `/v1/quarantine[/{id}]`, `POST /v1/runs/{id}/feedback`, `GET /v1/feedback/summary`; SQL 20/21/22;
+    `quality.json`; `deploy/compose/eval-scorer.yml` (profile `quality`).
+  - Rehearsed demos #4, #5 and #6 against a local API (inline, fakes, my seams on) and #6 in process: all evidence
+    present (`eval/tools/demo_trust.py`).
+- Open, needs others or a key:
+  - **Vismay:** flip `IMPL_GATE`/`IMPL_VERIFIER`/`IMPL_ROUTER` in the switchboard; add
+    `deploy/compose/eval-scorer.yml` to the root `include:` list; `services/api/tests/test_ops.py::test_every_router_module_is_mounted`
+    asserts exactly `["health", "runs"]` and fails once my two routers land (change it to a subset check or add
+    `feedback` and `quarantine`); `setup_dev.py` `RUNTIME` needs `libs/observability`;
+    `contracts/tests/test_reference_pipeline.py::test_registry_defaults_build_a_working_pipeline` should clear every
+    `IMPL_*`, not only `IMPL_PIPELINE`; CI step for the eval gate
+    (`python -m fssai_eval run --tag ci && python -m fssai_eval gate --baseline <committed> --candidate ci`).
+  - **Namith:** agree on researcher prompt 1.0.0 vs 1.1.0 as the V3.3 change (decision 205); the eval matches finding
+    ids with a fuzzy match, but canonical ids help (eval/README.md).
+  - **Team:** the protein RDA decision. Until then the §4.1 cases are `regulatory-review` (test values doc).
+  - **Me:** an LLM key in `.env` for V3.3 and real eval numbers; Docker for the Postgres tests and the full-stack
+    rehearsal (V4.1); hand-label ~20 items (`fssai_eval calibrate template`) for the kappa extra.
+- 2026-10-26 (Vihaan): pre-push review.
+  - Reproduced the CI `python` job in a clean `python:3.11-slim` container with a real Postgres: every package
+    green except Vismay's exact-match router test (below).
+  - Fixed what the review found:
+    - an f-string that only compiles on Python 3.12+ (it would have broken CI and the worker image);
+    - "Very low" claims checked against the Low condition;
+    - "no/without added sugar" read as a Schedule I number;
+    - numeric conditions read from labelling passages (now only from FSS-AC-2018);
+    - R6 treated one checked claim as covering every claim (now per claim);
+    - quarantine and feedback reads raised a 500 when Postgres was down (now a degraded read or an honest 503);
+    - a wasted LLM call on runs that escalate anyway.
+  - Added Postgres tests for feedback, live scores, candidates and every quality-dashboard query; built and ran
+    the `eval-scorer` image.
+- 2026-10-26 (Vihaan): merged `origin/main` (no conflicts). On Python 3.13 with a real Postgres, every package's
+  tests pass, including `services/api`, now that Vismay's router test is fixed; `audit_secrets.py` is clean.
+  Pushed, and opened **PR #9** (`main` ← `vihaan`), which closes V0.1.
+- 2026-10-26 (Vihaan): V4.1 rehearsed on the full Compose stack. The configuration is `main`'s `.env.example`
+  (real retriever, LangGraph researcher, guardrails, classifier) plus my gate, verifier and router; the LLM is
+  still the fake, since there is no key yet. `smoke.py` passes. `eval/tools/demo_trust.py --api ... --in-process`
+  showed all evidence:
+  - #4: 422, quarantine row, no run, rejected counter +1.
+  - #5: out-of-scope and no-condition claims both go to `regulatory-review` with a reason.
+  - #6: the verifier's steps are in the trace; in process, a bad quote is retried with a hint, then verified.
+
+  To redo on demo day with the Groq key: on the fake LLM the researcher cannot draft findings, so #5's claim cases
+  escalate as "could not be drafted" rather than for the RDA.
+- 2026-10-26 (Vihaan): V3.3 prep. `fssai_eval run --pause-s N --resume` paces scenarios for Groq's 8k tokens/min,
+  writes results after every scenario, marks provider failures (429/outage) as `provider_failed` (counted, not
+  scored), and reruns only those. Still waiting on two things: Namith's researcher fix on `main`, and my Groq key
+  in `.env`. Decision 205 has the commands.
+- Open: the RDA decision with Nishkal (his file still lists it as open). Until it is settled, §4.1 stays
+  `cannot_determine` → `regulatory-review` (test values doc, "What changes when the team adopts an RDA").
+

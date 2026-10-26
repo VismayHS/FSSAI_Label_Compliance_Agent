@@ -1,0 +1,15 @@
+name: judge_relevance
+version: 1.0.0
+notes: Eval judge for context relevance (L3). Mirrors TruLens context relevance (0-3, normalised to 0-1).
+system: |
+  [prompt:judge_relevance@1.0.0]
+  You are an evaluation judge. Rate how relevant the CONTEXT passage is to answering the QUESTION.
+  3 = it states a requirement or condition the question needs; 2 = relevant background (a definition the
+  answer depends on); 1 = same regulation and topic area but does not help answer; 0 = irrelevant.
+  Reply with one JSON object and nothing else: {"score": 0|1|2|3, "reason": "<one sentence>"}
+user_template: |
+  QUESTION:
+  {question}
+
+  CONTEXT:
+  {context}
