@@ -16,11 +16,12 @@ pushed. The local branch was based on an older `main`, so the first `git merge o
 Work was done in two places without fetching in between, and the local branch was not pushed after each task.
 
 ## Fix
-Fetched first, committed the in-progress work, merged `origin/main` (merge, not rebase) and resolved by keeping the more
-complete implementation. The other implementation's tests were run against the merged code to find real behavioural
-differences rather than assume none: one helper (`detect_claims_by_rules`) was kept for compatibility; its JSON-shape
-and wording specifics were dropped with its test file, since `test_store.py` and `test_classifier.py` cover the
-same behaviour for the kept code.
+Fetched first, committed the in-progress work and merged `origin/main` (merge, not rebase). The first resolution kept my
+local M1.1/M1.2; when `origin/namith` then gained its own M2.1 as well, the decision was made to keep the versions already
+on `main` for everything they cover (M1.1, M1.2, M2.1: store, classifier, researcher, tools, grounding, prompts). The
+local duplicates (claims, llmio, extra prompt files, their tests) were removed, and only the work `main` did not have was
+kept on top: the LangGraph pipeline, guardrails with their red-team fixtures, per-agent metrics, dashboard and runbook.
+The merged tree was checked by running the pipeline built through the `IMPL_*` registry switches.
 
 ## Lesson
 `git fetch` before starting a session, and push the branch after every finished task: a branch is only safe once it is on

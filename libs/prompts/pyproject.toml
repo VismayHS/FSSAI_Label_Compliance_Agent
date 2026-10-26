@@ -17,4 +17,4 @@ test = ["pytest>=9"]
 include = ["fssai_prompts*"]
 
 [tool.setuptools.package-data]
-fssai_prompts = ["prompts/**/*.yaml"]
+fssai_prompts = ["prompts/*/*.yaml"]
