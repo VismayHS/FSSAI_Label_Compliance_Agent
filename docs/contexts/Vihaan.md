@@ -127,7 +127,7 @@ method signatures, which other people's code and `.env` depend on.
 | `packages/gate` | `fssai_gate.gate:RequestGate` | `check_gate` | V1.2 |
 | `packages/verification` | `fssai_verification.verifier:AgentVerifier` | `check_verifier` | V2.1 |
 | `packages/verification` | `fssai_verification.router:RuleRouter` | `check_router` | V2.2 |
-| `eval` | `python -m fssai_eval run ...` (CLI options fixed) | CLI options test | V3.2 |
+| `packages/eval` | `python -m fssai_eval run ...` (CLI options fixed) | CLI options test | V3.2 |
 
 **How a skeleton tells you you're done.** Every skeleton method raises `NotImplementedError("<task>: ...")`.
 Its test calls the shared check in `packages/contracts/fssai_contracts/conformance.py`, marked

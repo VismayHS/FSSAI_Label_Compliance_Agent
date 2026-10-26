@@ -377,7 +377,7 @@ Or the API alone without Docker (inline mode, fakes by default):
    fakes. If a fake isn't good enough, improve it with a `contracts:` PR. Don't wait.
 3. **Your branch is yours; `main` belongs to nobody.** Commit and push to *your own branch*
    (`nishkal`, `namith`, `vihaan`, `vismay`) as often as you like, since that affects nobody. Work
-   reaches `main` only through a PR, at most once per person per day.
+   reaches `main` only through a PR whose CI checks pass; open one whenever work is finished (no daily limit).
 4. **`main` always boots.** Once Compose exists, `make smoke` must pass before you merge.
 5. **Write it down.** Decisions go in `docs/decisions/`, failures in `docs/incidents/`, and
    progress in your own `docs/contexts/<Name>.md` checklist.
@@ -475,7 +475,7 @@ early is better. The phases below are only the order of work, because each one b
 | **5. Freeze** | Review day, 30 Oct. Only bug fixes, no new features. `main` must boot from a clean clone. |
 
 What this means in practice:
-- **Merge often.** Open a PR into `main` whenever you have finished work. The once-per-day limit still holds, so don't sit on finished work.
+- **Merge often.** Open a PR into `main` whenever you have finished work. There is no daily limit, so don't sit on finished work.
 - **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
 - **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
 

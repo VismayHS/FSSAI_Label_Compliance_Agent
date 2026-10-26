@@ -28,7 +28,7 @@ Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns 
    - Each person works only on their own long-lived branch: `nishkal`, `namith`, `vihaan` or `vismay`. Check with `git branch --show-current` before any commit; if it isn't the current person's branch, stop and say so.
    - Never commit or push to `main`, never push to a teammate's branch, never force-push, never rewrite pushed history, never delete a branch, never use `--no-verify`.
    - Bring in teammates' work with `git fetch origin && git merge origin/main` (merge, never rebase). Never merge a teammate's branch directly.
-   - Work reaches `main` only through a PR from the person's branch, merged with a merge commit, at most once per person per day.
+   - Work reaches `main` only through a PR from the person's branch, merged with a merge commit once its CI checks pass. Open one whenever a piece of work is finished; there is no daily limit.
    - Don't commit or push unless the person asks.
    - **No AI attribution:** never add `Co-Authored-By:` trailers for AI tools or "Generated with ..." lines to commits or PRs. Commits are the person's own.
 8. **Progress notes** and checklist ticks go only in the current person's `docs/contexts/<Name>.md`.
