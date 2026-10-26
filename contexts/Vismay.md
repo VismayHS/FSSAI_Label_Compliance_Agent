@@ -3,6 +3,21 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file** (and `LLM_Context.md`). Tick
 > boxes as you go, and add notes at the bottom.
 
+## Next steps to 30 October (2026-10-26)
+
+What is left of my part, and what each item waits on:
+1. **Merge my PR first thing** (README per folder, docs/course/, extras, the API test fix Vihaan's CI needs).
+2. **After Vihaan's PR merges:** switch on `IMPL_GATE`, `IMPL_VERIFIER`, `IMPL_ROUTER` in `.env.example`; add his
+   `deploy/compose/eval-scorer.yml` to the root `docker-compose.yml`; check the feedback form and the reviewer
+   console against his live endpoint (then tick S3.6); clean-clone test; that finishes S2.4.
+3. **S3.2 cost per 100 runs:** paced real runs at Groq's list prices (the model and its prices are in `.env` only),
+   then `python scripts/cost_report.py` into my report section. The eval run pair (Namith + Vihaan) gives the
+   larger sample.
+4. **S4.3:** `python scripts/build_report.py --strict` once all four sections exist; two rehearsals of all 10 demos.
+
+**If I do not:** Vihaan's parts stay switched off on a clean clone even after his merge, and the report has no cost
+section. Demo #1 (clean clone) and #3 (trace) and #8 (breaker) are mine and already work.
+
 ## Your mission
 You make it **a production service, not a notebook**:
 - the API and async run model, the queue and the workers,
@@ -197,10 +212,10 @@ Summarise my current task in 3 lines, then wait for my go.
 - [x] **S4.4 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [x] **GitHub Actions CI:** contract tests, each package's tests, `docker compose build`, and smoke on PRs
-  - [ ] **Reviewer console:** a page listing `regulatory-review` runs, showing citations next to the retrieved passages, with accept/override actions → feedback
-  - [ ] **Live progress over SSE** instead of polling
-  - [ ] **PDF export** of a finding
-  - [ ] **Webhook callback** option for A4
+  - [x] **Reviewer console:** a page listing `regulatory-review` runs, showing citations next to the retrieved passages, with accept/override actions → feedback
+  - [x] **Live progress over SSE** instead of polling
+  - [x] **PDF export** of a finding
+  - [x] **Webhook callback** option for A4
 
 ## CV line you'll be able to write
 *"Built the production platform for a multi-agent LLM compliance service: FastAPI with async job
@@ -307,3 +322,20 @@ the web client."*
 - S3.6 (part): escalated runs say in plain words why, and copy a hand-off (run id, reasons, trace link) for the reviewer.
 - My local `.env` now uses Groq through the gateway (`IMPL_LLM`), with a smaller fallback model on the same key;
   live JSON-mode calls to both succeeded.
+
+- Organised the repo for a stranger: a README in every folder (owners, what is where), a repository map in the root
+  README, the course PDFs moved to `docs/course/` (all references updated). No code folder moved: three days before
+  the review, moving packages would break Compose, CI and Vihaan's unmerged 70-file branch for no gain.
+- Extras done and verified in the running stack: live progress over SSE (through nginx: running at 0 s, completed at
+  15 s, end), webhook callback (allowlisted hosts, HMAC-signed; the cloud-metadata address is refused with 400; a
+  signed notice reached a receiver container and verified), PDF export (a real two-page PDF checked by eye), reviewer
+  console (the regulatory-review queue, each quote marked inside its source passage, accept or override recorded as
+  feedback; checked at 1280 and 390 px).
+- Fixed: my feedback form sent an empty reason, which Vihaan's endpoint rejects (422); the reason is now required.
+  My API test hard-coded the router list and failed Vihaan's CI; it now compares with the routers package.
+- Found and fixed with the real LLM: Groq's free tier allows 8,000 tokens per minute per model, one run uses
+  8,000 to 12,500, so back-to-back runs were rate-limited into an incomplete run. The gateway now names the provider's
+  error code and retries `json_validate_failed`; incident `2026-10-26-vismay-groq-free-tier-rate-limit`.
+  The D4 audit missed `gpt-oss` and `publisher/model` ids; fixed and tested.
+- S4.3 started: `scripts/build_report.py` assembles the report from the sections, decisions and incidents.
+- Every teammate's file starts with *Next steps to 30 October*; LLM_Context §9 has the critical path.

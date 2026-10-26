@@ -194,6 +194,11 @@ what happens if any of them fails mid-run.
 Studio, OpenRouter's free models). The base URL, key and model id live **only** in `.env`. Set a
 spending limit on the account.
 
+**We use Groq's free tier.** It allows **8,000 tokens per minute per model** and 1,000 requests a day (read from its
+response headers), and one real run uses about 8,000 to 12,500 tokens. So run real-LLM checks **one at a time, about
+a minute apart**, and plan the eval set as at least half an hour per prompt variant. The fallback model has its own
+token budget. Load tests always use the stub LLM. See incident `2026-10-26-vismay-groq-free-tier-rate-limit`.
+
 **Out of scope:** model training, cloud deployment, and images (labels arrive as text only).
 
 ---
@@ -467,6 +472,16 @@ What this means in practice:
 - **Merge often.** Open a PR into `main` whenever you have finished work. The once-per-day limit still holds, so don't sit on finished work.
 - **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
 - **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
+
+**Critical path (checked 2026-10-26).** Each person's file starts with *Next steps to 30 October*. What blocks the most:
+
+| Waiting on | What is blocked until then |
+|---|---|
+| Vihaan's PR into `main` | Gate, verifier, router, feedback, quarantine and the eval runner on `main`; demos #4, #5, #6; the feedback form and reviewer console; every measured eval number |
+| Namith: the researcher searches for every requirement it reports | Meaningful findings with a real LLM (demo #2); the prompt comparison (L2) and before/after (L3) numbers; cost per 100 runs |
+| One eval run pair with the Groq key (researcher 1.0.0 vs 1.1.0), after both of the above | Namith's L2 comparison, Vihaan's L3 before/after, Vismay's cost per 100 runs (L5) |
+| Nishkal's Locust runs | Demo #9 and the D6, A7 and D7 numbers; nobody else can produce them |
+| The team's RDA decision (Nishkal + Vihaan) | Whether §4.1 (demo #10) can ever be `met`/`unmet`; until then the correct answer is `cannot_determine` |
 
 ---
 
