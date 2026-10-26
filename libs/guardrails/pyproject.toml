@@ -11,7 +11,9 @@ requires-python = ">=3.11"
 dependencies = ["fssai-contracts"]
 
 [project.optional-dependencies]
-test = ["pytest>=9"]
+test = ["pytest>=9", "pyyaml>=6,<7", "fssai-prompts"]
+# optional: a transformers toxicity model (GUARDRAIL_TOXICITY_MODEL); the lexicon is the offline default
+model = ["transformers>=4.40"]
 
 [tool.setuptools.packages.find]
 include = ["fssai_guardrails*"]

@@ -2,18 +2,28 @@
 
 Prompt-injection defence, toxicity in and out, and output filtering (L4).
 
-**Owner:** Namith · tasks in [`contexts/Namith.md`](../../contexts/Namith.md) · day-0 skeleton from the baseline.
+**Owner:** Namith · tasks in [`contexts/Namith.md`](../../contexts/Namith.md) · design: decision [101](../../docs/decisions/101-namith-guardrails.md).
 
-| File | What | Task |
-|---|---|---|
-| `fssai_guardrails/guardrails.py` | `Guardrails`, the `Guardrails` seam | M3.1 |
-| `tests/test_guardrails_contract.py` | conformance test (xfail until built) | M3.1 |
+| File | What |
+|---|---|
+| `fssai_guardrails/guardrails.py` | `Guardrails`: `screen_input` (blocks the run before any agent) and `filter_output` (only ever makes a result safer) |
+| `fssai_guardrails/detectors.py` | pluggable detectors: control characters, length, injection heuristics, toxicity (lexicon or model), optional LLM judge |
+| `fssai_guardrails/text.py` | walk every string in a request; fold obfuscated text |
+| `tests/attacks.yaml` | the red-team file: 29 attacks, 11 clean labels. Add new attacks here first |
+| `tests/test_screen_input.py`, `test_filter_output.py`, `test_in_pipeline.py` | behaviour tests |
 
 ```bash
-<venv-python> -m pip install -e "libs/guardrails[test]"     # setup_dev.py namith already does this
-<venv-python> -m pytest libs/guardrails -q                  # xfail = not built yet; a FAIL says which contract edge broke
+<venv-python> -m pip install -e "libs/guardrails[test]"
+<venv-python> -m pytest libs/guardrails -q
 ```
 
-**Done when** the conformance test passes without its `xfail` marker and your own tests cover the
-behaviour in your task. Then switch it on with `IMPL_GUARDRAILS=fssai_guardrails.guardrails:Guardrails` in your `.env` (and as a comment in your
-section of `.env.example`), and tell Vismay.
+**Switched on with** `IMPL_GUARDRAILS=fssai_guardrails.guardrails:Guardrails`. It passes `conformance.check_guardrails`.
+
+| Env | Default | |
+|---|---|---|
+| `GUARDRAIL_DETECTORS` | `control,length,injection,toxicity` | add `judge` for the LLM second layer (one extra LLM step per run), or `module:Class` for your own |
+| `GUARDRAIL_MAX_FIELD_CHARS` | `4000` | longer fields are flagged |
+| `GUARDRAIL_TOXICITY_MODEL` | empty | a transformers text-classification model (`pip install -e "libs/guardrails[model]"`); empty = built-in lexicon |
+| `GUARDRAIL_TOXICITY_THRESHOLD` | `0.8` | score at which the model flags |
+
+Flags look like `prompt_injection:label.claims[0]`; the report names the field and the rule, never the attacker's text.

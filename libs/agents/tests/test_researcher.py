@@ -281,7 +281,10 @@ def test_retry_is_the_next_attempt_keeps_passages_and_does_not_repeat_calls():
                     and s.input["regulation"] == "FSS-AC-2018") for s in new_steps)
 
 
-def test_prompt_versions_are_recorded():
+@pytest.mark.parametrize("version", ["1.0.0", "1.1.0"])
+def test_prompt_versions_are_recorded(monkeypatch, version):
+    """The pinned researcher version (PROMPT_RESEARCHER_VERSION) is the one recorded; both variants load."""
+    monkeypatch.setenv("PROMPT_RESEARCHER_VERSION", version)
     llm = ScriptedLLM(drafts=[draft(protein_finding())])
     _, ctx = run(researcher(llm))
-    assert ctx.prompt_versions["researcher"] == "1.0.0" and ctx.prompt_versions["researcher_draft"] == "1.0.0"
+    assert ctx.prompt_versions["researcher"] == version and ctx.prompt_versions["researcher_draft"] == "1.0.0"
