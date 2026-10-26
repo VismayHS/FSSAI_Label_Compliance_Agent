@@ -31,6 +31,8 @@ from fssai_contracts.schemas import LLMMessage, LLMResponse, PromptTemplate
 from .breaker import BreakerStore, CircuitBreaker, MemoryBreakerStore, RedisBreakerStore, State
 from .metrics import LLM_CALLS, LLM_COST, LLM_RETRIES, LLM_TOKENS
 
+USER_AGENT = "fssai-label-agent/0.1"
+
 
 @dataclass(frozen=True)
 class Provider:
@@ -158,7 +160,8 @@ class GatewayLLMClient:
         body: dict = {"model": provider.model, "messages": [m.model_dump() for m in messages], "temperature": 0}
         if json_mode:
             body["response_format"] = {"type": "json_object"}
-        headers = {"Content-Type": "application/json"}
+        # Our own User-Agent: Cloudflare-fronted providers (Groq) refuse library defaults with 403 (error 1010)
+        headers = {"Content-Type": "application/json", "User-Agent": USER_AGENT}
         if provider.api_key:
             headers["Authorization"] = f"Bearer {provider.api_key}"
 

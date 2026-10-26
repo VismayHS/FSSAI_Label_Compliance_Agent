@@ -111,7 +111,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ---
 
-## Phase 0: setup (days 1–2)
+## Phase 0: setup
 
 - [ ] **M0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py namith` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
@@ -119,7 +119,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   3. Make one small commit of your own on `namith` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `namith`), so you've done the whole loop once.
 - [ ] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
 
-## Phase 1: Evaluation 1 (week 1)
+## Phase 1: Evaluation 1 items
 
 - [x] **M1.1 Build the prompt registry (L2).**
   - Store prompts as files: `libs/prompts/prompts/<name>/<version>.yaml` with fields `name`, `version`, `system`, `user_template`, `notes`.
@@ -151,7 +151,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   - the loop bounds,
   - **what happens when each component fails mid-run** (A2).
 
-## Phase 2: real end-to-end (by end of week 2)
+## Phase 2: real end-to-end
 
 - [x] **M2.1 Build the research agent (F4, F5, A1).** This is the heart of the project. It is a LangGraph subgraph with three tools:
   - `corpus_search(query, regulation?)`
@@ -194,7 +194,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   ```
 - [ ] **M2.3 Switch it on.** Set `IMPL_PIPELINE`, `IMPL_CLASSIFIER` and `IMPL_RESEARCHER` in `.env.example` (commented examples), and tell Vismay to flip them in the shared `.env`.
 
-## Phase 3: all requirements (weeks 3–4)
+## Phase 3: all requirements
 
 - [ ] **M3.1 Build the guardrails (L4).** `fssai_guardrails.Guardrails` has two halves.
 
@@ -256,4 +256,11 @@ output-authorisation guardrails."*
 
 ## Notes / log
 - 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
+ vismay
+- 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).
+- 2026-10-26 (Vismay): `IMPL_PROMPTS` and `IMPL_CLASSIFIER` are switched on in `.env.example` (after your PR #4), so
+  that half of M2.3 is done; only `IMPL_RESEARCHER` and `IMPL_PIPELINE` remain. M0.2 and M1.3 are committed but
+  still unticked above: tick them if they're done.
+
 - 2026-10-26: M2.1 researcher built (LangGraph: plan, act, run_tool, coverage, draft). Prompts `researcher` and `researcher_draft` 1.0.0. Checked against the real index with a scripted LLM; not yet against a real LLM. RDA guard on by default (open team question).
+ main
