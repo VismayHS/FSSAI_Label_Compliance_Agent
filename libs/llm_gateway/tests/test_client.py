@@ -60,6 +60,8 @@ def test_success_records_one_llm_step_with_tokens_cost_and_prompt_version():
     assert sent["response_format"] == {"type": "json_object"} and sent["model"] == "model-a"
     assert sent["messages"][0]["content"].startswith("[prompt:classifier@v1]")
     assert route.calls.last.request.headers["authorization"] == "Bearer key-1"
+    # Cloudflare-fronted providers (Groq) refuse library default User-Agents with 403 (contexts/Namith.md M0.2)
+    assert route.calls.last.request.headers["user-agent"].startswith("fssai-label-agent/")
     [step] = c.steps
     assert (step.kind, step.agent, step.name) == ("llm", "classifier", "classify")
     assert (step.prompt_name, step.prompt_version) == ("classifier", "v1")

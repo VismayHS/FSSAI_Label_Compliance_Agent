@@ -75,9 +75,9 @@ Summarise my current task in 3 lines, then wait for my go.
 
 ---
 
-## Phase 0: setup (days 1–2)
+## Phase 0: setup
 
-- [ ] **S0.1 Set up the GitHub repo.**
+- [x] **S0.1 Set up the GitHub repo.**
   - Add Nishkal, Namith and Vihaan as collaborators, and write their GitHub usernames into the table in `LLM_Context.md` §1.
   - The four personal branches (`nishkal`, `namith`, `vihaan`, `vismay`) already exist on GitHub, along with `CONTRIBUTING.md`, `.githooks/` and `scripts/setup_dev.py`. Run `python scripts/setup_dev.py vismay` yourself, and from now on work only on `vismay` like everyone else.
   - Apply the GitHub settings in CONTRIBUTING.md §8: merge commits only (no squash or rebase), don't auto-delete head branches, a ruleset on `main` (require a PR, block force-pushes and deletion), and a ruleset on the four personal branches (block force-pushes and deletion).
@@ -87,7 +87,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - Decide whether the repo stays public. It contains the course PDFs; you can make it private under Settings → General.
 - [x] **S0.2 Create package skeletons.** Create `services/api`, `services/worker` and `libs/llm_gateway` packages (each with its own `pyproject.toml`), plus a `Makefile` with `install`, `test`, `up`, `down` and `smoke` targets.
 
-## Phase 1: Evaluation 1 (week 1): the walking skeleton
+## Phase 1: Evaluation 1 items: the walking skeleton
 
 - [x] **S1.1 Build the API and worker on fakes (A4, F1).** This is the system's first end-to-end path.
   - `POST /v1/runs`:
@@ -126,7 +126,7 @@ Summarise my current task in 3 lines, then wait for my go.
   ```
 - [x] **S1.3 Assemble the Evaluation 1 project plan** in `docs/eval1/project-plan.md`. Build it from LLM_Context §§2–4, 9 and 10, Nishkal's passages, Vihaan's test values and Namith's topology draft. Add a first `docs/architecture.md` diagram **with deployment boundaries marked**.
 
-## Phase 2: real end-to-end (by end of week 2)
+## Phase 2: real end-to-end
 
 - [x] **S2.1 Build the LLM gateway (A5, L5).** `fssai_llm_gateway.client:GatewayLLMClient` implements `LLMClient`:
   - **Provider adapter:** OpenAI-compatible, configured by `LLM_BASE_URL`, `LLM_API_KEY` and `LLM_MODEL`, with an optional fallback `LLM_FALLBACK_*`.
@@ -170,7 +170,7 @@ Summarise my current task in 3 lines, then wait for my go.
   ```
 - [ ] **S2.4 Integrate the real implementations.** As teammates merge, switch the `IMPL_*` variables in your local `.env` (and in `.env.example` comments) and run `make smoke` plus the §4.1 request on the real stack.
 
-## Phase 3: all requirements (weeks 3–4)
+## Phase 3: all requirements
 
 - [x] **S3.1 Make the circuit breaker demonstrable (A5).** Add a `make demo-breaker` target that points the gateway at the stub with `STUB_DOWN=1` (or a dead URL), submits runs, shows the breaker opening (metric and log), shows runs completing as `regulatory-review` with `complete=false` and an honest reason, then recovers.
 - [ ] **S3.2 Report cost (L5).**
@@ -265,3 +265,29 @@ the web client."*
 - Also fixed Nishkal's `chunker.py` for Python 3.11 (noted in his file).
 - Still open: S0.1 GitHub rulesets/dates/instructor check, S2.4 for Namith's and Vihaan's parts, S3.2 numbers,
   S3.6 once Vihaan's endpoint lands, S4.3 report, extras (reviewer console, SSE, PDF export, webhook).
+- PR #3 merged (merge commit `e5e44d3`) after CI passed, including the first Compose boot plus smoke test on a
+  clean GitHub runner. That job first failed on `docker compose up --wait`, which counts the indexer's expected
+  exit 1 as a failure; fixed in CI.
+- S0.1 mostly done: collaborators added (Vihaan's invite still pending), CODEOWNERS, Evaluation 1 date
+  (30 Oct 2026), merge commits only, rulesets on `main` (PR + green CI, no force-push or deletion) and on the
+  personal branches. Team of 4 confirmed with the instructor. Repo stays public (the free plan enforces rulesets only on
+  public repos, and the course reviews it).
+- Decided `EMBEDDING_MODEL=hashing` as the clean-clone default (in Nishkal's section, noted in his file): the
+  indexer now succeeds on a fresh clone with no download; the real model lives in the shared `.env`.
+
+
+**2026-10-26**
+- S2.4, Namith's part, dry run (his branch at `65fde8b`, not merged into mine): with `IMPL_PROMPTS` and
+  `IMPL_CLASSIFIER` on, the reference pipeline passes `check_pipeline`; the §4.1 request reports
+  `prompt_versions={"classifier": "1.0.0"}`, and the out-of-scope request goes to `regulatory-review`. His prompt
+  YAML files ship inside the built package, so the worker image will have them. Flip both switches once his PR merges.
+- Gateway now sends its own `User-Agent` (`fssai-label-agent/0.1`): Namith found Groq's Cloudflare front answers
+  library defaults with 403 (error 1010). Once agents use `IMPL_LLM=fssai_llm_gateway.client:GatewayLLMClient`,
+  his `fssai_agents.dev_llm` wrapper is no longer needed.
+- For Namith and Nishkal: the stub LLM has no `classifier` fixture yet, so under load tests the classifier gets the
+  default reply, retries once to repair it and falls back to rules (2 LLM calls per run instead of 1).
+- S2.4: Namith's PR #4 merged; `IMPL_PROMPTS` and `IMPL_CLASSIFIER` are now on in `.env.example` and in my `.env`.
+  Every package's tests pass on the merge (`scripts/test_all.py`).
+- Deadline moved: the whole project is due by Fri 30 Oct (the first review). LLM_Context §9 now states the one
+  deadline; phases are only the order of work. Dropped the week numbers from every person's phase headings (with a
+  dated note in each file's log) and updated the project plan.

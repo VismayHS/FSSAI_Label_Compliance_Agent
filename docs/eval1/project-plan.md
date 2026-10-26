@@ -80,14 +80,17 @@ variables, and every seam has a conformance check (`contracts/fssai_contracts/co
 | Compose stack, smoke test, clean-clone test, CI, breaker demo, cost report + dashboard | Vismay | built and verified on 2026-10-25 |
 | Web client | Vismay | built; feedback buttons appear when Vihaan's endpoint lands |
 | Corpus, chunking, index, hybrid retriever, cache, observability stack, stub LLM, load-test tooling | Nishkal | built; real retriever verified in the Compose stack |
-| Prompts, classifier, researcher, LangGraph pipeline, guardrails | Namith | skeletons ready, not started |
+| Prompts, classifier, researcher, LangGraph pipeline, guardrails | Namith | prompt store and classifier built and switched on (PR #4); researcher, pipeline and guardrails in progress |
 | Gate, verifier, router, eval set, feedback, quarantine endpoint | Vihaan | skeletons ready, not started |
 
 ## 10. Plan
-Phases and milestones: [LLM_Context §9](../../contexts/LLM_Context.md) (dates to be filled in once announced).
-Next, in order: confirm decision 001 and the RDA question; Namith's classifier and researcher and Vihaan's
-gate and verifier behind their conformance tests; the §4.1 case on the real stack by the end of week 2;
-then Nishkal's load test against the SLO, guardrails, the eval set and its before/after comparison.
+Phases and milestones: [LLM_Context §9](../../contexts/LLM_Context.md). The whole project is due by
+**Fri 30 October 2026**. Next, in order:
+1. Confirm decision 001 and the RDA question.
+2. Namith's researcher and Vihaan's gate, verifier and router behind their conformance tests, with the §4.1
+   case on the real stack.
+3. Nishkal's load test against the SLO, guardrails, the eval set and its before/after comparison.
+4. Two full demo rehearsals.
 
 ## 11. Risks
 
