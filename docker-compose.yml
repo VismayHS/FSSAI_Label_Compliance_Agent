@@ -25,3 +25,6 @@ include:
     env_file: .env
   - path: deploy/compose/observability.yml
     env_file: .env
+  # trust and evaluation (Vihaan); opt-in: docker compose --profile quality up -d --build eval-scorer
+  - path: deploy/compose/eval-scorer.yml
+    env_file: .env
