@@ -51,7 +51,7 @@ Known gap: an unseen paraphrased instruction passes the heuristics; the judge is
 
 ## 5. Prompt versions (L2)
 
-Prompts are files under `libs/prompts/fssai_prompts/prompts/<name>/<version>.yaml`, each starting with
+Prompts are files under `packages/prompts/fssai_prompts/prompts/<name>/<version>.yaml`, each starting with
 `[prompt:<name>@<version>]`, selected by `PROMPT_<NAME>_VERSION`; the version is recorded on every LLM step.
 
 Comparison: researcher 1.0.0 (plain rules) against 1.1.0 (adds an explicit modifier checklist). Both run
@@ -69,7 +69,7 @@ Result: TODO (which variant, on which metric, by how much; see `docs/decisions/`
 ## 6. Per-agent metrics and runbook (A6, D8)
 
 Prometheus metrics labelled by `agent`: runs and successes, steps and tool calls per run, per-step and
-end-to-end latency, retries; dashboard `observability/grafana/dashboards/agents.json`.
+end-to-end latency, retries; dashboard `infra/observability/grafana/dashboards/agents.json`.
 `docs/runbook.md` covers provider rate-limited or down (breaker open) and index missing or stale.
 Incident log: `docs/incidents/2026-10-26-namith-diverged-branch-merge.md`.
 

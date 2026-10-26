@@ -1,0 +1,26 @@
+# Live quality scorer (owner Vihaan; L6): every LIVE_SCORE_EVERY_S seconds, scores up to LIVE_SCORE_SAMPLE recently
+# completed runs with the eval metrics and writes them to quality_scores (Grafana "Quality and trust").
+# Opt-in profile, so a plain `docker compose up` (which must always boot) does not build or start it:
+#   docker compose --profile quality up -d --build eval-scorer
+services:
+  eval-scorer:
+    profiles: ["quality"]
+    build:
+      context: ../..
+      dockerfile: packages/eval/Dockerfile
+    image: fssai-eval-scorer:local
+    env_file:
+      - path: ../../.env
+        required: false
+    environment:
+      IMPL_RUN_STORE: fssai_run_store.postgres:PostgresRunStore   # reads the same runs the API and workers write
+      DATABASE_URL: postgresql://${POSTGRES_USER:-fssai}:${POSTGRES_PASSWORD:-change-me-locally}@postgres:5432/${POSTGRES_DB:-fssai}
+      EVAL_JUDGE_CACHE_DIR: /data/eval-cache
+    volumes:
+      - eval-cache:/data/eval-cache
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: unless-stopped
+
+volumes:
+  eval-cache:

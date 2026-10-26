@@ -2,26 +2,29 @@
 #   web client  http://localhost:8080      API + /docs  http://localhost:8000
 #   Grafana     http://localhost:3000      Prometheus   http://localhost:9090      Jaeger  http://localhost:16686
 #
-# This file only lists fragments; each owner edits their own file in deploy/compose/ (LLM_Context §8.3).
+# This file only lists fragments; each owner edits their own file in infra/compose/ (LLM_Context §8.3).
 # Deployment boundaries and why each service is separate: docs/decisions/304-vismay-deployment-boundaries.md
 name: fssai
 
 include:
   # platform (Vismay)
-  - path: deploy/compose/redis.yml
+  - path: infra/compose/redis.yml
     env_file: .env
-  - path: deploy/compose/postgres.yml
+  - path: infra/compose/postgres.yml
     env_file: .env
-  - path: deploy/compose/api.yml
+  - path: infra/compose/api.yml
     env_file: .env
-  - path: deploy/compose/worker.yml
+  - path: infra/compose/worker.yml
     env_file: .env
-  - path: deploy/compose/web.yml
+  - path: infra/compose/web.yml
     env_file: .env
   # knowledge and performance (Nishkal)
-  - path: deploy/compose/indexer.yml
+  - path: infra/compose/indexer.yml
     env_file: .env
-  - path: deploy/compose/stub-llm.yml
+  - path: infra/compose/stub-llm.yml
     env_file: .env
-  - path: deploy/compose/observability.yml
+  - path: infra/compose/observability.yml
+    env_file: .env
+  # trust and evaluation (Vihaan); opt-in: docker compose --profile quality up -d --build eval-scorer
+  - path: infra/compose/eval-scorer.yml
     env_file: .env

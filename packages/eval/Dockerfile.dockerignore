@@ -1,0 +1,6 @@
+**/__pycache__
+**/*.egg-info
+**/.pytest_cache
+.venv
+packages/eval/results
+packages/eval/candidates.jsonl

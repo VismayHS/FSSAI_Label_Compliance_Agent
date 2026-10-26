@@ -1,7 +1,7 @@
 # 2026-10-26: back-to-back real runs hit Groq's free-tier token limit and ended incomplete
 
 - **Author:** Vismay · **Severity:** would have broken any demo or eval run made in quick succession; found the day the real LLM was switched on
-- **Component:** `libs/llm_gateway` (and every run that uses the real provider)
+- **Component:** `packages/llm_gateway` (and every run that uses the real provider)
 
 ## What happened
 
@@ -38,7 +38,7 @@ was the same as a run that had just completed.
   malformed reply instead of failing the run.
 - On a 429 without `Retry-After`, the gateway now waits until the provider's token budget refills
   (`x-ratelimit-reset-tokens`, for example `4.11s`), still never past the run's deadline. Tests for all three in
-  `libs/llm_gateway/tests/test_client.py`.
+  `packages/llm_gateway/tests/test_client.py`.
 - Operating rule for the team: with the free tier, run real-LLM checks **one at a time**, about a minute apart, and
   plan the eval set accordingly (30 scenarios take over half an hour per prompt variant). The fallback model has its
   own 8,000-token bucket, so it is real extra capacity, not only a degradation path.

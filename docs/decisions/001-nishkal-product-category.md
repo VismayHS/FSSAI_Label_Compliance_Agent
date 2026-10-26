@@ -31,6 +31,6 @@ to a regulation we do not hold (see `docs/eval1/section-4.1-passages.md`, P11).
   explicit "unsupported" handling. The eval set's in-scope scenarios are cereals.
 - Namith's classifier cross-checks the declared category against the label text (a "cereal" with
   "whey protein isolate" first in the ingredients and supplement wording is suspicious, so it escalates).
-- Load-test payloads (`loadtest/payloads/`) are cereals.
-- `contracts/fssai_contracts/conformance.sample_request()` reads the category from `CORPUS_CATEGORIES`,
+- Load-test payloads (`infra/loadtest/payloads/`) are cereals.
+- `packages/contracts/fssai_contracts/conformance.sample_request()` reads the category from `CORPUS_CATEGORIES`,
   so the conformance tests keep working with the new value.

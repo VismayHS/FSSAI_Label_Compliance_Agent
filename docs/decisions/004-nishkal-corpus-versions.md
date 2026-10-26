@@ -33,7 +33,7 @@ Why:
 - Both have a full text layer, so no OCR is needed and the quotes are exact.
 - They are the versions an FSSAI analyst reads.
 
-Provenance is in `corpus/sources.yaml` and is computed into `corpus/manifest.json`: source URL, the URL the
+Provenance is in `data/corpus/sources.yaml` and is computed into `data/corpus/manifest.json`: source URL, the URL the
 bytes actually came from, version, sha256, pages, text layer. `fssai_ingest manifest` regenerates the
 manifest, and a test fails if the committed manifest no longer matches the PDFs.
 
@@ -49,6 +49,6 @@ manifest, and a test fails if the committed manifest no longer matches the PDFs.
 - **Where the bytes came from.** On 2026-10-25 every connection to fssai.gov.in was reset from our
   network (incident `docs/incidents/2026-10-25-nishkal-fssai-site-unreachable.md`). The files were
   fetched from the Internet Archive's captures of the official URLs (`retrieved_via` in
-  `corpus/sources.yaml`). When fssai.gov.in is reachable, download from `source_url` and compare the
+  `data/corpus/sources.yaml`). When fssai.gov.in is reachable, download from `source_url` and compare the
   sha256 in the manifest. A mismatch means a newer upload: re-run the manifest, rebuild the index
   (`--reembed changed`) and recheck the §4.1 passages.

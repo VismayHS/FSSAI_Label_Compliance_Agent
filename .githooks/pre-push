@@ -28,7 +28,7 @@ while read -r local_ref local_sha remote_ref remote_sha; do
     continue
   fi
   if [ -z "$owner" ]; then
-    fail "your branch isn't set. Run: python scripts/setup_dev.py <your-name>"
+    fail "your branch isn't set. Run: python tools/scripts/setup_dev.py <your-name>"
     continue
   fi
   if [ "$branch" != "$owner" ]; then

@@ -1,0 +1,41 @@
+# Postgres (owner Vismay): runs + step traces (D5), quarantine (D1), feedback (L6). Every owner's tables are
+# created from infra/postgres/init/NN-<name>-<table>.sql when the volume is first created, and postgres-init applies
+# them again on every `docker compose up`, so a table added later still appears on an existing volume.
+# To start from an empty database: docker compose down -v (this deletes all stored runs).
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-fssai}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change-me-locally}
+      POSTGRES_DB: ${POSTGRES_DB:-fssai}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\""]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  # One-shot: re-applies every init file in order. Each one must stay re-runnable (CREATE ... IF NOT EXISTS), so on an
+  # up-to-date database this changes nothing. The API and worker wait for it, because the gate and the feedback route
+  # pick Postgres or memory once, at start-up, by whether their table exists.
+  postgres-init:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-fssai}
+      PGPASSWORD: ${POSTGRES_PASSWORD:-change-me-locally}
+      PGDATABASE: ${POSTGRES_DB:-fssai}
+      PGOPTIONS: "-c client_min_messages=warning"   # no "already exists, skipping" notices on every boot
+    volumes:
+      - ../postgres/init:/init:ro
+    entrypoint: ["sh", "-c", "for f in /init/*.sql; do echo \"applying $$f\"; psql -q -v ON_ERROR_STOP=1 -f \"$$f\" || exit 1; done"]
+    depends_on:
+      postgres: {condition: service_healthy}
+    restart: "no"
+
+volumes:
+  postgres-data:

@@ -22,23 +22,23 @@ logs:            ## follow the logs                                   (docker co
 ps:              ## service status and health                         (docker compose ps)
 	docker compose ps
 
-smoke:           ## the stack serves a valid request (demo #1)        (python scripts/smoke.py)
-	$(PYTHON) scripts/smoke.py
+smoke:           ## the stack serves a valid request (demo #1)        (python tools/scripts/smoke.py)
+	$(PYTHON) tools/scripts/smoke.py
 
-test:            ## every package's tests                             (python scripts/test_all.py)
-	$(PYTHON) scripts/test_all.py
+test:            ## every package's tests                             (python tools/scripts/test_all.py)
+	$(PYTHON) tools/scripts/test_all.py
 
-audit:           ## no keys, endpoints or model ids in the repo (D4)  (python scripts/audit_secrets.py)
-	$(PYTHON) scripts/audit_secrets.py
+audit:           ## no keys, endpoints or model ids in the repo (D4)  (python tools/scripts/audit_secrets.py)
+	$(PYTHON) tools/scripts/audit_secrets.py
 
 demo-breaker:    ## circuit breaker opens and recovers (demo #8)      (docker compose exec worker python -m fssai_llm_gateway.demo)
 	docker compose exec worker python -m fssai_llm_gateway.demo
 
-clean-clone:     ## fresh clone -> compose up -> smoke (demo #1)      (python scripts/clean_clone_test.py)
-	$(PYTHON) scripts/clean_clone_test.py
+clean-clone:     ## fresh clone -> compose up -> smoke (demo #1)      (python tools/scripts/clean_clone_test.py)
+	$(PYTHON) tools/scripts/clean_clone_test.py
 
-cost:            ## cost per 100 runs and the biggest driver (L5)     (python scripts/cost_report.py)
-	$(PYTHON) scripts/cost_report.py
+cost:            ## cost per 100 runs and the biggest driver (L5)     (python tools/scripts/cost_report.py)
+	$(PYTHON) tools/scripts/cost_report.py
 
-report:          ## assemble docs/report/REPORT.md from every section (S4.3) (python scripts/build_report.py)
-	$(PYTHON) scripts/build_report.py
+report:          ## assemble docs/report/REPORT.md from every section (S4.3) (python tools/scripts/build_report.py)
+	$(PYTHON) tools/scripts/build_report.py

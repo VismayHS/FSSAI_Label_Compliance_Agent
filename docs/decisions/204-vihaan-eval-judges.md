@@ -1,7 +1,7 @@
 # 204: Eval metrics and judges: four definitions, three judges, TruLens yes, RAGAS no
 
 - **Owner:** Vihaan · **Status:** Accepted
-- **Requirement:** L3 (≥ 20 scenarios, TruLens, four metrics, before/after), L6 (live scoring) · Code: `eval/`
+- **Requirement:** L3 (≥ 20 scenarios, TruLens, four metrics, before/after), L6 (live scoring) · Code: `packages/eval/`
 
 ## Context
 
@@ -38,7 +38,7 @@ repeatably for before/after comparisons.
    Pinning older stacks would fork the team's dependency set for one extra metric. The RAGAS-style cross-check is
    instead the judge calibration in `python -m fssai_eval calibrate`: agreement and Cohen's kappa of the judge
    against hand labels.
-6. **Scenario quotes are machine-checked** (`eval/tools/check_scenarios.py`): each supporting quote must be verbatim
+6. **Scenario quotes are machine-checked** (`packages/eval/tools/check_scenarios.py`): each supporting quote must be verbatim
    text of the clause it names in the built index. Writing the set, the checker caught one quote typed as "no
    sugars" where the corpus reads "n o sugars".
 

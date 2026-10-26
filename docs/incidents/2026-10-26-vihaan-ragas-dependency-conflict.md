@@ -1,7 +1,7 @@
 # 2026-10-26: RAGAS cannot be installed next to the team's retrieval stack
 
-- **Author:** Vihaan · **Severity:** design change before merge; nothing reached `main` · **Components:** `eval/`
-  (judges), `libs/retrieval` (its pins)
+- **Author:** Vihaan · **Severity:** design change before merge; nothing reached `main` · **Components:** `packages/eval/`
+  (judges), `packages/retrieval` (its pins)
 
 ## What happened
 The plan for the L3 extras was a RAGAS faithfulness cross-check next to TruLens. In a throwaway venv, with the same

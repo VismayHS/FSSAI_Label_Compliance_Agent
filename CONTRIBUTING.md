@@ -2,7 +2,7 @@
 
 Four people share this repo, and each one keeps **their own branch and their own commit history**.
 Nobody works on `main` and nobody pushes to a shared branch. This file is the full workflow;
-`AGENTS.md` and `contexts/LLM_Context.md` §8 summarise it for AI assistants.
+`AGENTS.md` and `docs/contexts/LLM_Context.md` §8 summarise it for AI assistants.
 
 ## 1. The branch model
 
@@ -36,18 +36,18 @@ git config --global user.email "you@example.com"
 # 2. Clone and run the setup script with your own name
 git clone https://github.com/VismayHS/FSSAI_Label_Compliance_Agent.git
 cd FSSAI_Label_Compliance_Agent
-python scripts/setup_dev.py <your-name>      # nishkal | namith | vihaan | vismay
-#   (Windows: `py -3.11 scripts/setup_dev.py <your-name>` if `python` isn't 3.11+)
+python tools/scripts/setup_dev.py <your-name>      # nishkal | namith | vihaan | vismay
+#   (Windows: `py -3.11 tools/scripts/setup_dev.py <your-name>` if `python` isn't 3.11+)
 ```
 
 The script:
 1. switches you to your own branch (`<your-name>`) and sets it to track `origin/<your-name>`,
 2. turns on the repo's git hooks (`.githooks/`, see §6) and records your branch name for them,
-3. creates `.venv` and installs `contracts[test]`, your own packages (editable, with test extras) and
+3. creates `.venv` and installs `packages/contracts[test]`, your own packages (editable, with test extras) and
    the API + worker, then runs the contract tests and yours (`xfailed` = a skeleton you haven't built
-   yet; see *Start here* in your `contexts/<Name>.md`),
+   yet; see *Start here* in your `docs/contexts/<Name>.md`),
 4. creates `.env` from `.env.example` if you don't have one,
-5. installs the shared AI-assistant skills from `skills/` into `.claude/` for Claude Code.
+5. installs the shared AI-assistant skills from `tools/skills/` into `.claude/` for Claude Code.
 
 It is safe to run again at any time.
 
@@ -73,14 +73,14 @@ Commit messages: `<area>: <what changed>`, for example `gateway: add circuit bre
 1. Bring your branch up to date: `git fetch origin && git merge origin/main`.
 2. Run the checks:
    ```bash
-   <venv-python> -m pytest contracts -q
+   <venv-python> -m pytest packages/contracts -q
    <venv-python> -m pytest <your-package> -q
    # once Compose exists: docker compose up -d && make smoke   (or the plain command in the README)
    ```
 3. Push, then open a PR on GitHub: **base `main` ← compare `<your-name>`**. Fill in the template.
 4. Merge it with **"Create a merge commit"**. Squash and rebase merging are turned off.
    - If the PR only touches your own paths and the checks pass, you can merge it yourself.
-   - PRs touching `contracts/`, `docker-compose.yml`, `.env.example` structure or `.github/` need
+   - PRs touching `packages/contracts/`, `docker-compose.yml`, `.env.example` structure or `.github/` need
      one approval from an affected owner.
 5. Keep working on the same branch. **Don't delete it** when GitHub offers to.
 
@@ -89,7 +89,7 @@ push to your own branch as often as you like, because that affects nobody.
 
 ## 5. Working alongside each other
 
-- **You need a teammate's code that isn't on `main` yet.** Keep using the fake from `contracts/`.
+- **You need a teammate's code that isn't on `main` yet.** Keep using the fake from `packages/contracts/`.
   Don't merge their branch into yours: their commits would then show up inside your PR. To *read*
   what they're doing:
   ```bash
@@ -112,7 +112,7 @@ push to your own branch as often as you like, because that affects nobody.
 ## 6. Git hooks (`.githooks/`)
 
 GitHub can't limit who pushes to which branch in a personal repo, so the hooks enforce it on your
-machine. `scripts/setup_dev.py` turns them on; by hand that's
+machine. `tools/scripts/setup_dev.py` turns them on; by hand that's
 `git config core.hooksPath .githooks && git config fssai.branch <your-name>`.
 
 | Hook | What it does |
@@ -131,8 +131,8 @@ Use them freely, but **commits are written as yours alone**:
   tools (Copilot, Cursor, Codex, ...) have a similar setting; switch it off.
 - The assistant follows `AGENTS.md`: it edits only your paths, works only on your branch, and
   commits or pushes only when you ask.
-- How the assistant builds things (spec, tests first, review, the UI gate) is in `skills/`; see
-  `skills/README.md`. `scripts/setup_dev.py` installs them for Claude Code.
+- How the assistant builds things (spec, tests first, review, the UI gate) is in `tools/skills/`; see
+  `tools/skills/README.md`. `tools/scripts/setup_dev.py` installs them for Claude Code.
 
 ## 8. Settings the repo owner applies on GitHub
 

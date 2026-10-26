@@ -2,7 +2,7 @@
 
 Owner: Vihaan · Requirements: F1, F2, F6, F7, A3, D1, D7 (rate limiting), L3, L6 · Status: draft. The design and
 the harness are final. The before/after numbers marked **TODO(LLM)** need a free-tier key in `.env` and are filled
-from `eval/results/` (decision 205).
+from `packages/eval/results/` (decision 205).
 
 ## 1. Problem and scope of this part
 
@@ -78,7 +78,7 @@ read off once a value is chosen.
 
 ## 4. Evaluation method (L3)
 
-**Eval set:** `eval/scenarios.jsonl`, 30 scenarios in the breakfast-cereal category:
+**Eval set:** `packages/eval/scenarios.jsonl`, 30 scenarios in the breakfast-cereal category:
 
 Groups overlap, because one scenario can carry several tags:
 
@@ -96,12 +96,12 @@ Groups overlap, because one scenario can carry several tags:
 
 Expected routes: 14 `regulatory-review`, 12 `revise-and-recheck`, 4 `clear-for-print`. Each scenario has an
 expected route, expected findings and **real supporting quotes**.
-`eval/tools/check_scenarios.py` proves each quote is verbatim text of the named clause in the built index, and that
+`packages/eval/tools/check_scenarios.py` proves each quote is verbatim text of the named clause in the built index, and that
 each request passes the gate. It caught one hand-typed quote: the corpus reads "n o sugars" where it was typed as
 "no sugars".
 
 **Runner:** `python -m fssai_eval run --tag <name>` runs every scenario through `build("pipeline")` in-process, so
-it measures whatever the `IMPL_*` switches select. It writes `eval/results/<tag>.json` with per-scenario rows,
+it measures whatever the `IMPL_*` switches select. It writes `packages/eval/results/<tag>.json` with per-scenario rows,
 aggregates, the config (no secrets) and the definitions below. `compare` prints a before/after table with deltas;
 `gate` fails CI if hallucination or unsafe clears rise, or route accuracy drops.
 

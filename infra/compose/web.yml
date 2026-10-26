@@ -1,0 +1,17 @@
+# Web client (owner Vismay; A8): http://localhost:8080. nginx serves the app and proxies /v1, /docs and the
+# health endpoints to the api service.
+services:
+  web:
+    build:
+      context: ../../apps/web
+    image: fssai-web:local
+    depends_on:
+      api: {condition: service_healthy}
+    ports:
+      - "${WEB_HOST_PORT:-8080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:8080/web-healthz"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped

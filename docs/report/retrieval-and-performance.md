@@ -12,7 +12,7 @@ replaces:
 - Advertising and Claims Regulations 2018, Version-II (16.11.2021), 23 pages.
 - Labelling and Display Regulations 2020, Version-VI (22.02.2023), 42 pages.
 
-Both have a full text layer, so no OCR was needed. Provenance is in `corpus/manifest.json`: source URL,
+Both have a full text layer, so no OCR was needed. Provenance is in `data/corpus/manifest.json`: source URL,
 the URL the bytes came from, version and sha256. The product category is breakfast cereals (decision
 001). Health supplements are out of scope, because Schedule I Note 1 of the Claims regulation sends their
 claims to a regulation outside the corpus.
@@ -59,7 +59,7 @@ throughput) is published as Prometheus metrics by the worker that loads the inde
 
 ## 3. Retrieval quality
 
-28 hand-labelled queries (`corpus/eval/retrieval_queries.jsonl`), every relevant clause checked against
+28 hand-labelled queries (`data/corpus/eval/retrieval_queries.jsonl`), every relevant clause checked against
 the PDFs. Run with `python -m fssai_retrieval.evaluate`; real model:
 
 | Config | hit@1 | hit@3 | hit@5 | hit@10 | recall@5 | MRR |
@@ -79,7 +79,7 @@ be used …").
 
 ## 4. SLO, measured results and bottleneck (D6, A7)
 
-**Target** (declared before measuring, `loadtest/SLO.md`): complete-run p95 ≤ 60 s at 5 concurrent runs
+**Target** (declared before measuring, `infra/loadtest/SLO.md`): complete-run p95 ≤ 60 s at 5 concurrent runs
 (one worker, stub LLM with mean 1.5 s and p95 4 s per call), and ≤ 1 % failed runs.
 
 - **Why 60 s:** an analyst's pre-print check against tens of minutes by hand. Long enough for the
@@ -89,7 +89,7 @@ be used …").
 **Method.** Locust users submit, poll every 0.5 s and report `full_run` from submission to terminal
 state. Steps of 1, 2, 5, 10 and 20 users, 5 minutes each, at 1 and 3 workers, cache on and off.
 
-**Results.** *Pending the full-stack run (see `loadtest/results/README.md`).* The tooling has been
+**Results.** *Pending the full-stack run (see `infra/loadtest/results/README.md`).* The tooling has been
 verified end to end against the API on the fake pipeline. Those numbers measure the fakes, not the
 system, and are not reported.
 
@@ -118,11 +118,11 @@ cache-on/cache-off load matrix (pending, section 4). The expected result is a ch
 - `fssai_observability` gives every service JSON-lines logs (with `run_id` and `correlation_id`, and the
   RunContext events flattened to fields), OTel tracing to Jaeger over OTLP/HTTP (a no-op when not
   configured), and trace-context helpers to carry a trace across the queue.
-- The stack (`deploy/compose/observability.yml`) runs Prometheus, scraping every service including each
+- The stack (`infra/compose/observability.yml`) runs Prometheus, scraping every service including each
   worker replica via DNS discovery, plus Grafana, Jaeger, cAdvisor and Redis/Postgres exporters.
 - The *Service overview* dashboard shows run and HTTP p50/p95, error rate, throughput, availability,
   CPU, memory and uptime per container, retrieval latency and cache hit ratio, and index freshness.
-- Burn-rate alerts on the SLO are defined in `observability/prometheus/rules/slo.yml`.
+- Burn-rate alerts on the SLO are defined in `infra/observability/prometheus/rules/slo.yml`.
 
 ## 7. What did not work, or not first time
 

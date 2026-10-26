@@ -9,10 +9,10 @@ Every quote below is copied from the corpus PDFs, not from memory:
 
 | Code | File | Version |
 |---|---|---|
-| FSS-AC-2018 | `corpus/raw/FSS-AC-2018_compendium_2021-11-16.pdf` | Version-II (16.11.2021) |
-| FSS-LD-2020 | `corpus/raw/FSS-LD-2020_compendium.pdf` | Version-VI (22.02.2023) |
+| FSS-AC-2018 | `data/corpus/raw/FSS-AC-2018_compendium_2021-11-16.pdf` | Version-II (16.11.2021) |
+| FSS-LD-2020 | `data/corpus/raw/FSS-LD-2020_compendium.pdf` | Version-VI (22.02.2023) |
 
-Provenance and sha256 are in `corpus/manifest.json`. Quotes are the text layer as the system indexes it
+Provenance and sha256 are in `data/corpus/manifest.json`. Quotes are the text layer as the system indexes it
 (pypdf, whitespace collapsed), including the PDF's own spacing errors such as "itshall" and "schedule -I".
 That way a citation the system makes can be checked against this page character for character. Page
 numbers are the PDF page. "Passage id" is the id the retriever returns, so traces can be matched to this
@@ -46,7 +46,7 @@ original Schedule I (pp. 9–11) has the same protein condition. The system inde
 
 *Why it matters:* this is the provision the request never mentions and a single labelling search does
 not find (spec §5). Note that **the phrase "source of protein" occurs nowhere in either regulation**
-(`corpus/tools/grep_pdf.py "source of protein"` gives 0 matches). The table spells it as nutrient
+(`data/corpus/tools/grep_pdf.py "source of protein"` gives 0 matches). The table spells it as nutrient
 "Protein" and claim "Source", in separate columns. A system that matches the claim text against the
 regulations literally finds nothing.
 

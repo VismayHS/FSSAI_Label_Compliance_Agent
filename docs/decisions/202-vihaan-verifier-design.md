@@ -2,7 +2,7 @@
 
 - **Owner:** Vihaan · **Status:** Accepted
 - **Requirement:** A3 (verify every answer against retrieved passages; citations must resolve; else retry or
-  escalate), A2 (a second agent with its own prompt, tools and state), spec §5 step 4 · Code: `libs/verification/`
+  escalate), A2 (a second agent with its own prompt, tools and state), spec §5 step 4 · Code: `packages/verification/`
 
 ## Context
 

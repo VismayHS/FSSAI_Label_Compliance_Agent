@@ -34,7 +34,7 @@ for no measured benefit.
 
 **Rejected or failed requests never start work (D1).** The order on submit is: client id, size limit,
 gate (rate limit, validation, quarantine), save as `queued`, enqueue. A reject returns `422` with field
-errors and a quarantine id, and no run or job exists. `scripts/smoke.py` checks this on every run.
+errors and a quarantine id, and no run or job exists. `tools/scripts/smoke.py` checks this on every run.
 
 ## Asynchronous execution
 `POST /v1/runs` answers `202` with a run id, status URL and trace URL. The client polls with backoff
@@ -86,7 +86,7 @@ against the stub, with breaker state in Redis:
 
 ## Cost per 100 runs (L5)
 Cost is computed at call time from the provider's token counts and `LLM_PRICE_*_PER_1K`, recorded on each
-`llm` step, and stored per step in `run_steps`. `scripts/cost_report.py` and the Grafana `Cost (L5)`
+`llm` step, and stored per step in `run_steps`. `tools/scripts/cost_report.py` and the Grafana `Cost (L5)`
 dashboard show cost per 100 runs, cost by step and agent, and the largest single driver, all from the same
 table.
 
@@ -96,7 +96,7 @@ million completion tokens (Groq's model documentation). On the free tier we actu
 
 | | Value |
 |---|---|
-| Runs measured | 8 (`python scripts/cost_report.py --since 2026-10-26T16:00`) |
+| Runs measured | 8 (`python tools/scripts/cost_report.py --since 2026-10-26T16:00`) |
 | Mean cost per run | $0.002759 (p95 $0.003539) |
 | **Cost per 100 runs** | **$0.28** at list price |
 | Largest single cost driver (step) | the researcher's `act` step: 64% of spend (23 calls, 49,367 tokens); the researcher as a whole is 91% |

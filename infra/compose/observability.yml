@@ -1,0 +1,93 @@
+# Observability stack (owner Nishkal, D5, F8): Prometheus, Grafana, Jaeger, cAdvisor, and exporters for
+# Redis and Postgres so that Prometheus scrapes every service. Images are multi-arch (amd64 + arm64).
+#
+#   Grafana     http://localhost:3000   dashboards: service-overview (Nishkal), agents, quality, cost
+#   Prometheus  http://localhost:9090   targets: /targets, SLO burn-rate alerts: /alerts
+#   Jaeger      http://localhost:16686  traces (services export OTLP to http://jaeger:4318)
+#
+# Services send traces when OTEL_EXPORTER_OTLP_ENDPOINT=http://jaeger:4318 is in .env.
+services:
+  prometheus:
+    image: prom/prometheus:v3.5.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-7d}
+      - --web.enable-lifecycle
+    volumes:
+      - ../observability/prometheus:/etc/prometheus:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_HOST_PORT:-9090}:9090"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/-/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:12.0.0
+    depends_on:
+      prometheus: {condition: service_healthy}
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_AUTH_ANONYMOUS_ENABLED: "true"          # dashboards readable without logging in (demo)
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/service-overview.json
+      GRAFANA_PG_HOST: ${GRAFANA_PG_HOST:-postgres:5432}
+      GRAFANA_PG_DB: ${POSTGRES_DB:-fssai}
+      GRAFANA_PG_USER: ${GRAFANA_PG_USER:-fssai}
+      GRAFANA_PG_PASSWORD: ${GRAFANA_PG_PASSWORD:-change-me-locally}
+    volumes:
+      - ../observability/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ../observability/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana-data:/var/lib/grafana
+    ports:
+      - "${GRAFANA_HOST_PORT:-3000}:3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  jaeger:
+    image: jaegertracing/jaeger:2.5.0   # all-in-one; OTLP receivers on by default in v2
+    ports:
+      - "${JAEGER_UI_HOST_PORT:-16686}:16686"    # UI; OTLP 4317/4318 stay on the compose network
+    restart: unless-stopped
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.52.1
+    privileged: true
+    command:
+      - --docker_only=true
+      - --housekeeping_interval=10s
+      - --store_container_labels=false
+      - --whitelisted_container_labels=com.docker.compose.service,com.docker.compose.project
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    restart: unless-stopped
+
+  redis-exporter:
+    image: oliver006/redis_exporter:v1.67.0
+    environment:
+      REDIS_ADDR: ${REDIS_EXPORTER_ADDR:-redis://redis:6379}
+    restart: unless-stopped
+
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.17.1
+    environment:
+      DATA_SOURCE_URI: ${GRAFANA_PG_HOST:-postgres:5432}/${POSTGRES_DB:-fssai}?sslmode=disable
+      DATA_SOURCE_USER: ${GRAFANA_PG_USER:-fssai}
+      DATA_SOURCE_PASS: ${GRAFANA_PG_PASSWORD:-change-me-locally}
+    restart: unless-stopped
+
+volumes:
+  prometheus-data:
+  grafana-data:

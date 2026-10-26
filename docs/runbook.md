@@ -86,15 +86,15 @@ the exact "provision that modifies another" failure this project exists to catch
    docker compose run --rm indexer            # runs: build --reembed changed
    docker compose up -d --force-recreate worker   # the worker loads the index at start
    ```
-2. **Stale index after a regulation update.** Replace the PDF in `corpus/raw/` (and its version in `sources.yaml`), then run
+2. **Stale index after a regulation update.** Replace the PDF in `data/corpus/raw/` (and its version in `sources.yaml`), then run
    the same two commands. Nothing else changes.
 3. **Dense retrieval degraded (BM25 only).** The embedding model is missing from the `hf-cache` volume. Rebuild with
    network access once: `docker compose run --rm indexer`, then recreate the worker.
 4. **Confirm the fix.** `fssai_index_chunks_total` shows both regulations, `fssai_retrieval_empty_total` stops climbing,
-   and the §4.1 case ("source of protein") cites both regulations: `python scripts/smoke.py`.
+   and the §4.1 case ("source of protein") cites both regulations: `python tools/scripts/smoke.py`.
 5. Write an incident entry.
 
-**Do not** hand-edit files under `/data/index`; always rebuild from `corpus/raw/`.
+**Do not** hand-edit files under `/data/index`; always rebuild from `data/corpus/raw/`.
 
 ---
 

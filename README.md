@@ -31,7 +31,7 @@ Then open the web client at **http://localhost:8080**, press **Check the §4.1 e
 run's **Trace** tab. Check that everything works end to end:
 
 ```bash
-python scripts/smoke.py           # (python3 on macOS) readiness, one run to completion, one rejected request
+python tools/scripts/smoke.py           # (python3 on macOS) readiness, one run to completion, one rejected request
 ```
 
 With `.env` copied unchanged, every agent runs on the shared **fakes**, so the regulation text you see
@@ -47,7 +47,7 @@ is marked `[PLACEHOLDER, NOT REAL REGULATION TEXT]`. The next section switches o
 | Each teammate's component, once merged | its `IMPL_*` line (examples in `.env.example`) |
 
 Apply changes with `docker compose up -d` (it recreates only what changed). Credentials, endpoints and
-model ids live only in `.env`, which git ignores (D4; `python scripts/audit_secrets.py` checks the repo).
+model ids live only in `.env`, which git ignores (D4; `python tools/scripts/audit_secrets.py` checks the repo).
 
 ### What runs where
 
@@ -67,26 +67,26 @@ A port already taken on your machine? Change `API_HOST_PORT`, `WEB_HOST_PORT`, `
 
 ```bash
 curl -s -X POST http://localhost:8000/v1/runs -H "Content-Type: application/json" -H "X-Client-Id: me" \
-     -d @loadtest/payloads/protein-claim-low.json                    # 202 {run_id, status_url, trace_url}
+     -d @infra/loadtest/payloads/protein-claim-low.json                    # 202 {run_id, status_url, trace_url}
 curl -s http://localhost:8000/v1/runs/<run_id>                       # poll until state is completed or failed
 curl -s http://localhost:8000/v1/runs/<run_id>/trace                 # every step, passage, prompt, latency, cost
 ```
 
 A malformed body gets `422` with field-level errors and a `quarantine_id`, and no run is created. The
-full HTTP contract is in [contexts/LLM_Context.md §7](contexts/LLM_Context.md) and at `/docs`.
+full HTTP contract is in [docs/contexts/LLM_Context.md §7](docs/contexts/LLM_Context.md) and at `/docs`.
 
 ### Demos and checks
 
 | What | Command (or `make <target>` on macOS/Linux) |
 |---|---|
-| Smoke test (demo #1) | `python scripts/smoke.py` · `make smoke` |
-| Fresh clone → up → smoke, isolated from your running stack | `python scripts/clean_clone_test.py` · `make clean-clone` |
+| Smoke test (demo #1) | `python tools/scripts/smoke.py` · `make smoke` |
+| Fresh clone → up → smoke, isolated from your running stack | `python tools/scripts/clean_clone_test.py` · `make clean-clone` |
 | Circuit breaker opens, fails fast, recovers (demo #8) | `docker compose exec worker python -m fssai_llm_gateway.demo` · `make demo-breaker` |
 | Scale the workers (A7) | `docker compose up -d --scale worker=3` |
-| Load test against the declared SLO (demo #9) | see [loadtest/results/README.md](loadtest/results/README.md) |
-| Cost per 100 runs and the largest driver (L5) | `python scripts/cost_report.py` · `make cost` |
-| Every package's tests | `python scripts/test_all.py` (in the dev `.venv`) · `make test` |
-| No secrets in the repo (D4) | `python scripts/audit_secrets.py` · `make audit` |
+| Load test against the declared SLO (demo #9) | see [infra/loadtest/results/README.md](infra/loadtest/results/README.md) |
+| Cost per 100 runs and the largest driver (L5) | `python tools/scripts/cost_report.py` · `make cost` |
+| Every package's tests | `python tools/scripts/test_all.py` (in the dev `.venv`) · `make test` |
+| No secrets in the repo (D4) | `python tools/scripts/audit_secrets.py` · `make audit` |
 | Logs · status · stop | `docker compose logs -f` · `docker compose ps` · `docker compose down` |
 
 ### When something goes wrong
@@ -114,51 +114,61 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) before your first commit.
    git config --global user.email "you@example.com"     # the email on your GitHub account
    git clone https://github.com/VismayHS/FSSAI_Label_Compliance_Agent.git
    cd FSSAI_Label_Compliance_Agent
-   python scripts/setup_dev.py <your-name>             # nishkal | namith | vihaan | vismay
+   python tools/scripts/setup_dev.py <your-name>             # nishkal | namith | vihaan | vismay
    ```
    It switches you to your branch, turns on the git hooks, creates `.venv` with the contracts, your own
    packages and the API, runs the tests and creates `.env`.
-2. Read [contexts/LLM_Context.md](contexts/LLM_Context.md), then your own `contexts/<Name>.md` from *Start here*.
+2. Read [docs/contexts/LLM_Context.md](docs/contexts/LLM_Context.md), then your own `docs/contexts/<Name>.md` from *Start here*.
    AI coding assistants pick up [AGENTS.md](AGENTS.md) (Claude Code also loads [CLAUDE.md](CLAUDE.md)).
 
 Without Docker, the API also runs on its own on the fakes (inline mode, no Redis or Postgres):
 ```bash
 .venv/Scripts/python -m uvicorn app.main:create_app --factory --env-file .env --port 8000   # macOS: .venv/bin/python
-npm --prefix services/web ci && npm --prefix services/web run dev                          # http://localhost:5173
+npm --prefix apps/web ci && npm --prefix apps/web run dev                          # http://localhost:5173
 ```
 
 ## Repository map
 
-Every folder has a README that says what is in it and who owns it.
+Six top-level folders, each with a README that says what is in it and who owns it.
 
 ```text
 .
-├── docker-compose.yml   the whole stack: includes one fragment per owner from deploy/compose/
+├── apps/                what runs as a container
+│   ├── api/             FastAPI: submit, poll, trace, health (+ feedback and quarantine routes)
+│   ├── worker/          queue consumer that runs the agent pipeline (--scale worker=N)
+│   ├── web/             the analyst's web client (React + Vite, served by nginx)
+│   └── stub_llm/        OpenAI-compatible stand-in LLM for load tests and the breaker demo
+├── packages/            Python packages, one per component, each with its own pyproject.toml and tests
+│   ├── contracts/       the shared seams: schemas, interfaces, fakes, reference pipeline, conformance checks
+│   ├── agents/ prompts/ guardrails/            classifier, researcher, LangGraph pipeline; versioned prompts
+│   ├── ingest/ retrieval/ observability/       index build, hybrid retrieval, logs/tracing/metrics helpers
+│   ├── gate/ verification/                     ingestion gate; verifier agent and router
+│   ├── llm_gateway/ run_store/                 LLM client with retries, breaker and cost; Postgres run store
+│   └── eval/            evaluation set, runner, metrics and live scoring
+├── infra/               how it is deployed and observed
+│   ├── compose/         one Compose fragment per owner (included by docker-compose.yml)
+│   ├── postgres/init/   one SQL file per owner and table
+│   ├── observability/   Prometheus rules and Grafana dashboards
+│   └── loadtest/        the declared SLO, the Locust load test and its results
+├── data/corpus/         the two FSSAI regulations (PDFs), their provenance, claim-trigger map
+├── docs/                architecture, agent topology, runbook, data contract, decisions, incidents, report
+│   ├── contexts/        the shared project context and each team member's plan and progress
+│   └── course/          the course documents (spec, glossary, index)
+├── tools/
+│   ├── scripts/         setup, smoke test, clean-clone test, tests, secrets audit, cost report, report builder
+│   └── skills/          shared AI-assistant skills (our own, plus pinned vendored copies)
+├── docker-compose.yml   the whole stack: includes the fragments in infra/compose/
 ├── .env.example         every setting, one section per owner (copy to .env; .env is never committed)
-├── Makefile             shortcuts for the commands below (each is also a plain command)
-├── contracts/           the shared seams: schemas, interfaces, fakes, reference pipeline, conformance checks
-├── libs/                the components, one Python package each (retrieval, agents, guardrails, gate, ...)
-├── services/            what runs: api, worker, web (the client), stub_llm
-├── corpus/              the two FSSAI regulations (PDFs) and what the index is built from
-├── eval/                the evaluation set, runner, metrics and live scoring
-├── loadtest/            the declared SLO, Locust load test and its results
-├── deploy/              Compose fragments and Postgres tables
-├── observability/       Prometheus and Grafana configuration and dashboards
-├── scripts/             setup, smoke test, clean-clone test, secrets audit, cost report
-├── docs/                architecture, agent topology, runbook, decisions, incidents, report, course documents
-├── contexts/            each team member's plan and progress, plus the shared project context
-├── skills/              shared AI-assistant skills (vendored, pinned)
+├── Makefile             shortcuts for the commands above (each is also a plain command)
 └── .github/ .githooks/  CI, CODEOWNERS and PR template; the git hooks that enforce the branch rules
 ```
 
 | Path | Owner |
 |---|---|
-| [`contracts/`](contracts/) | shared, stewarded by Vismay |
-| [`libs/`](libs/) | per package: see [libs/README.md](libs/README.md) |
-| [`services/`](services/) | api, worker, web: Vismay · stub_llm: Nishkal |
-| [`corpus/`](corpus/), [`loadtest/`](loadtest/), [`observability/`](observability/) | Nishkal (one dashboard file per owner) |
-| [`eval/`](eval/) | Vihaan |
-| [`deploy/`](deploy/) | one Compose fragment and one SQL file per owner |
-| [`docs/`](docs/) | per file: see [docs/README.md](docs/README.md) |
-| [`scripts/`](scripts/), [`skills/`](skills/), [`.github/`](.github/), root files | Vismay |
-| [`contexts/`](contexts/) | each person edits their own file; `LLM_Context.md` is Vismay's |
+| [`apps/`](apps/) | api, worker, web: Vismay · stub_llm: Nishkal · api feedback and quarantine routes: Vihaan |
+| [`packages/`](packages/) | per package: see [packages/README.md](packages/README.md); `contracts/` is shared, stewarded by Vismay |
+| [`infra/`](infra/) | one Compose fragment and one SQL file per owner; `observability/` and `loadtest/`: Nishkal (one dashboard file per owner) |
+| [`data/corpus/`](data/corpus/) | Nishkal |
+| [`docs/`](docs/) | per file: see [docs/README.md](docs/README.md); each person edits only their own `contexts/<Name>.md` |
+| [`tools/`](tools/), [`.github/`](.github/), root files | Vismay |
+
