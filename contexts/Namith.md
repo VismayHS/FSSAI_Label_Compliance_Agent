@@ -113,11 +113,11 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 0: setup
 
-- [ ] **M0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py namith` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
+- [x] **M0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py namith` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_prompt_store`, `check_guardrails`, `check_classifier`, `check_researcher`, `check_pipeline`).
   3. Make one small commit of your own on `namith` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `namith`), so you've done the whole loop once.
-- [ ] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
+- [x] **M0.2 Do a LangGraph spike.** Build a throwaway two-node graph with one tool call, run against `DevLLMClient`. Learn how state, conditional edges and `recursion_limit` work. Get a free-tier key (OpenAI-compatible) into your local `.env`.
 
 ## Phase 1: Evaluation 1 items
 
@@ -145,7 +145,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   category in CORPUS_CATEGORIES (env). Record a "classification" step. Tests with a scripted fake LLM:
   claim hidden in front_of_pack_text is detected; malformed LLM JSON triggers fallback; out-of-scope.
   ```
-- [ ] **M1.3 Draft the topology document** (`docs/agent-topology.md`) for the Evaluation 1 plan. Include:
+- [x] **M1.3 Draft the topology document** (`docs/agent-topology.md`) for the Evaluation 1 plan. Include:
   - a diagram of guardrails → classifier → researcher ⇄ verifier → router → output filter,
   - each agent's tools and state, and the hand-off schemas,
   - the loop bounds,
@@ -179,7 +179,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   Tests: with FakeRetriever + scripted fake LLM, a "source of protein" claim leads to a search
   restricted to FSS-AC-2018 after the labelling search; quotes are substrings; budget stops the loop.
   ```
-- [ ] **M2.2 Build the LangGraph pipeline (A2).** `fssai_agents.graph:LangGraphPipeline` implements `Pipeline`. It does what `ReferencePipeline` does, as a graph:
+- [x] **M2.2 Build the LangGraph pipeline (A2).** `fssai_agents.graph:LangGraphPipeline` implements `Pipeline`. It does what `ReferencePipeline` does, as a graph:
   - guardrails → classifier → researcher ⇄ verifier (retry edge) → router → output filter.
   - Its behaviour at the edges must be identical, which you prove by running the **contracts test-suite against your pipeline**.
   - The verifier and router come from the registry (Vihaan's, or fakes until then).
@@ -196,7 +196,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 3: all requirements
 
-- [ ] **M3.1 Build the guardrails (L4).** `fssai_guardrails.Guardrails` has two halves.
+- [x] **M3.1 Build the guardrails (L4).** `fssai_guardrails.Guardrails` has two halves.
 
   **`screen_input`** checks every free-text field for:
   - injection, using heuristics *and* a local classifier model or an LLM-judge, whichever you justify in a decision record,
@@ -223,20 +223,20 @@ Each package README lists its files and commands. `conformance.sample_request()`
   - Run both on Vihaan's eval set (`PROMPT_RESEARCHER_VERSION=...`, same scenarios).
   - Report which was better, on which metric, and by how much, in `docs/decisions/1xx-namith-prompt-comparison.md`.
   - If the runner isn't ready yet, compare route accuracy on the scenarios with your own script, then redo it with the full metrics later.
-- [ ] **M3.3 Add per-agent metrics (A6)** using `prometheus_client`, labelled by `agent`:
+- [x] **M3.3 Add per-agent metrics (A6)** using `prometheus_client`, labelled by `agent`:
   - runs and successes (task success rate),
   - steps and tool calls per run (histograms),
   - per-step latency (histogram), end-to-end latency,
   - retries (counter).
 
   Build the `agents.json` dashboard, plus container uptime from cAdvisor or `process_start_time_seconds`. Nishkal's stack scrapes it.
-- [ ] **M3.4 Write the runbook (D8)** in `docs/runbook.md` for the two most likely failure modes, probably "LLM provider rate-limited or down → breaker open" and "index missing or stale → empty retrieval". For each, give the symptom (which dashboard or log), how to confirm it (exact command or query) and how to recover (exact steps). Use the incident entries everyone writes.
+- [x] **M3.4 Write the runbook (D8)** in `docs/runbook.md` for the two most likely failure modes, probably "LLM provider rate-limited or down → breaker open" and "index missing or stale → empty retrieval". For each, give the symptom (which dashboard or log), how to confirm it (exact command or query) and how to recover (exact steps). Use the incident entries everyone writes.
 
 ## Phase 4: hardening, extras, report
 
 - [ ] **M4.1 Rehearse demo items 2 and 7.** For #2, show a valid request whose citations resolve in the trace. For #7, show an injection in `front_of_pack_text` with the guardrail report visible in the result and the trace.
 - [ ] **M4.2 Write your report section** in `docs/report/agent-design.md`.
-- [ ] **M4.3 Write at least one incident entry** in `docs/incidents/`.
+- [x] **M4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [ ] LangGraph checkpointing (Postgres or Redis saver) so a run interrupted mid-graph can resume, and add this to the A2 failure doc
   - [ ] a red-team suite of 30+ attacks run in CI, reporting the block rate
@@ -263,4 +263,9 @@ output-authorisation guardrails."*
   still unticked above: tick them if they're done.
 
 - 2026-10-26: M2.1 researcher built (LangGraph: plan, act, run_tool, coverage, draft). Prompts `researcher` and `researcher_draft` 1.0.0. Checked against the real index with a scripted LLM; not yet against a real LLM. RDA guard on by default (open team question).
+ namith
+- 2026-10-26: M2.2 LangGraphPipeline built (screen, classify, research, verify with retry edge, route, finish). Parity tests run the reference pipeline's scenarios through both pipelines and compare route, verdict, findings and step sequence. Opt-in slow e2e test for section 4.1 (real LLM + real index). M2.3: IMPL_* examples added to .env.example; still to tell Vismay to flip them in the shared .env.
+- 2026-10-26: M3.3 per-agent metrics (`fssai_agents.metrics`, derived from the run's step trace and hooked into the pipeline) and the `agents.json` dashboard done. M3.4 runbook (`docs/runbook.md`) done. M4.3 incident entry written (`2026-10-26-namith-diverged-branch-merge`). Still open: M2.3 (Vismay flips the `IMPL_*` switches), M3.2 prompt comparison (needs a real LLM key and Vihaan's eval set), M4.1, M4.2.
+
+ main
  main
