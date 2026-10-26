@@ -216,6 +216,15 @@ class ModelToxicity:
 
 # ---------------------------------------------------------------- LLM judge (opt-in second layer)
 
+
+_DATA_TAG = re.compile(r"</?\s*label_data[^>]*>")
+
+
+def _strip_data_tags(text: str) -> str:
+    """Remove any label_data tag from untrusted text so it cannot close or fake our data delimiters."""
+    return _DATA_TAG.sub("[removed tag]", text)
+
+
 class LLMJudgeInjection:
     """One LLM call per run: which fields try to instruct the system? Wrapped as data; output validated.
     Needs an LLM step, so it is off by default. If the provider is down the heuristics still apply."""
@@ -228,8 +237,9 @@ class LLMJudgeInjection:
         names = list(fields)
         if not names:
             return []
-        blocks = "\n".join(f'<label_data field="{n}">\n{re.sub(r"</?\s*label_data[^>]*>", "[removed tag]", t)[:1500]}\n</label_data>'
-                           for n, t in fields.items())
+        blocks = "\n".join(
+            f'<label_data field="{n}">\n{_strip_data_tags(t)[:1500]}\n</label_data>'
+            for n, t in fields.items())
         prompt = self.prompts.get("guardrail_judge")
         messages = prompt.render(fields=blocks, input=blocks)
         ctx.check_budget()
