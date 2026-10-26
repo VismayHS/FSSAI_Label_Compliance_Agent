@@ -10,4 +10,5 @@ Helpers written in Python, so they run the same on Windows and macOS. The `Makef
 | `test_all.py` | Every Python package's tests, one pytest process each (what CI runs) | `make test` |
 | `audit_secrets.py` | D4: fails on credentials, provider endpoints or model ids in the repo | `make audit` |
 | `cost_report.py` | L5: cost per 100 runs, cost by step and agent, and the biggest cost driver, from the run store | `make cost` |
+| `build_report.py` | Assembles the final report from every owner's section, the decision records and the incidents (`--strict` fails while a section is missing) | `make report` |
 | `sync_skills.py` | Vendor, update and install the shared AI-assistant skills (see `skills/README.md`) | |
