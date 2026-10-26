@@ -128,13 +128,37 @@ npm --prefix services/web ci && npm --prefix services/web run dev               
 ```
 
 ## Repository map
-| Path | What |
+
+Every folder has a README that says what is in it and who owns it.
+
+```text
+.
+├── docker-compose.yml   the whole stack: includes one fragment per owner from deploy/compose/
+├── .env.example         every setting, one section per owner (copy to .env; .env is never committed)
+├── Makefile             shortcuts for the commands below (each is also a plain command)
+├── contracts/           the shared seams: schemas, interfaces, fakes, reference pipeline, conformance checks
+├── libs/                the components, one Python package each (retrieval, agents, guardrails, gate, ...)
+├── services/            what runs: api, worker, web (the client), stub_llm
+├── corpus/              the two FSSAI regulations (PDFs) and what the index is built from
+├── eval/                the evaluation set, runner, metrics and live scoring
+├── loadtest/            the declared SLO, Locust load test and its results
+├── deploy/              Compose fragments and Postgres tables
+├── observability/       Prometheus and Grafana configuration and dashboards
+├── scripts/             setup, smoke test, clean-clone test, secrets audit, cost report
+├── docs/                architecture, agent topology, runbook, decisions, incidents, report, course documents
+├── contexts/            each team member's plan and progress, plus the shared project context
+├── skills/              shared AI-assistant skills (vendored, pinned)
+└── .github/ .githooks/  CI, CODEOWNERS and PR template; the git hooks that enforce the branch rules
+```
+
+| Path | Owner |
 |---|---|
-| `contexts/` | Team and LLM context files |
-| `contracts/` | Shared schemas, interfaces, fakes, reference pipeline, conformance checks |
-| `libs/`, `services/` | Components, each its own Python package (the web client is `services/web`) |
-| `docker-compose.yml`, `deploy/` | The stack: the root file includes one Compose fragment per owner; Postgres tables |
-| `corpus/`, `eval/`, `loadtest/`, `observability/` | Regulations + index inputs, evaluation, load tests, monitoring |
-| `docs/` | Course documents (spec, glossary, index), architecture, decisions, incidents, report |
-| `scripts/`, `.githooks/`, `.github/` | Setup, smoke, demos, audit; git hooks; CI |
-| `skills/` | Shared AI-assistant skills (see [skills/README.md](skills/README.md)) |
+| [`contracts/`](contracts/) | shared, stewarded by Vismay |
+| [`libs/`](libs/) | per package: see [libs/README.md](libs/README.md) |
+| [`services/`](services/) | api, worker, web: Vismay · stub_llm: Nishkal |
+| [`corpus/`](corpus/), [`loadtest/`](loadtest/), [`observability/`](observability/) | Nishkal (one dashboard file per owner) |
+| [`eval/`](eval/) | Vihaan |
+| [`deploy/`](deploy/) | one Compose fragment and one SQL file per owner |
+| [`docs/`](docs/) | per file: see [docs/README.md](docs/README.md) |
+| [`scripts/`](scripts/), [`skills/`](skills/), [`.github/`](.github/), root files | Vismay |
+| [`contexts/`](contexts/) | each person edits their own file; `LLM_Context.md` is Vismay's |

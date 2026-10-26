@@ -4,6 +4,7 @@ import type { LabelCheckRequest } from "./api/types";
 
 import { Header } from "./components/Header";
 import { RecentRuns } from "./components/RecentRuns";
+import { ReviewQueue } from "./components/ReviewQueue";
 import { RequestPanel } from "./components/RequestPanel";
 import { RunPanel } from "./components/RunPanel";
 import { useHashRoute } from "./lib/useHashRoute";
@@ -26,9 +27,11 @@ export default function App() {
     <>
       <a className="skip-link" href="#main">Skip to the check</a>
       <Header view={view} ready={ready} />
-      <main id="main" className={view.name === "runs" ? "layout layout--single" : "layout"}>
+      <main id="main" className={view.name === "check" ? "layout" : "layout layout--single"}>
         {view.name === "runs" ? (
           <RecentRuns />
+        ) : view.name === "review" ? (
+          <ReviewQueue runId={view.runId} />
         ) : (
           <>
             <RequestPanel initialKey={formRun?.runId ?? "new"} initial={formRun?.request} onAccepted={open} />

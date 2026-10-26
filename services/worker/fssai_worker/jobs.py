@@ -19,10 +19,13 @@ from fssai_contracts.context import RunContext
 from fssai_contracts.registry import build
 from fssai_contracts.schemas import LabelCheckRequest, RunState, RunStatus, utcnow
 
-log = logging.getLogger("fssai.worker")
+from . import webhook
+
+log =logging.getLogger("fssai.worker")
 
 RUNS_FINISHED = Counter("fssai_runs_finished_total", "Runs finished by the worker",
                         ["state", "route", "complete"])
+WEBHOOKS = Counter("fssai_webhooks_total", "Run-finished callbacks sent by the worker", ["outcome"])
 RUN_SECONDS = Histogram("fssai_run_duration_seconds", "Wall-clock time of a run inside the worker",
                         buckets=(0.5, 1, 2, 5, 10, 20, 30, 45, 60, 90, 120, 180))
 
@@ -39,11 +42,16 @@ def default_deps() -> Deps:
     return Deps(pipeline=build("pipeline"), run_store=build("run_store"))
 
 
-def payload_for(run_id: str, correlation_id: str, request: LabelCheckRequest) -> dict:
+def payload_for(run_id: str, correlation_id: str, request: LabelCheckRequest,
+                callback_url: str | None = None) -> dict:
     """What travels on the queue: plain JSON, so any worker can pick it up. `trace` carries the caller's
-    OpenTelemetry context (empty when tracing is off), so the run continues the API's trace (D5)."""
-    return {"run_id": run_id, "correlation_id": correlation_id, "request": request.model_dump(mode="json"),
-            "trace": inject_trace_context()}
+    OpenTelemetry context (empty when tracing is off), so the run continues the API's trace (D5).
+    `callback_url` (already checked by the API) is notified when the run finishes."""
+    payload = {"run_id": run_id, "correlation_id": correlation_id, "request": request.model_dump(mode="json"),
+               "trace": inject_trace_context()}
+    if callback_url:
+        payload["callback_url"] = callback_url
+    return payload
 
 
 def execute_run(payload: dict, deps: Deps | None = None) -> str:
@@ -85,4 +93,8 @@ def _execute(payload: dict, deps: Deps) -> str:
     RUN_SECONDS.observe(time.monotonic() - t0)
     ctx.event("run_finished", state=final.state.value, route=route, complete=complete,
               duration_ms=round((time.monotonic() - t0) * 1000, 1))
+    if payload.get("callback_url"):  # after the save: the receiver can fetch the run as soon as it is told
+        delivered = webhook.notify(payload["callback_url"], final)
+        WEBHOOKS.labels("delivered" if delivered else "failed").inc()
+        ctx.event("webhook_delivered" if delivered else "webhook_failed")
     return final.state.value

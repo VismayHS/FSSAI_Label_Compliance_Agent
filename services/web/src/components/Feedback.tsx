@@ -49,11 +49,13 @@ export function Feedback({ runId }: { runId: string }) {
           ))}
         </div>
         <div className="field">
-          <label htmlFor="feedback-reason">Why (optional)</label>
-          <textarea id="feedback-reason" rows={2} maxLength={2000} value={reason}
+          {/* The feedback endpoint requires a reason (1 to 2000 characters): the team reads it to fix the system. */}
+          <label htmlFor="feedback-reason">Why? One sentence is enough</label>
+          <textarea id="feedback-reason" rows={2} maxLength={2000} required value={reason}
             onChange={(e) => setReason(e.target.value)} />
         </div>
-        <button type="submit" className="button" disabled={satisfactory === null || state === "sending"}
+        <button type="submit" className="button"
+          disabled={satisfactory === null || !reason.trim() || state === "sending"}
           aria-busy={state === "sending" || undefined}>
           {state === "sending" ? "Sending…" : "Send feedback"}
         </button>

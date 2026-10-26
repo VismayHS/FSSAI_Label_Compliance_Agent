@@ -6,7 +6,7 @@
 D3 asks for at least four Compose services started by one `docker compose up`, each with a health check,
 and for the boundaries to be justified by scaling, failure isolation, independent release and resource
 profile. A *deployment boundary* is everything deployed, scaled and restarted as one unit
-(`docs/00_GLOSSARY.pdf`). The pieces differ a lot: HTTP handling takes milliseconds, an agent run takes
+(`docs/course/00_GLOSSARY.pdf`). The pieces differ a lot: HTTP handling takes milliseconds, an agent run takes
 tens of seconds and holds an embedding model and the index in memory, the index build is a heavy job that
 runs only when the corpus changes, and the load test must not pay a real provider.
 

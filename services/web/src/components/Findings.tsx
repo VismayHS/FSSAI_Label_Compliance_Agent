@@ -5,7 +5,7 @@ import { STATUS_MEANING, STATUS_WORD } from "../lib/format";
 import { Mark } from "./Mark";
 
 /** Most severe first, so what must change is read before what passed. */
-const SEVERITY = { unmet: 0, cannot_determine: 1, met: 2, not_applicable: 3 } as const;
+export const SEVERITY = { unmet: 0, cannot_determine: 1, met: 2, not_applicable: 3 } as const;
 
 /** One row per requirement on a shared grid: mark, id, what was checked + the quoted clause, status. */
 export function Findings({ findings, verdict }: { findings: Finding[]; verdict: Verdict | null }) {

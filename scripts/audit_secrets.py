@@ -34,7 +34,10 @@ CHECKS: list[tuple[str, re.Pattern[str]]] = [
                                          r"|openrouter\.ai/api|api\.anthropic\.com|api\.together\.xyz|api\.mistral\.ai"
                                          r"|api\.deepseek\.com|integrate\.api\.nvidia\.com|api\.cohere\.ai)\b")),
     # model ids
-    ("LLM model id", re.compile(r"(?i)\b(?:gpt-(?:3\.5|4|4o|4\.1|5)[\w.-]*|o[134]-mini|llama-?3[\w.-]*|gemini-[0-9][\w.-]*"
+    # an "<publisher>/<model>" id as OpenAI-compatible providers take them (but not a path segment such as openai/v1)
+    ("LLM model id", re.compile(r"(?i)\b(?:openai|meta-llama|qwen|mistralai|deepseek-ai|moonshotai|google|nvidia"
+                                r"|microsoft|ibm-granite)/(?!v\d+\b)[a-z][\w.-]*\d[\w.-]*")),
+    ("LLM model id", re.compile(r"(?i)\b(?:gpt-oss-[\w.-]+|gpt-(?:3\.5|4|4o|4\.1|5)[\w.-]*|o[134]-mini|llama-?3[\w.-]*|gemini-[0-9][\w.-]*"
                                 r"|mixtral-[\w.-]+|claude-(?:[0-9]|opus|sonnet|haiku)[\w.-]*|deepseek-(?:chat|r1|v[0-9])[\w.-]*"
                                 r"|qwen[0-9][\w.-]*|gemma-?[0-9][\w.-]*)\b")),
     ("embedding model id", re.compile(r"(?i)\b(?:all-MiniLM-L\d+[\w.-]*|bge-(?:small|base|large)[\w.-]*"

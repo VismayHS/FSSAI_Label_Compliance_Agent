@@ -5,21 +5,24 @@ Order on submit, so a malformed request can never start an agent run (D1, demo #
 """
 from __future__ import annotations
 
+import asyncio
 import json
 import math
 import os
 import re
+import time
 import uuid
 from typing import Annotated
 from urllib.parse import urlencode
 
 from fastapi import APIRouter, Header, Path, Query, Request
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from fssai_observability import span
 from prometheus_client import Counter
 
-from fssai_contracts.schemas import FieldError, RunState, RunStatus, utcnow
+from fssai_contracts.schemas import FieldError, Route, RunState, RunStatus, utcnow
+from fssai_worker import webhook
 from fssai_worker.jobs import payload_for
 
 from ..models import AgentRollup, Problem, RateLimited, RunAccepted, RunRejected, RunSummary, RunTrace
@@ -69,11 +72,15 @@ def _parse(body: bytes) -> tuple[dict, list[FieldError]]:
     openapi_extra={"requestBody": {"required": True, "content": {"application/json": {
         "schema": {"$ref": "#/components/schemas/LabelCheckRequest"}}}}},
 )
-async def submit_run(request: Request, x_client_id: str | None = Header(None, description="Caller id, used for rate limiting")):
+async def submit_run(request: Request, x_client_id: str | None = Header(None, description="Caller id, used for rate limiting"),
+                     x_callback_url: str | None = Header(None, description="Optional: POSTed a run-finished notice "
+                                                         "when the run ends. Only hosts in WEBHOOK_ALLOWED_HOSTS.")):
     state = request.app.state
     cid = request.state.correlation_id
     if not x_client_id or not _CLIENT_ID.match(x_client_id):
         return _problem(400, "Header X-Client-Id is required: 1-64 letters, digits or . _ : -", request)
+    if x_callback_url is not None and (problem := webhook.check_url(x_callback_url)):
+        return _problem(400, problem, request)  # before the gate: a bad callback is the caller's setup, not data
 
     limit = state.settings.max_request_bytes
     declared = request.headers.get("content-length", "")
@@ -109,7 +116,8 @@ async def submit_run(request: Request, x_client_id: str | None = Header(None, de
     await run_in_threadpool(state.run_store.save, status)
     try:
         with span("api.submit_run", run_id=run_id, correlation_id=cid, client_id=x_client_id):
-            payload = payload_for(run_id, cid, decision.request)  # carries this span's context to the worker
+            payload = payload_for(run_id, cid, decision.request,  # carries this span's context to the worker
+                                  callback_url=x_callback_url)
         await run_in_threadpool(state.dispatcher.submit, payload)
     except Exception as exc:  # noqa: BLE001 - the queue being down must end as an honest error
         failed = status.model_copy(update={"state": RunState.FAILED, "updated_at": utcnow(),
@@ -127,8 +135,14 @@ async def submit_run(request: Request, x_client_id: str | None = Header(None, de
 
 
 @router.get("/runs", response_model=list[RunSummary], summary="Recent runs, newest first")
-async def list_runs(request: Request, limit: int = Query(20, ge=1, le=100)) -> list[RunSummary]:
-    runs = await run_in_threadpool(request.app.state.run_store.recent, limit)
+async def list_runs(request: Request, limit: int = Query(20, ge=1, le=100),
+                    route: Route | None = Query(None, description="Only runs routed here, e.g. the "
+                                                "regulatory-review queue for the reviewer console")) -> list[RunSummary]:
+    if route is None:
+        runs = await run_in_threadpool(request.app.state.run_store.recent, limit)
+    else:  # the RunStore seam has no route filter, so look further back and filter here
+        recent = await run_in_threadpool(request.app.state.run_store.recent, min(limit * 10, 500))
+        runs = [r for r in recent if r.result and r.result.routing.route == route][:limit]
     return [RunSummary(run_id=r.run_id, state=r.state, submitted_at=r.submitted_at, updated_at=r.updated_at,
                        product_name=r.request.label.product_name if r.request else None,
                        route=r.result.routing.route if r.result else None,
@@ -174,3 +188,45 @@ async def get_trace(request: Request, run_id: RunId):
         "verdict": result.verdict, "routing": result.routing, "guardrails": result.guardrails,
         "prompt_versions": result.prompt_versions, "totals": result.totals, "agents": agents,
         "steps": result.steps, "notice": result.notice})
+
+
+def _env_s(name: str, default: float) -> float:
+    raw = os.environ.get(name, "").split("#", 1)[0].strip()
+    return float(raw) if raw else default
+
+
+@router.get("/runs/{run_id}/events", summary="Follow a run live (server-sent events)",
+            description="A `text/event-stream` instead of polling: an `event: status` with the full `RunStatus` "
+                        "every time the run changes, then `event: end` once it is completed or failed. Comment "
+                        "lines are keep-alives. Clients without EventSource keep polling `GET /v1/runs/{run_id}`.",
+            responses={200: {"content": {"text/event-stream": {}}}, 404: {"model": Problem}})
+async def run_events(request: Request, run_id: RunId):
+    store = request.app.state.run_store
+    first = await run_in_threadpool(store.get, run_id)
+    if first is None:
+        return _problem(404, f"No run with id {run_id}.", request)
+    poll_s = _env_s("SSE_POLL_S", 0.5)
+    # Never hold a connection longer than a run can last (RUN_MAX_WALL_S) plus time in the queue.
+    deadline = time.monotonic() + _env_s("RUN_MAX_WALL_S", 90.0) + _env_s("SSE_QUEUE_GRACE_S", 300.0)
+
+    async def stream():
+        status, last, quiet = first, None, 0.0
+        while True:
+            key = (status.state, status.updated_at)
+            if key != last:
+                yield f"event: status\ndata: {status.model_dump_json()}\n\n"
+                last, quiet = key, 0.0
+            if status.state in (RunState.COMPLETED, RunState.FAILED):
+                yield "event: end\ndata: {}\n\n"
+                return
+            if await request.is_disconnected() or time.monotonic() > deadline:
+                return
+            await asyncio.sleep(poll_s)
+            quiet += poll_s
+            if quiet >= 15:  # under nginx's 30 s read timeout on the web proxy
+                yield ": keep-alive\n\n"
+                quiet = 0.0
+            status = await run_in_threadpool(store.get, run_id) or status
+
+    return StreamingResponse(stream(), media_type="text/event-stream",
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

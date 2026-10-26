@@ -1,7 +1,7 @@
 // The HTTP contract of contexts/LLM_Context.md §7. Every outcome the UI must show is a typed result,
 // so no screen has to guess what a status code meant.
 import { clientId } from "../lib/clientId";
-import type { FieldError, Readiness, RunStatus, RunSummary, RunTrace } from "./types";
+import type { FieldError, Readiness, Route, RunStatus, RunSummary, RunTrace } from "./types";
 
 declare global {
   interface Window {
@@ -65,7 +65,10 @@ export async function submitRun(body: unknown, clientId: string): Promise<Submit
 
 export const getRun = (id: string, signal?: AbortSignal) => getJson<RunStatus>(`/v1/runs/${encodeURIComponent(id)}`, signal);
 export const getTrace = (id: string, signal?: AbortSignal) => getJson<RunTrace>(`/v1/runs/${encodeURIComponent(id)}/trace`, signal);
-export const listRuns = (limit = 20, signal?: AbortSignal) => getJson<RunSummary[]>(`/v1/runs?limit=${limit}`, signal);
+/** Server-sent events for one run (GET /v1/runs/{id}/events): `status` on every change, then `end`. */
+export const runEventsUrl = (id: string) => `${base()}/v1/runs/${encodeURIComponent(id)}/events`;
+export const listRuns = (limit = 20, signal?: AbortSignal, route?: Route) =>
+  getJson<RunSummary[]>(`/v1/runs?limit=${limit}${route ? `&route=${route}` : ""}`, signal);
 
 export async function getReadiness(signal?: AbortSignal): Promise<Readiness | null> {
   try {

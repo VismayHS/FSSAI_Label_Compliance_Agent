@@ -66,7 +66,7 @@ against text it actually retrieved, and escalates instead of guessing.
 
 ## Evidence on Hand
 
-- The spec (`docs/MiniProject_10_Food_Label_Compliance.pdf`), the contracts, and the §4.1 example
+- The spec (`docs/course/MiniProject_10_Food_Label_Compliance.pdf`), the contracts, and the §4.1 example
   request. No real customer data, testimonials or statistics exist; none may be invented.
 
 ## Product Principles
