@@ -301,3 +301,9 @@ the web client."*
 - Reviewed Nishkal's work on main on Python 3.11: ingest 32, retrieval 43 (+3 real-model quality tests), observability 9,
   stub 10 pass. All 12 regulation quotes in `section-4.1-passages.md` are verbatim in the PDFs (P3's table is on
   PDF page 16, not 15). SLO committed 2026-10-25 before any measurement.
+- S2.4: Namith's PR #7 merged; `IMPL_PIPELINE` (LangGraphPipeline) and `IMPL_GUARDRAILS` are on in `.env.example`.
+  Every package passes on the merge (guardrails 99, agents 61). Fixed a flaky gateway test: it used a real 0.5 s
+  deadline, which a busy machine could use up before the first call.
+- S3.6 (part): escalated runs say in plain words why, and copy a hand-off (run id, reasons, trace link) for the reviewer.
+- My local `.env` now uses Groq through the gateway (`IMPL_LLM`), with a smaller fallback model on the same key;
+  live JSON-mode calls to both succeeded.
