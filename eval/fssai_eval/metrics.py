@@ -160,6 +160,7 @@ class ResponseScore:
     citation_resolution: float | None = None
     expected_findings: dict[str, dict] = field(default_factory=dict)
     error: str | None = None
+    provider_failed: bool = False   # the LLM provider gave out (rate limit, outage): not scored, rerun with --resume
     cost_usd: float = 0.0
     latency_ms: float = 0.0
     llm_calls: int = 0
@@ -247,7 +248,8 @@ def _avg(xs: list[float]) -> float | None:
 
 
 def aggregate(rows: list[ResponseScore]) -> dict:
-    ok = [r for r in rows if r.error is None]
+    # A run the provider cut short says nothing about the system's quality: it is counted, never scored.
+    ok = [r for r in rows if r.error is None and not r.provider_failed]
     stmts = [s for r in ok for s in r.statements]
     expected = [v for r in ok for v in r.expected_findings.values()]
     with_statements = [r for r in ok if r.hallucinated is not None]
@@ -257,7 +259,8 @@ def aggregate(rows: list[ResponseScore]) -> dict:
             by_tag.setdefault(t, []).append(r.route == r.expected_route)
     cleared = [r for r in ok if r.route == Route.CLEAR_FOR_PRINT.value]
     return {
-        "scenarios": len(rows), "errors": len(rows) - len(ok),
+        "scenarios": len(ok), "errors": sum(r.error is not None for r in rows),
+        "provider_failures": sum(r.provider_failed for r in rows),
         "groundedness": _avg([r.groundedness for r in ok if r.groundedness is not None]),
         "context_relevance": _avg([r.context_relevance for r in ok if r.context_relevance is not None]),
         "faithfulness": _share([s.faithful for s in stmts if s.faithful is not None]),

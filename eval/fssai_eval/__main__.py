@@ -48,6 +48,10 @@ def parser() -> argparse.ArgumentParser:
     run.add_argument("--only", default="", help="comma-separated scenario ids")
     run.add_argument("--out-dir", default="eval/results")
     run.add_argument("--quiet", action="store_true")
+    run.add_argument("--pause-s", type=float, default=None,
+                     help="seconds between scenarios for a free tier's rate limit (default EVAL_PAUSE_S or 0)")
+    run.add_argument("--resume", action="store_true",
+                     help="keep the scored rows of eval/results/<tag>.json; rerun only errors and provider failures")
 
     cmp_ = sub.add_parser("compare", help="before/after table of two results")
     cmp_.add_argument("before")
@@ -82,14 +86,23 @@ def parser() -> argparse.ArgumentParser:
 
 
 def _run(args) -> int:
+    import os
     from .judges import make_judge
-    from .runner import load_scenarios, run_eval, summary_table, write_results
+    from .runner import load_results, load_scenarios, run_eval, summary_table, write_results
 
     scenarios = load_scenarios(args.scenarios)
     only = {s.strip() for s in args.only.split(",") if s.strip()} or None
     progress = None if args.quiet else (lambda line: print(line, file=sys.stderr))
-    results = run_eval(scenarios, args.tag, judge=make_judge(args.judge), only=only, progress=progress)
-    path = write_results(results, Path(args.out_dir))
+    out = Path(args.out_dir)
+    pause = args.pause_s if args.pause_s is not None else float(
+        os.environ.get("EVAL_PAUSE_S", "").split("#", 1)[0].strip() or 0)
+    previous = load_results(args.tag, out) if args.resume and (out / f"{args.tag}.json").exists() else None
+    results = run_eval(scenarios, args.tag, judge=make_judge(args.judge), only=only, progress=progress,
+                       pause_s=pause, resume=previous, checkpoint=lambda r: write_results(r, out))
+    path = write_results(results, out)
+    if results["aggregate"]["provider_failures"]:
+        print(f"{results['aggregate']['provider_failures']} scenario(s) hit the provider's limits; rerun with "
+              "--resume to complete them", file=sys.stderr)
     print(summary_table(results))
     print(f"\nwrote {path}")
     return 0

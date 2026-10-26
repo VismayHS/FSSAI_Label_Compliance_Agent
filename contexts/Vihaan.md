@@ -137,7 +137,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 0: setup
 
-- [ ] **V0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py vihaan` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
+- [x] **V0.1 Set up and prove the loop.** Clone the repo and run `python scripts/setup_dev.py vihaan` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_gate`, `check_verifier`, `check_router`).
   3. Make one small commit of your own on `vihaan` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `vihaan`), so you've done the whole loop once.
@@ -255,7 +255,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **V4.1 Rehearse demo items 4, 5 and 6.**
+- [x] **V4.1 Rehearse demo items 4, 5 and 6.**
   - **#4:** a malformed request → 422 with field errors, the quarantine row, and no run in the DB or queue.
   - **#5:** an out-of-scope category or a missing condition → escalation.
   - **#6:** a researcher answer with a bad citation → the verifier retries with a hint → re-search or escalate, all visible in the trace.
@@ -330,4 +330,23 @@ experiments and live quality monitoring from user feedback."*
     - a wasted LLM call on runs that escalate anyway.
   - Added Postgres tests for feedback, live scores, candidates and every quality-dashboard query; built and ran
     the `eval-scorer` image.
+- 2026-10-26 (Vihaan): merged `origin/main` (no conflicts). On Python 3.13 with a real Postgres, every package's
+  tests pass, including `services/api`, now that Vismay's router test is fixed; `audit_secrets.py` is clean.
+  Pushed, and opened **PR #9** (`main` ← `vihaan`), which closes V0.1.
+- 2026-10-26 (Vihaan): V4.1 rehearsed on the full Compose stack. The configuration is `main`'s `.env.example`
+  (real retriever, LangGraph researcher, guardrails, classifier) plus my gate, verifier and router; the LLM is
+  still the fake, since there is no key yet. `smoke.py` passes. `eval/tools/demo_trust.py --api ... --in-process`
+  showed all evidence:
+  - #4: 422, quarantine row, no run, rejected counter +1.
+  - #5: out-of-scope and no-condition claims both go to `regulatory-review` with a reason.
+  - #6: the verifier's steps are in the trace; in process, a bad quote is retried with a hint, then verified.
+
+  To redo on demo day with the Groq key: on the fake LLM the researcher cannot draft findings, so #5's claim cases
+  escalate as "could not be drafted" rather than for the RDA.
+- 2026-10-26 (Vihaan): V3.3 prep. `fssai_eval run --pause-s N --resume` paces scenarios for Groq's 8k tokens/min,
+  writes results after every scenario, marks provider failures (429/outage) as `provider_failed` (counted, not
+  scored), and reruns only those. Still waiting on two things: Namith's researcher fix on `main`, and my Groq key
+  in `.env`. Decision 205 has the commands.
+- Open: the RDA decision with Nishkal (his file still lists it as open). Until it is settled, §4.1 stays
+  `cannot_determine` → `regulatory-review` (test values doc, "What changes when the team adopts an RDA").
 

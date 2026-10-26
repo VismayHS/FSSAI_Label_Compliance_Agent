@@ -44,38 +44,68 @@ def config_snapshot() -> dict:
             if k.startswith(keep) and not any(s in k for s in secret)}
 
 
+def _provider_failed(result) -> bool:
+    """The pipeline turns ProviderUnavailable into an incomplete run (pipeline.py); that is quota, not quality."""
+    return not result.complete and "ProviderUnavailable" in (result.routing.escalation_reason or "")
+
+
+def _row(d: dict) -> ResponseScore:
+    from .metrics import StatementScore
+    return ResponseScore(**{**d, "statements": [StatementScore(**s) for s in d.get("statements", [])]})
+
+
 def run_eval(scenarios: list[EvalScenario], tag: str, *, judge: Judge | None = None, pipeline=None,
-             only: set[str] | None = None, progress: Callable[[str], None] | None = None) -> dict:
+             only: set[str] | None = None, progress: Callable[[str], None] | None = None, pause_s: float = 0.0,
+             resume: dict | None = None, checkpoint: Callable[[dict], None] | None = None) -> dict:
+    """pause_s: seconds between scenarios that call the pipeline (a free tier's tokens-per-minute limit).
+    resume: an earlier results dict for the same tag; its scored rows are kept and only errors and provider
+    failures run again. checkpoint: called with the results so far after every scenario (write them to disk)."""
     from fssai_contracts.registry import build
 
     judge = judge or make_judge()
     pipeline = pipeline or build("pipeline")
+    kept = {r["scenario_id"]: _row(r) for r in (resume or {}).get("scenarios", [])
+            if r.get("error") is None and not r.get("provider_failed")}
     rows: list[ResponseScore] = []
-    prompt_versions: dict[str, str] = {}
+    prompt_versions: dict[str, str] = dict((resume or {}).get("prompt_versions", {}))
     started = time.monotonic()
-    for s in scenarios:
-        if only and s.scenario_id not in only:
+    todo = [s for s in scenarios if not only or s.scenario_id in only]
+
+    def results() -> dict:
+        return {
+            "tag": tag, "created_at": utcnow().isoformat(), "git_sha": _git_sha(),
+            "judge": judge.name, "judge_calls": getattr(judge, "calls", 0),
+            "config": config_snapshot(), "prompt_versions": prompt_versions,
+            "elapsed_s": round(time.monotonic() - started, 2),
+            "aggregate": aggregate(rows), "definitions": DEFINITIONS,
+            "scenarios": [r.as_dict() for r in rows],
+        }
+
+    ran_one = False
+    for s in todo:
+        if s.scenario_id in kept:
+            rows.append(kept[s.scenario_id])
             continue
+        if ran_one and pause_s > 0:
+            time.sleep(pause_s)
+        ran_one = True
         ctx = RunContext.new()
         try:
             result = pipeline.run(s.request, ctx)
             row = score_response(result, s.request, judge, s)
+            row.provider_failed = _provider_failed(result)
             prompt_versions.update(result.prompt_versions)
         except Exception as exc:  # noqa: BLE001 - one broken scenario must not hide the other results
             row = ResponseScore(scenario_id=s.scenario_id, route=None, expected_route=s.expected_route.value,
                                 complete=None, error=f"{type(exc).__name__}: {exc}", tags=list(s.tags))
         rows.append(row)
         if progress:
-            mark = "ok " if row.route == row.expected_route else ("ERR" if row.error else "-- ")
+            mark = ("ERR" if row.error else "429" if row.provider_failed
+                    else "ok " if row.route == row.expected_route else "-- ")
             progress(f"{mark} {s.scenario_id:32s} {row.route or row.error} (expected {row.expected_route})")
-    return {
-        "tag": tag, "created_at": utcnow().isoformat(), "git_sha": _git_sha(),
-        "judge": judge.name, "judge_calls": getattr(judge, "calls", 0),
-        "config": config_snapshot(), "prompt_versions": prompt_versions,
-        "elapsed_s": round(time.monotonic() - started, 2),
-        "aggregate": aggregate(rows), "definitions": DEFINITIONS,
-        "scenarios": [r.as_dict() for r in rows],
-    }
+        if checkpoint:
+            checkpoint(results())
+    return results()
 
 
 def write_results(results: dict, out_dir: Path = RESULTS) -> Path:

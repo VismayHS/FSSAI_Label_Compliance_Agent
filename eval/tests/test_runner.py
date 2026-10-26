@@ -80,3 +80,53 @@ def test_env_file_does_not_override_the_shell(tmp_path, monkeypatch):
     import os
     assert os.environ["FSSAI_T1"] == "from-file" and os.environ["FSSAI_T2"] == "from-shell"
     monkeypatch.delenv("FSSAI_T1")
+
+
+# ---------------------------------------------------------------- free-tier pacing (Groq: 8k tokens/min, 1k requests/day)
+
+class Incomplete:
+    """A pipeline whose provider gives out on chosen scenarios, like a rate-limited free tier."""
+
+    def __init__(self, failing=()):
+        from fssai_contracts.pipeline import ReferencePipeline
+        self.inner, self.failing, self.calls = ReferencePipeline.from_registry(), set(failing), []
+
+    def run(self, request, ctx):
+        from fssai_contracts.schemas import Route, RunResult, Routing
+        self.calls.append(request.label.product_name)
+        if request.label.product_name in self.failing:
+            return RunResult(run_id=ctx.run_id, correlation_id=ctx.correlation_id, complete=False,
+                             routing=Routing(route=Route.REGULATORY_REVIEW, reason="Run did not complete.",
+                                             escalation_reason="ProviderUnavailable: 429 rate limited"))
+        return self.inner.run(request, ctx)
+
+
+def test_pause_between_scenarios(monkeypatch):
+    import fssai_eval.runner as runner
+    slept = []
+    monkeypatch.setattr(runner.time, "sleep", slept.append)
+    run_eval(load_scenarios(SCENARIOS)[:3], "p", judge=ReferenceJudge(), pipeline=ReferencePipeline.from_registry(),
+             pause_s=60)
+    assert slept == [60, 60], "a pause between scenarios, none after the last"
+
+
+def test_provider_failures_are_marked_and_resume_reruns_only_them():
+    scenarios = load_scenarios(SCENARIOS)[:3]
+    flaky = scenarios[1].request.label.product_name
+    first = run_eval(scenarios, "r", judge=ReferenceJudge(), pipeline=Incomplete(failing={flaky}))
+    rows = {r["scenario_id"]: r for r in first["scenarios"]}
+    assert rows[scenarios[1].scenario_id]["provider_failed"] is True
+    assert first["aggregate"]["provider_failures"] == 1
+    assert first["aggregate"]["scenarios"] == 2, "a provider failure is not scored as an escalation"
+
+    again = Incomplete()
+    second = run_eval(scenarios, "r", judge=ReferenceJudge(), pipeline=again, resume=first)
+    assert again.calls == [flaky], "only the scenario the provider failed is run again"
+    assert second["aggregate"]["provider_failures"] == 0 and len(second["scenarios"]) == 3
+
+
+def test_checkpoint_after_every_scenario():
+    seen = []
+    run_eval(load_scenarios(SCENARIOS)[:2], "c", judge=ReferenceJudge(), pipeline=ReferencePipeline.from_registry(),
+             checkpoint=lambda res: seen.append(len(res["scenarios"])))
+    assert seen == [1, 2]
