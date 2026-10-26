@@ -341,7 +341,7 @@ Tell Vismay (worker/compose):
 - worker `depends_on: indexer: {condition: service_completed_successfully}`; mount `index-data:/data/index:ro`
   and `hf-cache:/data/hf-cache:ro`; env `INDEX_DIR=/data/index`, `HF_HOME=/data/hf-cache`, `HF_HUB_OFFLINE=1`.
   The volumes are declared in `infra/compose/indexer.yml`: reference them, don't redeclare them.
-- The worker image needs `contracts`, `packages/observability` and `packages/retrieval[embeddings]` with CPU torch
+- The worker image needs `packages/contracts`, `packages/observability` and `packages/retrieval[embeddings]` with CPU torch
   (`--index-url https://download.pytorch.org/whl/cpu`, as in `packages/ingest/Dockerfile`), or every
   replica pulls ~2 GB of CUDA wheels.
 - Prometheus expects the API's `/metrics` on `api:8000` and the worker's on `worker:9100`.

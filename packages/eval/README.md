@@ -1,4 +1,4 @@
-# fssai_eval (`eval`)
+# fssai_eval (`packages/eval`)
 
 The eval set, its runner and metrics (L3), live scoring and feedback tooling (L6). Metric definitions and the judge
 choice: [decision 204](../../docs/decisions/204-vihaan-eval-judges.md) and
