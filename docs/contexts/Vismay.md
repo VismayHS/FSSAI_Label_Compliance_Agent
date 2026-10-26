@@ -8,9 +8,10 @@
 **New folder layout (27 Oct, [decision 305](../decisions/305-vismay-repository-layout.md)).** Your paths moved,
 nothing else changed: `services/` is `apps/`, `libs/` is `packages/`, `deploy/` is `infra/`, and `contracts/`,
 `eval/`, `corpus/`, `contexts/`, `scripts/`, `skills/`, `observability/`, `loadtest/` are now under `packages/`,
-`data/`, `docs/`, `tools/` and `infra/` (this file is `docs/contexts/<Name>.md`). **After you merge `main`, run
-`python tools/scripts/setup_dev.py <name>` once**: your editable installs still point at the old folders. Your
-own edits merge onto the moved files; if git asks, keep the new path.
+`data/`, `docs/`, `tools/` and `infra/` (this file is `docs/contexts/<Name>.md`). Before you merge `main`, run
+`git config merge.directoryRenames true` (so a file you added under an old folder follows the move); **after the
+merge, run `python tools/scripts/setup_dev.py <name>` once**, because your editable installs still point at the old
+folders. Your own edits merge onto the moved files.
 
 What is left of my part, and what each item waits on (updated 26 Oct evening, after PR #9):
 1. **Merge my PR** (Vihaan's parts switched on, `postgres-init`, `setup_dev.py` fix, console fixes). Done before it:

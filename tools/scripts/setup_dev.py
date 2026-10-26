@@ -57,6 +57,8 @@ def setup_git(name: str) -> None:
 
     run("git", "config", "core.hooksPath", ".githooks")
     run("git", "config", "fssai.branch", name)
+    # a file you add under a folder that main has since moved follows the move instead of stopping the merge
+    run("git", "config", "merge.directoryRenames", "true")
     run("git", "fetch", "origin")
 
     current = git_out("branch", "--show-current")
