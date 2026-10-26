@@ -20,7 +20,7 @@ Four people share this repo: **Nishkal, Namith, Vihaan, Vismay**. Each one owns 
    - Use the fakes for anything owned by someone else.
    - Integrate through `IMPL_*` env vars, never by importing a teammate's classes.
 3. **No credentials, endpoints or model ids in the repo.** Read them from env, and document new variables in the person's own section of `.env.example`.
-4. **Never invent FSSAI regulation text, clause numbers or thresholds.** Quote only from the PDFs in `corpus/` or `docs/`.
+4. **Never invent FSSAI regulation text, clause numbers or thresholds.** Quote only from the PDFs in `corpus/raw/` or `docs/course/`.
 5. **The system never approves a label.** When unsure, escalate to `regulatory-review` rather than inventing an answer.
 6. **Every behaviour gets a pytest test.** `pytest contracts -q` must keep passing.
    - Each package starts as a day-0 skeleton: keep its seam class names and signatures, and make its conformance test (`fssai_contracts.conformance`) pass, then delete that test's `xfail` marker.

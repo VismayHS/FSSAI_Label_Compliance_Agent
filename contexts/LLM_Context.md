@@ -12,7 +12,7 @@
 4. [`CONTRIBUTING.md`](../CONTRIBUTING.md) before your first commit: one branch per person, PRs into `main`
 5. [`skills/project/fssai-workflow/SKILL.md`](../skills/project/fssai-workflow/SKILL.md) before writing code: how every change is built, tested and reviewed ([`skills/README.md`](../skills/README.md) lists all skills)
 
-The original course documents are in `docs/`:
+The original course documents are in `docs/course/`:
 - `MiniProject_10_Food_Label_Compliance.pdf`: the spec
 - `00_GLOSSARY.pdf`: official definitions, summarised in §13
 - `00_INDEX.pdf`: all 15 course projects
@@ -207,7 +207,7 @@ spending limit on the account.
 | `contracts/` | shared, steward Vismay | Schemas, interfaces, fakes, reference pipeline, registry (§6) |
 | `contexts/LLM_Context.md` | Vismay | This file |
 | `contexts/<Name>.md` | that person | Your plan, checklist, prompts, notes |
-| `docs/*.pdf` | none | Course documents. Never edit. |
+| `docs/course/*.pdf` | none | Course documents. Never edit. |
 | `docs/eval1/` | Nishkal (`*-passages.md`), Vihaan (`*-test-values.md`), Vismay (`project-plan.md`) | Evaluation 1 deliverables |
 | `docs/decisions/` | author of each file | Decision records (ADRs), one file each: `NNN-<name>-<slug>.md`. Number blocks so parallel branches never clash: Nishkal `001–099`, Namith `100–199`, Vihaan `200–299`, Vismay `300–399`; take the next free number in your block. Index: `docs/decisions/README.md` |
 | `docs/incidents/` | author of each file | Incident log (D8), one file each: `YYYY-MM-DD-<name>-<slug>.md` |
@@ -532,7 +532,7 @@ These start only after that owner's required work for Phase 3 is done. Each pers
 
 ---
 
-## 13. Glossary (from `docs/00_GLOSSARY.pdf`), with what each means for us
+## 13. Glossary (from `docs/course/00_GLOSSARY.pdf`), with what each means for us
 
 - **Chunking:** splitting documents into passages before embedding. **For us:** keep the regulation, clause id and heading path in each chunk's metadata.
 - **Groundedness:** the share of an answer's statements that the retrieved passages support.
