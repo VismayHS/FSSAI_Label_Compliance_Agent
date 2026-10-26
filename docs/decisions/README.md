@@ -21,3 +21,4 @@ The report's "design decisions and what was rejected" section is written from th
 | [302](302-vismay-queue-rq.md) | Queue: RQ on Redis with in-process `SimpleWorker`s; inline mode for local development | Vismay | Accepted |
 | [303](303-vismay-web-client-stack.md) | Web client: React + Vite + TypeScript, plain CSS tokens, React Bits for state | Vismay | Accepted |
 | [304](304-vismay-deployment-boundaries.md) | Deployment boundaries: a Compose service per scaling, failure and release profile | Vismay | Accepted |
+| [305](305-vismay-repository-layout.md) | Repository layout: six top-level folders by purpose (apps, packages, infra, data, docs, tools) | Vismay | Accepted |

@@ -14,11 +14,11 @@ the labelling rules, and the Labelling text never points to it. A single embeddi
 it; the agent must look for the modifying provision, search again from what it read, and verify that the
 passages support the answer (spec §5). Escalating is always better than inventing.
 
-Out of scope: model training, cloud deployment, label images. Source: [LLM_Context §2](../../contexts/LLM_Context.md).
+Out of scope: model training, cloud deployment, label images. Source: [LLM_Context §2](../contexts/LLM_Context.md).
 
 ## 2. Corpus and product category
 - **Corpus:** both regulations as the official FSSAI compendia, `FSS-AC-2018` Version-II (16.11.2021) and
-  `FSS-LD-2020` Version-VI (22.02.2023), with provenance and sha256 in `corpus/manifest.json`
+  `FSS-LD-2020` Version-VI (22.02.2023), with provenance and sha256 in `data/corpus/manifest.json`
   ([decision 004](../decisions/004-nishkal-corpus-versions.md)).
 - **Category:** breakfast cereals; health supplements out of scope
   ([decision 001](../decisions/001-nishkal-product-category.md), *proposed*: the team confirms it in the group chat).
@@ -44,7 +44,7 @@ indexer, stub LLM, Prometheus, Grafana, Jaeger, cAdvisor. Async model: 202 + run
 
 ## 5. Agent topology
 Three agents with their own prompts, tools and state, joined only by the hand-off schemas in
-`contracts/fssai_contracts/schemas.py`; guardrails and the router are deterministic steps around them:
+`packages/contracts/fssai_contracts/schemas.py`; guardrails and the router are deterministic steps around them:
 
 | Agent | Owner | Input → output | Tools |
 |---|---|---|---|
@@ -53,23 +53,23 @@ Three agents with their own prompts, tools and state, joined only by the hand-of
 | Verifier | Vihaan | `ResearchDossier` → `Verdict` | `resolve_citation`, `clause_lookup` |
 
 Order and edge behaviour: `guardrails → classifier → (researcher → verifier) × ≤3 → router → output filter`
-(`contracts/fssai_contracts/pipeline.py`). Mid-run failure handling and the LangGraph design: *pending*
+(`packages/contracts/fssai_contracts/pipeline.py`). Mid-run failure handling and the LangGraph design: *pending*
 (Namith, `docs/agent-topology.md`, M1.3).
 
 ## 6. Data contract
 Request shape: `LabelCheckRequest` (published at `/docs` as OpenAPI). Every reject is quarantined with
-field-level errors, and no run is created (demo #4, verified by `scripts/smoke.py`). Published contract with
+field-level errors, and no run is created (demo #4, verified by `tools/scripts/smoke.py`). Published contract with
 ranges and cross-field rules: *pending* (Vihaan, `docs/data-contract.md`, V1.1).
 
 ## 7. SLO (declared before measuring)
 **p95 of complete-run latency ≤ 60 s with 5 runs in flight**, LLM replaced by the stub (mean 1.5 s, p95 4 s),
-one worker; **≤ 1 % of runs fail**. Declared 2026-10-25 in [loadtest/SLO.md](../../loadtest/SLO.md)
+one worker; **≤ 1 % of runs fail**. Declared 2026-10-25 in [infra/loadtest/SLO.md](../../infra/loadtest/SLO.md)
 (Nishkal), before any load test.
 
 ## 8. Owners and requirements
-Every F, A, L and D requirement has one primary owner: [LLM_Context §3](../../contexts/LLM_Context.md).
-Each person's tasks, status and prompts: `contexts/<Name>.md`. Work is integrated by switching `IMPL_*`
-variables, and every seam has a conformance check (`contracts/fssai_contracts/conformance.py`) that defines
+Every F, A, L and D requirement has one primary owner: [LLM_Context §3](../contexts/LLM_Context.md).
+Each person's tasks, status and prompts: `docs/contexts/<Name>.md`. Work is integrated by switching `IMPL_*`
+variables, and every seam has a conformance check (`packages/contracts/fssai_contracts/conformance.py`) that defines
 "done" the same way for everybody.
 
 ## 9. Status
@@ -84,7 +84,7 @@ variables, and every seam has a conformance check (`contracts/fssai_contracts/co
 | Gate, verifier, router, eval set, feedback, quarantine endpoint | Vihaan | skeletons ready, not started |
 
 ## 10. Plan
-Phases and milestones: [LLM_Context §9](../../contexts/LLM_Context.md). The whole project is due by
+Phases and milestones: [LLM_Context §9](../contexts/LLM_Context.md). The whole project is due by
 **Fri 30 October 2026**. Next, in order:
 1. Confirm decision 001 and the RDA question.
 2. Namith's researcher and Vihaan's gate, verifier and router behind their conformance tests, with the §4.1
@@ -96,7 +96,7 @@ Phases and milestones: [LLM_Context §9](../../contexts/LLM_Context.md). The who
 
 | Risk | Mitigation |
 |---|---|
-| `docker compose up` fails at the demo (zero marks) | CI boots the stack and runs the smoke test on every PR into `main`; `scripts/clean_clone_test.py` before every rehearsal |
+| `docker compose up` fails at the demo (zero marks) | CI boots the stack and runs the smoke test on every PR into `main`; `tools/scripts/clean_clone_test.py` before every rehearsal |
 | The agent misses the claim condition in the other regulation | Claim-trigger hints in retrieval (decision 002), the researcher's modifying-provision step, the §4.1 case in the eval set |
 | A finding cites text that wasn't retrieved | The verifier resolves every citation verbatim; unverified answers go to `regulatory-review` |
 | Free-tier rate limits or outages | Gateway retries with backoff, a shared circuit breaker, a fallback model, `complete=false` with an honest reason |

@@ -1,7 +1,7 @@
 # 2026-10-26: my local `namith` branch and `origin/namith` had diverged on the same tasks
 
-- **Author:** Namith · **Severity:** none reached `main`; caught before the first push · **Components:** `libs/prompts`,
-  `libs/agents`, `contexts/Namith.md`
+- **Author:** Namith · **Severity:** none reached `main`; caught before the first push · **Components:** `packages/prompts`,
+  `packages/agents`, `docs/contexts/Namith.md`
 
 ## What happened
 M1.1 and M1.2 (prompt store, classifier) existed twice: once on `origin/namith` (already merged to `main` in PR #4) and

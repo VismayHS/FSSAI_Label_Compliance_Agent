@@ -42,7 +42,7 @@ with `IMPL_PIPELINE=fssai_agents.graph:LangGraphPipeline`, `IMPL_RESEARCHER=...L
 
 ## Consequences
 
-- The results files go in `eval/results/` and the table goes in `docs/report/verification-and-evaluation.md`.
+- The results files go in `packages/eval/results/` and the table goes in `docs/report/verification-and-evaluation.md`.
 - What is measured so far (no key here): the harness itself, run on the contracts' fakes, with the fake verifier and
   router vs `AgentVerifier` + `RuleRouter`. Route accuracy 0.310 → 0.345 and escalation recall 0.308 → 0.615 on 29
   scenarios. That shows the measurement pipeline works, not prompt quality.

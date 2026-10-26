@@ -4,8 +4,8 @@ Owner: Namith · Requirement: A2 (and the structure behind A1, A3, F7) · Status
 
 This page says which agents exist, what each one owns, how they hand work to each other, how the
 loop is bounded, and what happens when something fails mid-run. The hand-off types are in
-`contracts/fssai_contracts/schemas.py`; the order of steps is fixed by
-`contracts/fssai_contracts/pipeline.py` and `LangGraphPipeline` must behave identically at the edges.
+`packages/contracts/fssai_contracts/schemas.py`; the order of steps is fixed by
+`packages/contracts/fssai_contracts/pipeline.py` and `LangGraphPipeline` must behave identically at the edges.
 
 ## 1. Diagram
 
@@ -33,7 +33,7 @@ agents are the Classifier, the Researcher and the Verifier.
 | | Classifier | Researcher | Verifier |
 |---|---|---|---|
 | Owner | Namith | Namith | Vihaan |
-| Package | `libs/agents` | `libs/agents` | `libs/verification` |
+| Package | `packages/agents` | `packages/agents` | `packages/verification` |
 | Prompts | `classifier` | `researcher` (act), `researcher_draft` | its own |
 | Input | `LabelCheckRequest` | `Classification` (+ request, + optional `retry_hint` and `previous` dossier) | `ResearchDossier` + request |
 | Output | `Classification` | `ResearchDossier` | `Verdict` |

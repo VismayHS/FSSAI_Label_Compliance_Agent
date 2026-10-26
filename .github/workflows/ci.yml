@@ -39,33 +39,33 @@ jobs:
           python-version: "3.11"
           cache: pip
       - name: Every file compiles on Python 3.11
-        run: python -m compileall -q contracts libs services eval scripts loadtest corpus/tools
+        run: python -m compileall -q packages apps tools/scripts infra/loadtest data/corpus/tools
       - name: No credentials, endpoints or model ids (D4)
-        run: python scripts/audit_secrets.py
+        run: python tools/scripts/audit_secrets.py
       - name: Install every package (CPU-only torch for the retriever's embeddings)
         run: |
           python -m pip install --upgrade pip
           pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.4,<3"
-          pip install -e "contracts[test]" -e "libs/observability[test]" -e "libs/retrieval[test,embeddings]" \
-            -e "libs/ingest[test]" -e "libs/llm_gateway[test]" -e "libs/run_store[test]" -e "libs/prompts[test]" \
-            -e "libs/guardrails[test]" -e "libs/agents[test]" -e "libs/gate[test]" -e "libs/verification[test]" \
-            -e "eval[test]" -e "services/stub_llm[test]" -e "services/worker[test]" -e "services/api[test]"
+          pip install -e "packages/contracts[test]" -e "packages/observability[test]" -e "packages/retrieval[test,embeddings]" \
+            -e "packages/ingest[test]" -e "packages/llm_gateway[test]" -e "packages/run_store[test]" -e "packages/prompts[test]" \
+            -e "packages/guardrails[test]" -e "packages/agents[test]" -e "packages/gate[test]" -e "packages/verification[test]" \
+            -e "packages/eval[test]" -e "apps/stub_llm[test]" -e "apps/worker[test]" -e "apps/api[test]"
       - name: Tests, one process per package
-        run: python scripts/test_all.py
+        run: python tools/scripts/test_all.py
 
   web:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
       run:
-        working-directory: services/web
+        working-directory: apps/web
     steps:
       - uses: actions/checkout@v4.2.2
       - uses: actions/setup-node@v4.4.0
         with:
           node-version: "22"
           cache: npm
-          cache-dependency-path: services/web/package-lock.json
+          cache-dependency-path: apps/web/package-lock.json
       - run: npm ci --no-audit --no-fund
       - run: npm run check
 
@@ -83,7 +83,7 @@ jobs:
       - name: docker compose up
         run: docker compose up -d --build api worker web
       - name: Smoke test (demo #1)
-        run: python3 scripts/smoke.py --timeout 300
+        run: python3 tools/scripts/smoke.py --timeout 300
       - name: Logs on failure
         if: failure()
         run: docker compose ps -a && docker compose logs --tail=80 api worker indexer

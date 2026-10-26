@@ -2,6 +2,7 @@
 
 | Path | What | Owner |
 |---|---|---|
+| [`contexts/`](contexts/) | The shared project context (`LLM_Context.md`) and each team member's plan, checklist and log | each person their own file; `LLM_Context.md`: Vismay |
 | [`course/`](course/) | The course documents: the spec, the glossary, the index of all 15 projects. Never edited | none |
 | [`architecture.md`](architecture.md) | Architecture diagram with deployment boundaries | Vismay |
 | [`agent-topology.md`](agent-topology.md) | The three agents, their tools, hand-offs and failure behaviour (A2) | Namith |

@@ -2,7 +2,7 @@
 
 - **Author:** Vismay · **Severity:** the full stack could not serve real retrieval; caught during the first
   Compose bring-up, before `main` depended on it
-- **Components:** `indexer` (`libs/ingest`, Nishkal), `worker` (`services/worker`), `deploy/compose/worker.yml`
+- **Components:** `indexer` (`packages/ingest`, Nishkal), `worker` (`apps/worker`), `infra/compose/worker.yml`
 
 ## What happened
 
@@ -43,7 +43,7 @@ start: `docker compose up` would serve nothing at the demo.
 - `chunker.py`: the regex runs on the line above, outside the f-string. Output is unchanged, and the
   indexer container now builds and re-runs idempotently in about 3 s. This was a one-line fix in Nishkal's
   path, noted in his context file.
-- `deploy/compose/worker.yml`: the indexer dependency is `required: false`. A failed index build now
+- `infra/compose/worker.yml`: the indexer dependency is `required: false`. A failed index build now
   degrades retrieval and no longer stops the stack from booting. Compose prints a warning instead.
 - CI (`.github/workflows/ci.yml`) compiles every file and runs every package's tests on **Python 3.11**,
   the containers' version, so a 3.12-only construct fails the PR instead of the demo.
@@ -54,4 +54,4 @@ start: `docker compose up` would serve nothing at the demo.
   about 3.11.
 - A hard `depends_on` on an optional, environment-dependent job turns one missing setting into a stack
   that doesn't boot. Make dependencies hard only where the service truly cannot work without them.
-- Run the clean-clone path (`scripts/clean_clone_test.py`) after every change to Compose or `.env.example`.
+- Run the clean-clone path (`tools/scripts/clean_clone_test.py`) after every change to Compose or `.env.example`.

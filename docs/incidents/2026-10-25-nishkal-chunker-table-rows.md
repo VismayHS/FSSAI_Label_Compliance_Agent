@@ -1,7 +1,7 @@
 # 2026-10-25: chunker split Schedule I rows and invented a schedule
 
 - **Author:** Nishkal · **Severity:** would have broken the §4.1 case (demo #10) silently; caught by inspection before any index was shared
-- **Component:** `libs/ingest/fssai_ingest/chunker.py`
+- **Component:** `packages/ingest/fssai_ingest/chunker.py`
 
 ## What happened
 

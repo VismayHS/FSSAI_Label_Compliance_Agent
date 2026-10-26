@@ -1,13 +1,13 @@
 # §4.1 test values: "source of protein"
 
 Owner: Vihaan (V1.3, Evaluation 1) · Passages: Nishkal, [`section-4.1-passages.md`](section-4.1-passages.md) (P1–P12) ·
-Eval set: `eval/scenarios.jsonl` (the `section-4.1` tag) · Routing rules: [decision 201](../decisions/201-vihaan-routing-rules.md)
+Eval set: `packages/eval/scenarios.jsonl` (the `section-4.1` tag) · Routing rules: [decision 201](../decisions/201-vihaan-routing-rules.md)
 
 > *"The label carries the claim 'source of protein'. Is the claim permitted, given the protein content declared on
 > the nutrition panel?"* (spec §4.1)
 
 These are the reference answers for demo item 10 and for the `section-4.1` eval scenarios. Every regulation quote
-is copied from the corpus as the indexer extracts it, and `eval/tools/check_scenarios.py` checks each one against
+is copied from the corpus as the indexer extracts it, and `packages/eval/tools/check_scenarios.py` checks each one against
 the index.
 
 ## The condition, and why no number appears in it
@@ -239,5 +239,5 @@ Scenario `s41-protein-basis-differs`. 9 g protein per 100 g, but an energy-dense
    text.
 2. The researcher's RDA guard is turned off for that nutrient, and the value reaches the agents as a cited
    reference.
-3. In `eval/scenarios.jsonl`, the scenarios tagged `rda-pending` get their "with R adopted" answers from the tables
+3. In `packages/eval/scenarios.jsonl`, the scenarios tagged `rda-pending` get their "with R adopted" answers from the tables
    above (one edit per scenario), and the before/after eval shows the change.

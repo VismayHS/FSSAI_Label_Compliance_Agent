@@ -1,2 +1,2 @@
 @AGENTS.md
-@contexts/LLM_Context.md
+@docs/contexts/LLM_Context.md

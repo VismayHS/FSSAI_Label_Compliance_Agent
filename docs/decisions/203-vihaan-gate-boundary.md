@@ -2,7 +2,7 @@
 
 - **Owner:** Vihaan · **Status:** Accepted
 - **Requirement:** F1, F2, D1 (validate before any agent; quarantine rejects), D7 (per-client rate limiting) ·
-  Code: `libs/gate/` · Contract: `docs/data-contract.md`
+  Code: `packages/gate/` · Contract: `docs/data-contract.md`
 
 ## Context
 

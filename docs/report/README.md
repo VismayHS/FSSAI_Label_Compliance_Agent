@@ -1,6 +1,6 @@
 # Report sections
 
-Each owner writes their own section (LLM_Context §10). `python scripts/build_report.py` (or `make report`) assembles
+Each owner writes their own section (LLM_Context §10). `python tools/scripts/build_report.py` (or `make report`) assembles
 them, with the decision records and the incidents, into `REPORT.md`. Edit the sections, never `REPORT.md`.
 
 | Section | Covers | Owner |

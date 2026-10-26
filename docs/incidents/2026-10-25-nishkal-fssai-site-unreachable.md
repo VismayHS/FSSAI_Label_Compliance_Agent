@@ -1,7 +1,7 @@
 # 2026-10-25: fssai.gov.in unreachable while fetching the corpus
 
 - **Author:** Nishkal · **Severity:** blocked a task (N0.2) for about 20 minutes; no system impact
-- **Component:** corpus acquisition (`corpus/raw/`)
+- **Component:** corpus acquisition (`data/corpus/raw/`)
 
 ## What happened
 
@@ -35,8 +35,8 @@ Fetched the official files from the Internet Archive's captures of the exact off
 - `https://web.archive.org/web/20260329130834id_/https://fssai.gov.in/upload/uploadfiles/files/Comp_Labelling.pdf`
 
 Both are valid PDFs with a full text layer, and their version labels match FSSAI's (Version-II
-16.11.2021, Version-VI 22.02.2023). `corpus/sources.yaml` records both the official `source_url` and
-`retrieved_via`; `corpus/manifest.json` records the sha256.
+16.11.2021, Version-VI 22.02.2023). `data/corpus/sources.yaml` records both the official `source_url` and
+`retrieved_via`; `data/corpus/manifest.json` records the sha256.
 
 ## Lesson
 

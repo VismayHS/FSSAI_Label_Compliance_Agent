@@ -1,48 +1,48 @@
-# Who reviews what: the ownership table of contexts/LLM_Context.md §5. GitHub requests these owners on
+# Who reviews what: the ownership table of docs/contexts/LLM_Context.md §5. GitHub requests these owners on
 # every PR that touches their paths. Later lines win, so specific paths come after general ones.
 # Nishkal = @Nishkal00 · Namith = @namithkumar2006 · Vihaan = @Vihaan-Wadhwa · Vismay = @VismayHS
 
 *                                                   @VismayHS
 
 # shared: any change needs an affected owner's approval (LLM_Context §6, §8.2)
-/contracts/                                         @VismayHS @Nishkal00 @namithkumar2006 @Vihaan-Wadhwa
+/packages/contracts/                                         @VismayHS @Nishkal00 @namithkumar2006 @Vihaan-Wadhwa
 /.env.example                                       @VismayHS @Nishkal00 @namithkumar2006 @Vihaan-Wadhwa
 
 # Nishkal: knowledge and performance
-/corpus/                                            @Nishkal00
-/libs/ingest/                                       @Nishkal00
-/libs/retrieval/                                    @Nishkal00
-/libs/observability/                                @Nishkal00
-/services/stub_llm/                                 @Nishkal00
-/loadtest/                                          @Nishkal00
-/observability/prometheus/                          @Nishkal00
-/observability/grafana/provisioning/                @Nishkal00
-/observability/grafana/dashboards/service-overview.json  @Nishkal00
-/deploy/compose/indexer.yml                         @Nishkal00
-/deploy/compose/stub-llm.yml                        @Nishkal00
-/deploy/compose/observability.yml                   @Nishkal00
+/data/corpus/                                            @Nishkal00
+/packages/ingest/                                       @Nishkal00
+/packages/retrieval/                                    @Nishkal00
+/packages/observability/                                @Nishkal00
+/apps/stub_llm/                                 @Nishkal00
+/infra/loadtest/                                          @Nishkal00
+/infra/observability/prometheus/                          @Nishkal00
+/infra/observability/grafana/provisioning/                @Nishkal00
+/infra/observability/grafana/dashboards/service-overview.json  @Nishkal00
+/infra/compose/indexer.yml                         @Nishkal00
+/infra/compose/stub-llm.yml                        @Nishkal00
+/infra/compose/observability.yml                   @Nishkal00
 /docs/eval1/section-4.1-passages.md                 @Nishkal00
 /docs/report/retrieval-and-performance.md           @Nishkal00
-/contexts/Nishkal.md                                @Nishkal00
+/docs/contexts/Nishkal.md                                @Nishkal00
 
 # Namith: agent reasoning
-/libs/agents/                                       @namithkumar2006
-/libs/prompts/                                      @namithkumar2006
-/libs/guardrails/                                   @namithkumar2006
-/observability/grafana/dashboards/agents.json       @namithkumar2006
+/packages/agents/                                       @namithkumar2006
+/packages/prompts/                                      @namithkumar2006
+/packages/guardrails/                                   @namithkumar2006
+/infra/observability/grafana/dashboards/agents.json       @namithkumar2006
 /docs/agent-topology.md                             @namithkumar2006
 /docs/runbook.md                                    @namithkumar2006
 /docs/report/agent-design.md                        @namithkumar2006
-/contexts/Namith.md                                 @namithkumar2006
+/docs/contexts/Namith.md                                 @namithkumar2006
 
 # Vihaan: trust and evaluation
-/libs/gate/                                         @Vihaan-Wadhwa
-/libs/verification/                                 @Vihaan-Wadhwa
-/eval/                                              @Vihaan-Wadhwa
-/services/api/app/routers/feedback.py               @Vihaan-Wadhwa
-/services/api/app/routers/quarantine.py             @Vihaan-Wadhwa
+/packages/gate/                                         @Vihaan-Wadhwa
+/packages/verification/                                 @Vihaan-Wadhwa
+/packages/eval/                                              @Vihaan-Wadhwa
+/apps/api/app/routers/feedback.py               @Vihaan-Wadhwa
+/apps/api/app/routers/quarantine.py             @Vihaan-Wadhwa
 /docs/data-contract.md                              @Vihaan-Wadhwa
 /docs/eval1/section-4.1-test-values.md              @Vihaan-Wadhwa
-/observability/grafana/dashboards/quality.json      @Vihaan-Wadhwa
+/infra/observability/grafana/dashboards/quality.json      @Vihaan-Wadhwa
 /docs/report/verification-and-evaluation.md         @Vihaan-Wadhwa
-/contexts/Vihaan.md                                 @Vihaan-Wadhwa
+/docs/contexts/Vihaan.md                                 @Vihaan-Wadhwa

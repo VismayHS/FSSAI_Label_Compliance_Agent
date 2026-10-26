@@ -1,0 +1,11 @@
+# Build context is the repo root; send only what the API image copies.
+*
+!packages/contracts/
+!packages/observability/
+!packages/run_store/
+!packages/gate/
+!apps/worker/
+!apps/api/
+**/__pycache__
+**/*.egg-info
+**/tests

@@ -20,7 +20,7 @@ runs only when the corpus changes, and the load test must not pay a real provide
 
 ## Decision
 Eleven services (plus two metric exporters), one `docker compose up -d --build`, each owner's services in
-their own fragment under `deploy/compose/`, included by the root `docker-compose.yml`:
+their own fragment under `infra/compose/`, included by the root `docker-compose.yml`:
 
 | Service | Image | Scales on | Fails how | Released when | Resources |
 |---|---|---|---|---|---|

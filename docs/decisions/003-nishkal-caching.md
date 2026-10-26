@@ -1,6 +1,6 @@
 # 003: Caching: query embeddings and retrieval results in Redis; no whole-run cache
 
-- **Owner:** Nishkal · **Status:** Accepted, built (`libs/retrieval/fssai_retrieval/cache.py`)
+- **Owner:** Nishkal · **Status:** Accepted, built (`packages/retrieval/fssai_retrieval/cache.py`)
 - **Requirement:** D7 (caching, justified and measured; rate limiting is Vihaan's half)
 
 ## Context
@@ -47,7 +47,7 @@ A hit saves ~15 ms per search. With ~5–10 searches per run that is under 0.2 s
 several seconds of model calls. **Retrieval caching is not what moves p95 or cost.** It cuts worker CPU
 per run (the embedding forward pass), which matters once several replicas share a CPU. It changes LLM
 cost per run by zero, because no tokens are saved. The run-level effect on p95 under load (cache on vs
-off, same matrix) is measured with the stack in `loadtest/results/` and reported in
+off, same matrix) is measured with the stack in `infra/loadtest/results/` and reported in
 `docs/report/retrieval-and-performance.md`.
 
 ## Consequences

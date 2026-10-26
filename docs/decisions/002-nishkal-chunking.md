@@ -1,6 +1,6 @@
 # 002: Clause-aware chunking, local embeddings, hybrid retrieval
 
-- **Owner:** Nishkal · **Status:** Accepted, built (`libs/ingest`, `libs/retrieval`)
+- **Owner:** Nishkal · **Status:** Accepted, built (`packages/ingest`, `packages/retrieval`)
 - **Requirements:** L1 (chunking and embedding strategy, partial re-embed), D2 (idempotent pipeline), F4, A1 tool backends
 
 ## Context
@@ -76,9 +76,9 @@ agent cannot ground a finding in wording that no longer applies.
 ### Retrieval: hybrid by default (`fssai_retrieval/faiss_retriever.py`)
 
 Dense similarity, BM25 over the same embedded text, and claim-trigger hints are fused by reciprocal rank
-(k = 60). The hints come from `corpus/claim_triggers.yaml`: claim word + nutrient → Schedule I row, plus
+(k = 60). The hints come from `data/corpus/claim_triggers.yaml`: claim word + nutrient → Schedule I row, plus
 5(3), Schedule II and 2(1)(l). The regulation filter is applied before ranking, so it never starves k.
-Measured on 28 hand-labelled queries (`corpus/eval/retrieval_queries.jsonl`, real model):
+Measured on 28 hand-labelled queries (`data/corpus/eval/retrieval_queries.jsonl`, real model):
 
 | Config | hit@1 | hit@3 | hit@5 | hit@10 | MRR | §4.1 phrasings in top 5 |
 |---|---:|---:|---:|---:|---:|---:|
@@ -93,7 +93,7 @@ ranker, never forced in. With hints off, hybrid still finds all three.
 
 ### Idempotent build and partial re-embedding (D2, L1)
 
-`python -m fssai_ingest build --corpus corpus/raw --out $INDEX_DIR --reembed none|changed|all`.
+`python -m fssai_ingest build --corpus data/corpus/raw --out $INDEX_DIR --reembed none|changed|all`.
 
 - Chunk id = `passage_id`: stable across runs and independent of the text.
 - `chunk_table.json` records each vector's text hash and model.

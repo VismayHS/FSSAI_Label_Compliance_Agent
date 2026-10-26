@@ -2,7 +2,7 @@
 
 - **Owner:** Vihaan · **Status:** Accepted
 - **Requirement:** F6 (route to clear / revise / regulatory-review with a reason), F7 (escalate on conflict, possible
-  exemption, out-of-corpus category), A3 (never return an unverified answer) · Code: `libs/verification/fssai_verification/router.py`
+  exemption, out-of-corpus category), A3 (never return an unverified answer) · Code: `packages/verification/fssai_verification/router.py`
 
 ## Context
 
@@ -46,4 +46,4 @@ a quick fix and a resubmission while the open question stays open.
 - R6 means a weak researcher (or the fake one) produces more escalations. That is the intended failure direction:
   on the fakes, switching the router on raised escalation recall from 0.31 to 0.62 on the eval set.
 - The routing step records the rule id (`output.rule`), so the eval can count which rules fire.
-- Adding a signal means adding a rule, a test in `libs/verification/tests/test_router.py` and a row above.
+- Adding a signal means adding a rule, a test in `packages/verification/tests/test_router.py` and a row above.
