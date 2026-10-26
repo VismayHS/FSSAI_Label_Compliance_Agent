@@ -8,10 +8,10 @@ version = "0.1.0"
 description = "Classifier and research agents and the LangGraph pipeline"
 requires-python = ">=3.11"
 # Add each real dependency with bounds as a task needs it, e.g. "faiss-cpu>=1.8,<2".
-dependencies = ["fssai-contracts"]
+dependencies = ["fssai-contracts", "langgraph>=0.2,<2"]
 
 [project.optional-dependencies]
-test = ["pytest>=9"]
+test = ["pytest>=9", "fssai-prompts"]
 
 [tool.setuptools.packages.find]
 include = ["fssai_agents*"]

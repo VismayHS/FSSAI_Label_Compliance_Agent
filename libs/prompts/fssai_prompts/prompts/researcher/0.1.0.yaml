@@ -1,8 +1,0 @@
-name: researcher
-version: 0.1.0
-notes: PLACEHOLDER so the store conformance test has a researcher prompt. Replaced by researcher.plan/act/reflect/draft in M2.1.
-system: |
-  [prompt:researcher@0.1.0]
-  Placeholder prompt. The real researcher prompts arrive with task M2.1.
-user_template: |
-  {input}

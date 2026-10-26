@@ -34,7 +34,7 @@ agents are the Classifier, the Researcher and the Verifier.
 |---|---|---|---|
 | Owner | Namith | Namith | Vihaan |
 | Package | `libs/agents` | `libs/agents` | `libs/verification` |
-| Prompts | `classifier` | `researcher.plan`, `.act`, `.reflect`, `.draft` | its own |
+| Prompts | `classifier` | `researcher` (act), `researcher_draft` | its own |
 | Input | `LabelCheckRequest` | `Classification` (+ request, + optional `retry_hint` and `previous` dossier) | `ResearchDossier` + request |
 | Output | `Classification` | `ResearchDossier` | `Verdict` |
 | Tools | none that it chooses (label text is pre-parsed); rule-based fallback | `corpus_search(query, regulation?)`, `clause_lookup(regulation, clause_id)`, `request_field_lookup(path)` | `resolve_citation`, `clause_lookup` |
@@ -48,21 +48,16 @@ never sees how the Researcher searched, only what it retrieved and cited.
 
 ## 3. The Researcher's loop (spec section 5)
 
-Nodes: `plan_queries` → `act` → `observe` → `reflect` → (`act` again, or `draft_findings`).
+Nodes: `plan` → `act` ⇄ `run_tool` → `coverage` → `draft`.
 
-1. **plan_queries:** from the classification and request, decide which provisions probably apply.
-2. **act:** the LLM picks one tool (or `finish`). Arguments are validated against an allowlist
-   (regulation must be a known code, `path` must be a field of `LabelCheckRequest`). `ctx.check_budget(tool_call=True)` runs before every call.
-3. **observe:** append passages to the dossier and record a `tool` step with the full passages
-   (this is what lets a run be rebuilt from its trace, D5).
-4. **reflect:** ask "does anything I have read modify, condition or exempt what I found? Which
-   regulation would hold it?" Then build the next query from the text just read (a clause
-   reference, a defined term, the nutrient and claim named in a table). This is the step a fixed
-   pipeline does not have.
-5. **draft_findings:** one `Finding` per requirement. Each citation's `quote` must be a verbatim
-   substring of a retrieved passage; any that is not is repaired or dropped before returning.
-   Conflicts, possible exemptions, a missing condition, or a needed value that is not in the corpus
-   go into `escalation_signals`, and the finding is `cannot_determine`.
+1. **plan:** deterministic, no LLM step. Seeds suggested searches from the detected claims, the nutrition panel and the package size. The model may follow, reorder or ignore them.
+2. **act:** the LLM first writes a short reflection ("does anything I have read modify, condition, define or exempt something? which regulation would hold it?") and then picks one tool, or `finish`. The prompt also lists clause and schedule names mentioned inside retrieved passages that have not been looked up yet. Arguments are validated against an allowlist (regulation must be a known code, `path` must be a field of `LabelCheckRequest`, query length is capped). An invalid or repeated call is replaced by the next unused suggestion, or by `finish`.
+3. **run_tool:** `ctx.check_budget(tool_call=True)` first, then the call, then a `tool` step with the full passages (this is what lets a run be rebuilt from its trace, D5). A failing tool is recorded with its error and the loop goes on; it does not kill the run.
+4. **coverage:** a safety net for weak models. Every detected claim must have a search that reached the Claims regulation for its condition. If the model finished without one, this node runs it.
+5. **draft:** the LLM writes one `Finding` per requirement from the retrieved passages only. Every citation quote is made a verbatim span of the cited passage (whitespace and quote-mark differences are repaired to the passage's own text; paraphrases are dropped). A met or unmet finding that loses all its citations becomes `cannot_determine` with an escalation signal.
+   Conflicts, possible exemptions, a missing condition, or a needed value that is not in the corpus go into `escalation_signals`.
+
+The reflection step from the first draft of this page is part of `act`, not a separate node: a separate reflect call would double the LLM calls per round and the step budget (25) is shared by the whole run. Each round is two steps (one LLM call, one tool call), and the number of rounds is capped by what is left of the step budget after reserving steps for the verifier, router and output filter (`RESEARCHER_MAX_ITERATIONS`, `RESEARCHER_STEP_RESERVE`).
 
 **Retry mode.** When the Verifier says `retry`, the Researcher receives `retry_hint` and the
 `previous` dossier, keeps what was already retrieved, and must change strategy: clause lookup
@@ -77,8 +72,8 @@ with no supporting retrieved passage is `cannot_determine` plus an escalation si
   A literal match finds nothing, so the Researcher searches by nutrient plus claim level
   ("protein", "source", conditions for nutrient content claims), which reaches FSS-AC-2018
   Schedule I, item 11 and regulation 5(3).
-- The Labelling regulation never points to that condition. The step that finds it is `reflect`
-  applied to the detected claim ("what regulation conditions a nutrient content claim?"), followed
+- The Labelling regulation never points to that condition. The step that finds it is the reflection in `act`
+  applied to the detected claim (and, if the model skips it, the `coverage` node) ("what regulation conditions a nutrient content claim?"), followed
   by a search restricted to FSS-AC-2018.
 - The condition is a percentage of the RDA, and neither regulation states the RDA value. The
   Researcher must not fill it in from training data. Unless the retrieved text supplies the value,
@@ -114,7 +109,8 @@ It returns `complete=false`, route `regulatory-review`, and the reason.
 | LLM provider down or circuit breaker open, in Classifier | `ProviderUnavailable` | Classifier degrades to rules and the run continues; the Researcher will hit the same outage | See next row |
 | LLM provider down or breaker open, in Researcher or Verifier | `ProviderUnavailable` | No further model calls; nothing partial is trusted | `complete=false`, `regulatory-review` (demo item 8) |
 | Retriever fails, or the index is missing or empty | exception, or zero passages | Researcher records the tool error; with no passages it cannot ground a finding | `cannot_determine` + escalation signal, so `regulatory-review` |
-| A tool call returns nothing useful | empty `passages` | `reflect` changes the query or regulation; repeated misses end in an escalation signal | Escalate, never a guess |
+| A tool call returns nothing useful | empty `passages` | the next `act` step changes the query or regulation; repeated misses end in an escalation signal | Escalate, never a guess |
+| Model stops searching early, or answers with bad JSON | parse failure, or `finish` with a claim uncovered | Next suggested search runs instead; `coverage` still searches the Claims regulation for each claim | Run continues, noted in the trace |
 | Researcher produces a citation that is not verbatim | Researcher's own quote check, then Verifier | Repaired or dropped; if the finding loses its support it becomes `cannot_determine` | Verifier `retry` or `escalate` |
 | Verifier says `retry` | `Verdict.action` | Researcher re-runs in retry mode with the hint | Up to 3 attempts |
 | Still unverified after the last attempt | pipeline | Verdict becomes `escalate` ("still unverified after N attempts") | `regulatory-review` (demo item 6) |
