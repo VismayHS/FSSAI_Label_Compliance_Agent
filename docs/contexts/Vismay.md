@@ -3,27 +3,19 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file** (and `LLM_Context.md`). Tick
 > boxes as you go, and add notes at the bottom.
 
-## Next steps to 30 October (2026-10-26)
+## Next steps to 30 October (2026-10-27)
 
-**New folder layout (27 Oct, [decision 305](../decisions/305-vismay-repository-layout.md)).** Your paths moved,
-nothing else changed: `services/` is `apps/`, `libs/` is `packages/`, `deploy/` is `infra/`, and `contracts/`,
-`eval/`, `corpus/`, `contexts/`, `scripts/`, `skills/`, `observability/`, `loadtest/` are now under `packages/`,
-`data/`, `docs/`, `tools/` and `infra/` (this file is `docs/contexts/<Name>.md`). Before you merge `main`, run
-`git config merge.directoryRenames true` (so a file you added under an old folder follows the move); **after the
-merge, run `python tools/scripts/setup_dev.py <name>` once**, because your editable installs still point at the old
-folders. Your own edits merge onto the moved files.
-
-What is left of my part, and what each item waits on (updated 26 Oct evening, after PR #9):
-1. **Merge my PR** (Vihaan's parts switched on, `postgres-init`, `setup_dev.py` fix, console fixes). Done before it:
-   PR #8 merged; Vihaan's three switches, his eval scorer in Compose, and S3.6 checked live against his endpoint.
-2. **S3.2 re-measure** cost per 100 runs once Namith's researcher fix is on `main`: Vihaan's verifier adds about
-   1.8k tokens per run (his estimate, roughly $0.32-0.34 per 100 runs), and a run that searches every requirement
-   costs more. Take the numbers from the eval run pair (Namith + Vihaan).
-3. **S4.3:** `python tools/scripts/build_report.py --strict` once all four sections exist (Namith's `agent-design.md` is
-   missing); two rehearsals of all 10 demos with the team.
-
-**If I do not:** Vihaan's parts stay switched off on a clean clone even after his merge, and the report has no cost
-section. Demo #1 (clean clone) and #3 (trace) and #8 (breaker) are mine and already work.
+What is left of my part:
+1. **Two rehearsals of all 10 demos with the team (S4.3).** Run `python tools/scripts/clean_clone_test.py` before
+   each. Mine: #1 clean clone, #3 trace, #8 breaker. Rehearse with nobody else using the Groq key in the minute
+   before a real run (the §4.1 run hit the 90 s limit on 27 Oct waiting for the per-minute token budget).
+2. **The final report build.** `python tools/scripts/build_report.py --strict` now also fails on `TODO`/*pending*
+   numbers. My section has none left; the others' gaps are listed in LLM_Context §9 and in each person's *Next steps*.
+   Run it again once Namith, Vihaan and Nishkal have their numbers, and commit `docs/report/REPORT.md`.
+3. **Cost on the whole eval set (optional).** When Namith and Vihaan run the prompt-comparison pair, add its mean cost
+   per run to the cost section (`compare report` prints it). The 27 Oct measurement already answers L5.
+4. **Merge teammates' PRs** as they arrive: Namith's (red team, structured output, compare and demo tools, CI green)
+   and Nishkal's (stub fixtures, after his one failing test).
 
 ## Your mission
 You make it **a production service, not a notebook**:
@@ -217,7 +209,7 @@ Summarise my current task in 3 lines, then wait for my go.
   - links to the runbook, incident log, `.env.example` and eval set.
 - [ ] **S4.3 Assemble the report.** Merge `docs/report/*.md` into the final report covering every point in spec §11, and run two rehearsals of all 10 demo items with the team.
 - [x] **S4.4 Write at least one incident entry** in `docs/incidents/`.
-- [ ] **Extras:**
+- [x] **Extras:**
   - [x] **GitHub Actions CI:** contract tests, each package's tests, `docker compose build`, and smoke on PRs
   - [x] **Reviewer console:** a page listing `regulatory-review` runs, showing citations next to the retrieved passages, with accept/override actions → feedback
   - [x] **Live progress over SSE** instead of polling
@@ -368,3 +360,21 @@ the web client."*
   anyone but Nishkal failed at the install step (Vihaan reported it).
 - Told Vihaan: three of his eval tests read files without `encoding="utf-8"` and fail on Windows only.
 - S2.4 done: all 11 parts real in the shared configuration; clean-clone test of this branch passed in 4.9 min (`postgres-init` ran on the empty volume).
+
+**2026-10-27**
+- Merged `main` (Namith's PR #12, the researcher sweep). On the rebuilt stack with all 11 parts real and Groq,
+  `smoke.py` passes.
+- S3.2 re-measured with the sweep: 8 paced eval scenarios, **$0.26 per 100 runs** (was $0.28); the largest driver
+  moved from `act` (64%) to `draft` (56%), because the sweep replaced most `act` rounds. A run that researches and
+  drafts costs about $0.0037. Report section updated; no *pending* number left in it.
+- Found in the same runs, passed to Namith (his *Next steps*, LLM_Context §9): 5 of 8 escalated with R1 because
+  grounding dropped quotes that were not verbatim (14 of 42 shortened with "..."), and 2 (§4.1, small pack) hit the
+  90 s wall-clock limit waiting on Groq's per-minute token budget. Nothing was wrongly cleared; the verifier marked
+  nothing unsupported.
+- `build_report.py --strict` now also fails while a section still has a `TODO` or *pending* marker (tested), so
+  the final build cannot ship placeholder numbers. 16 markers are left, all in the others' sections.
+- Rewrote every teammate's *Next steps*: Nishkal's CI failure (`apps/stub_llm/tests/test_with_gateway.py:59` expects
+  the default reply his new classifier fixture now replaces), Namith's open PR and the two findings above, Vihaan's
+  merge of the layout move and the Windows test reads. LLM_Context §9 critical path updated.
+- Local tests on Windows: Application Control blocks the `_xxhash` and `_uuid_utils` DLLs, so `pytest` needs
+  `-p no:langsmith_plugin` and retrieval, ingest and agents fail to import locally; CI on Linux is the check.

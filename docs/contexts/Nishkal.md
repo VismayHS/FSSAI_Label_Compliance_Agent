@@ -3,41 +3,40 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 30 October (written by Vismay, 2026-10-26)
+## Next steps to 30 October (written by Vismay, 2026-10-27)
 
-**New folder layout (27 Oct, [decision 305](../decisions/305-vismay-repository-layout.md)).** Your paths moved,
-nothing else changed: `services/` is `apps/`, `libs/` is `packages/`, `deploy/` is `infra/`, and `contracts/`,
-`eval/`, `corpus/`, `contexts/`, `scripts/`, `skills/`, `observability/`, `loadtest/` are now under `packages/`,
-`data/`, `docs/`, `tools/` and `infra/` (this file is `docs/contexts/<Name>.md`). Before you merge `main`, run
-`git config merge.directoryRenames true` (so a file you added under an old folder follows the move); **after the
-merge, run `python tools/scripts/setup_dev.py <name>` once**, because your editable installs still point at the old
-folders. Your own edits merge onto the moved files.
-
-Everything is due by **Fri 30 Oct**. What was checked: all 13 ticked tasks match the code; every package of yours
-passes on Python 3.11 (ingest 32, retrieval 43 plus the 3 real-model quality tests, observability 9, stub 10); all
-12 quotes in `section-4.1-passages.md` are verbatim PDF text; your SLO was committed before any measurement; your
-retriever is switched on for everyone in `.env.example`. Vismay also added `infra/loadtest/README.md` and
-`infra/observability/README.md` (folder guides only; nothing of yours changed).
+**Where you are (27 Oct evening).** Built and checked: corpus, index, retriever, cache, observability stack, SLO
+(committed before any measurement) and all four extras. On your branch but not on `main` yet: the five stub
+fixtures, the P3 page fix and the load-test status line. Two boxes to tick: N0.1 (your first PR merged long ago)
+and the *Extras* parent box (all four are done). What is left is measurement, and only you can produce it: demo #9
+and the numbers for D6, A7 and D7.
 
 Do next, in this order:
-1. **N3.5 Locust load test (demo #9; D6, A7).** Nothing blocks it any more: the full Compose stack is on `main`.
-   Point the stack at the stub LLM (step 1 of `infra/loadtest/results/README.md`), then run
-   `python infra/loadtest/run_matrix.py --host http://localhost:8000 --compose --scales 1 3`, commit the results folder
-   and fill in the tables.
-2. **N3.6 caching effect (D7).** The same matrix with `CACHE_ENABLED=0` and `CACHE_ENABLED=1`, written up as decision 003 says.
-3. **Stub replies for every prompt.** The pipeline now sends the stub the `classifier`, `researcher` and
-   `researcher_draft` prompts (and `verifier_support`: Vihaan's verifier is on since 26 Oct; for a load test you can also set
-   `VERIFIER_SUPPORT_CHECK=off`, which skips that call), and the stub answers them all
-   with its default reply, so a load test never reaches a finding. Add `apps/stub_llm/fssai_stub_llm/fixtures/<prompt>.json` with a valid reply for each
-   (ask Namith and Vihaan for one real reply each). Without this the load test measures a path the demo never takes.
-4. **N4.1 §4.1 rehearsal (demo #10).** Today's reference answer (Vihaan's test values) is `cannot_determine`, routed
-   to `regulatory-review`, because no protein RDA value is in the corpus. Rehearse that, and settle the RDA
-   question with Vihaan (the open question in your passages doc).
-5. Small fixes: P3 in `section-4.1-passages.md` cites p. 15, but the substituted Schedule II table is on PDF page 16
-   (only its heading is on 15). `infra/loadtest/results/README.md` still says Compose is not on `main`. Tick N0.1.
+1. **Make your branch's CI green, then open the PR.** CI run 40523049609 fails one test:
+   `apps/stub_llm/tests/test_with_gateway.py:59` still expects the default `"stub response"`, but the prompt it sends
+   carries the `[prompt:classifier@...]` tag, which your new `classifier.json` fixture now answers. Send an untagged
+   prompt in that test, or assert on the fixture's reply. Then open the PR `main ← nishkal`, so the load test runs
+   against fixtures that are on `main`.
+2. **N3.5 Locust (demo #9; D6, A7).** Docker Desktop with 8 GB, stub LLM on (step 1 of
+   `infra/loadtest/results/README.md`), then
+   `python infra/loadtest/run_matrix.py --host http://localhost:8000 --compose --scales 1 3`. Commit the results
+   folder, fill in the tables, and name the concurrency at which p95 passes 60 s and the component responsible
+   (`GET /v1/runs/{id}/trace` gives per-step latency and the queue wait).
+3. **N3.6 caching effect (D7).** The same matrix with `CACHE_ENABLED=0` and `CACHE_ENABLED=1`: the change in p95 and
+   in cost per run.
+4. **Real stub replies.** Your fixtures are hand-written. Any run on the real stack with the Groq key has the real
+   reply for each prompt in its trace: each `llm` step's `output.text`, named by `prompt_name`. Copy one per prompt
+   (Vismay's 27 Oct runs have real `classifier`, `researcher` and `researcher_draft` replies; `guardrail_judge` and
+   `verifier_support` were not called in that configuration, so take those two from Namith and Vihaan).
+5. **N4.1 §4.1 rehearsal (demo #10)**, and settle the RDA question with Vihaan. Today the reference answer is
+   `cannot_determine`, routed to `regulatory-review`. On 27 Oct the real §4.1 run also hit the 90 s wall-clock
+   limit while drafting (Groq's token-per-minute wait), so rehearse it with nothing else using the key in the
+   minute before.
+6. **Report section.** `build_report.py --strict` now fails on `TODO`/`pending`; yours are lines 92 and 114 of
+   `docs/report/retrieval-and-performance.md`, filled from steps 2 and 3.
 
 **If this does not happen:** demo #9 and the measured half of your report section have no numbers, and nobody else
-can produce them. You are the only one who can deliver D6, A7 and the D7 cache measurement.
+can produce them.
 
 ## Your mission
 You own **what the system knows** and **how fast it runs**:

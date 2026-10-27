@@ -479,15 +479,19 @@ What this means in practice:
 - **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
 - **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
 
-**Critical path (checked 2026-10-26).** Each person's file starts with *Next steps to 30 October*. What blocks the most:
+**Critical path (checked 2026-10-27).** Each person's file starts with *Next steps to 30 October*. What blocks the most:
 
 | Waiting on | What is blocked until then |
 |---|---|
-| ~~Vihaan's PR into `main`~~ Done 26 Oct (PR #9); switched on for everyone in `.env.example` | (Was: gate, verifier, router, feedback, quarantine, eval runner; demos #4-#6; feedback form and reviewer console) |
-| Namith: the researcher searches for every requirement it reports | Meaningful findings with a real LLM (demo #2); the prompt comparison (L2) and before/after (L3) numbers; cost per 100 runs |
-| One eval run pair with the Groq key (researcher 1.0.0 vs 1.1.0), after both of the above | Namith's L2 comparison, Vihaan's L3 before/after, Vismay's cost per 100 runs (L5) |
-| Nishkal's Locust runs | Demo #9 and the D6, A7 and D7 numbers; nobody else can produce them |
+| ~~Vihaan's PR into `main`~~ Done 26 Oct (PR #9) | (Was: gate, verifier, router, feedback, quarantine, eval runner) |
+| ~~Namith: the researcher searches for every requirement it reports~~ Done 27 Oct (PR #12, decision 102) | (Was: meaningful findings with a real LLM) |
+| Namith: quotes the model shortens with "..." are dropped by grounding, and the §4.1 run hits the 90 s limit on real Groq | Demo #2 ever clearing a label; a §4.1 run that completes (demo #10) |
+| One eval run pair with the Groq key (`python -m fssai_agents.compare run`, researcher 1.0.0 vs 1.1.0): Namith + Vihaan, one slot, nobody else on the key | Namith's L2 comparison, Vihaan's L3 before/after, cost per 100 runs on the whole eval set (L5) |
+| Nishkal's Locust runs (his branch CI first) | Demo #9 and the D6, A7 and D7 numbers; nobody else can produce them |
 | The team's RDA decision (Nishkal + Vihaan) | Whether §4.1 (demo #10) can ever be `met`/`unmet`; until then the correct answer is `cannot_determine` |
+| Two rehearsals of all 10 demos (everyone, Vismay leads) | Evaluation on 30 Oct |
+
+`python tools/scripts/build_report.py --strict` lists every `TODO` and *pending* number still left in the report sections.
 
 ---
 

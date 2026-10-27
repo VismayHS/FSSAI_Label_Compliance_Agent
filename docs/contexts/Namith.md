@@ -3,47 +3,41 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 30 October (written by Vismay, 2026-10-26)
+## Next steps to 30 October (written by Vismay, 2026-10-27)
 
-**New folder layout (27 Oct, [decision 305](../decisions/305-vismay-repository-layout.md)).** Your paths moved,
-nothing else changed: `services/` is `apps/`, `libs/` is `packages/`, `deploy/` is `infra/`, and `contracts/`,
-`eval/`, `corpus/`, `contexts/`, `scripts/`, `skills/`, `observability/`, `loadtest/` are now under `packages/`,
-`data/`, `docs/`, `tools/` and `infra/` (this file is `docs/contexts/<Name>.md`). Before you merge `main`, run
-`git config merge.directoryRenames true` (so a file you added under an old folder follows the move); **after the
-merge, run `python tools/scripts/setup_dev.py <name>` once**, because your editable installs still point at the old
-folders. Your own edits merge onto the moved files.
-
-Everything is due by **Fri 30 Oct**. What was checked: all 11 ticked tasks match the code; 192 tests pass on Python
-3.11; with all your parts switched on, `check_pipeline` and `check_guardrails` pass, both injection attempts tried
-(front of pack, other text) are blocked, and against the real index the researcher reaches FSS-AC-2018 Schedule I
-item 11. **M2.3 is done:** Vismay switched on `IMPL_PROMPTS`, `IMPL_CLASSIFIER`, `IMPL_RESEARCHER`, `IMPL_PIPELINE`
-and `IMPL_GUARDRAILS` in `.env.example`; tick it.
-
-**Update, 26 Oct evening (Vismay):** Vihaan's PR #9 is merged and his gate, verifier and router are switched on, so
-the eval runner is on `main` and nothing blocks step 2 except step 1. **Watch the step budget:** the verifier now runs
-inside every run (about 1 LLM call per attempt, up to 3 research attempts), and Vihaan measured a run that fails
-verification stopping at `RUN_MAX_STEPS=25`. A researcher that searches every requirement makes more tool calls, so
-check a full real run still completes inside 25 steps and 90 s (`RUN_MAX_WALL_S`); if not, search the labelling
-requirements in fewer, broader queries rather than raising the limits silently (and say which in your decision record).
+**Where you are (27 Oct evening).** PR #12 (the researcher sweep, decision 102) is on `main`, and Vismay checked it
+on the full Compose stack with all 11 parts real and Groq: `smoke.py` passes. On your branch, CI green, not on
+`main` yet: the 44-attack red team, `ask_structured`, the `compare` and `demo` tools, and the dashboard panel.
 
 Do next, in this order:
-1. **The researcher must search for what it reports (highest priority; demo #2).** A live §4.1 run with the real LLM
-   (Groq, researcher 1.1.0, run `a4702e8fcf3f4c44aa452896f171a129`) made only 2 searches, then drafted 11 findings;
-   9 of them are `cannot_determine` with "no passage was provided" (allergen, ingredients, veg mark, licence,
-   manufacturer, date marking, batch, whole grains). Either every requirement in the draft is searched first (for
-   example `coverage` also covering the labelling requirements, not only claims), or the draft leaves it out. As it
-   is, every label ends in `regulatory-review`.
-2. **M3.2 prompt comparison (L2).** Run `researcher` 1.0.0 against 1.1.0 on Vihaan's eval set
-   (`python -m fssai_eval run --tag ...`; it is on `main` now, use `--pause-s 60` for Groq). Vihaan's decision 205 plans one measured change
-   with you, so this pair can serve his L3 before/after too. It needs the Groq key, and one run uses about 12,500
-   tokens, so free-tier limits are tight: run in batches, or ask Vismay to run it. Fill the TODO table in
-   `docs/report/agent-design.md` and write `docs/decisions/1xx-namith-prompt-comparison.md`.
-3. **M4.1** rehearse demos #2 and #7. **M4.2** finish the TODOs in your report section.
-4. Delete the three stray lines " vismay" / " main" in *Notes / log* below (left over from a merge).
+1. **Open the PR `main ← namith`** for that work now; its CI is green.
+2. **Quotes shortened with "..." lose their citations (demo #2).** Smoke run `247f11fb07eb46e7963bf7decf500a08`
+   (27 Oct, real Groq): the draft quoted `FSS-LD-2020:5(3)(b)` as "Nutritional Information per 100g or 100ml ...
+   shall be given on the label containing the following:", which is not one verbatim span, so grounding dropped it.
+   LBL-NUTRITION, LBL-FSSAI-LICENCE and LBL-MANUFACTURER became `cannot_determine` and the run went to
+   `regulatory-review` (R1), even though the model had cited the right clause. Either accept a quote whose
+   "..."-separated parts each occur, in order, in the cited passage (and store those parts), or tell
+   `researcher_draft` never to shorten a quote. Add a test with this quote. Measured over 8 paced eval scenarios on
+   real Groq (27 Oct): 5 runs escalated with R1 for this reason alone. 15 findings lost every citation, 14 of the 42
+   drafted quotes contained "...", and the verifier marked nothing unsupported. Expected routes were
+   clear-for-print (fibre-source-pass, fat-low-pass, all-declarations-no-claims) and revise-and-recheck (sugar-low-fail,
+   missing-allergen). The rest of the dropped quotes were not verbatim either, so check the repair on those too.
+3. **The 90 s check is now measured, and it fails.** In the same batch, `s41-protein-clearly-above` and
+   `small-pack-exemption` stopped at the 90 s wall-clock limit (`complete=false`, 11-12 steps) while waiting on a 429
+   for Groq's tokens per minute; the runs that finished took 36-78 s. Numbers in
+   `docs/report/platform-and-integration.md` (cost section). Decide in decision 102 or a new record:
+   smaller draft context (`RESEARCHER_DRAFT_CHARS`), a higher `RUN_MAX_WALL_S` for the real provider, or both.
+   Say which and why.
+4. **M3.2 prompt comparison (L2).** `python -m fssai_agents.compare run --pause-s 60`, then `report --write`. Agree
+   on a time slot with Vihaan: there is one key, one run at a time, at least half an hour per variant, and the same
+   pair is his V3.3 before/after. Don't run it while anyone else uses the key.
+5. **M4.1** `python -m fssai_agents.demo --api http://localhost:8000` on the real stack (demos #2 and #7).
+6. **M4.2** fill the TODO table in `docs/report/agent-design.md` from step 4; `build_report.py --strict` now fails
+   while it has `TODO`. Then tick M4.2.
+7. Checkpointing (extra) can stay open: your note says why, and that is a fine "what was not done" line in the report.
 
-**If this does not happen:** demo #2 (a valid request routed, with citations that resolve) only ever shows
-escalations, and L2 has no comparison. The researcher fix is on the critical path: the eval numbers (Vihaan) and the
-cost per 100 runs (Vismay) are only meaningful once it searches properly.
+**If this does not happen:** demo #2 only ever shows escalations, L2 has no comparison, and Vihaan's L3 and
+Vismay's cost per 100 runs on the eval set have no numbers.
 
 ## Your mission
 You build the **thinking part**: the classifier and the research agent, and the LangGraph graph

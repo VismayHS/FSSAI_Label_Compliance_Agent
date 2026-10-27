@@ -3,41 +3,37 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 30 October (written by Vismay, 2026-10-26)
+## Next steps to 30 October (written by Vismay, 2026-10-27)
 
-**New folder layout (27 Oct, [decision 305](../decisions/305-vismay-repository-layout.md)).** Your paths moved,
-nothing else changed: `services/` is `apps/`, `libs/` is `packages/`, `deploy/` is `infra/`, and `contracts/`,
-`eval/`, `corpus/`, `contexts/`, `scripts/`, `skills/`, `observability/`, `loadtest/` are now under `packages/`,
-`data/`, `docs/`, `tools/` and `infra/` (this file is `docs/contexts/<Name>.md`). Before you merge `main`, run
-`git config merge.directoryRenames true` (so a file you added under an old folder follows the move); **after the
-merge, run `python tools/scripts/setup_dev.py <name>` once**, because your editable installs still point at the old
-folders. Your own edits merge onto the moved files.
+**Bring your branch up to date first.** Your branch is still on the old folder layout
+([decision 305](../decisions/305-vismay-repository-layout.md)): run `git config merge.directoryRenames true`,
+`git fetch origin && git merge origin/main`, then `python tools/scripts/setup_dev.py vihaan` once (your editable
+installs still point at the old folders).
 
-Everything is due by **Fri 30 Oct**. What was checked on your branch: you stayed in your own paths; on Python 3.11
-the gate, verification and eval tests pass; with all 11 parts real, `check_gate`, `check_verifier`, `check_router`
-and `check_pipeline` pass, and demos #4, #5 and #7 behave correctly; all 54 supporting quotes in
-`packages/eval/scenarios.jsonl` and the quote in your §4.1 test values are verbatim PDF text.
-
-**Update, 26 Oct evening (Vismay):** PR #9 is merged. Vismay's next PR (after #9) switches `IMPL_GATE`,
-`IMPL_VERIFIER` and `IMPL_ROUTER` on in `.env.example`; `infra/compose/eval-scorer.yml` is in the root `docker-compose.yml` (still opt-in,
-`--profile quality`); and `setup_dev.py` installs `packages/observability` for everyone (the API and worker import it).
+**Where you are (27 Oct evening).** Your gate, verifier, router, feedback, quarantine and eval runner are on `main`
+and switched on for everyone; Vismay checked them on the full stack with real Groq on 27 Oct (`smoke.py` passes:
+422 + quarantine, no run started). No commits since `d28a05e` (26 Oct, eval pacing and resume).
 
 Do next, in this order:
-1. **Three test reads fail on Windows** (they pass on Linux CI): `read_text()` without `encoding="utf-8"` meets a
-   non-ASCII character and Windows decodes it as cp1252. Fix `packages/eval/tests/test_tools.py:48`, `packages/eval/tests/test_postgres.py:99`
-   and `packages/eval/tests/test_runner.py:35` (and its `write_text` on line 76). Your non-test code already sets the encoding.
-2. **V3.3 before/after (L3), with Namith:** agree decision 205 with him (then mark it Accepted). Run it only after
-   his researcher fix is on `main` (otherwise most scenarios end `cannot_determine` and the comparison means
-   nothing), with your own Groq key and `--pause-s 60` or more. All four metrics with deltas go in
-   `docs/report/verification-and-evaluation.md`; the same pair serves Namith's M3.2.
-3. **Redo demos #5 and #6 with the real LLM.** Your V4.1 rehearsal used the fake LLM, so #5 escalated as "could not
-   be drafted" rather than for the missing RDA. Add the 429 step to demo #4 (D7 live).
+1. **The Windows test reads are still unfixed** (CI on Linux passes): `read_text()` without `encoding="utf-8"` in
+   `packages/eval/tests/test_tools.py:48`, `test_postgres.py:99`, `test_runner.py:35`, and `write_text` on
+   `test_runner.py:76`. `test_tools.py::test_checker_flags_a_fabricated_quote` fails on Windows today.
+2. **V3.3 before/after (L3), with Namith.** His `python -m fssai_agents.compare run` runs your
+   `python -m fssai_eval run` once per researcher variant (1.0.0 and 1.1.0), so one pair of runs gives his L2 and
+   your L3. Agree on the time slot with him (one key, one run at a time, `--pause-s 60`, at least half an hour per
+   variant), mark decision 205 Accepted, then fill the **TODO(LLM)** tables in
+   `docs/report/verification-and-evaluation.md` with all four metrics and their deltas. `build_report.py --strict`
+   now fails while they say `TODO`.
+3. **Redo demos #5 and #6 with the real LLM**, and add the 429 step to demo #4 (D7 live). Note for #6: in the 27 Oct
+   real runs (8 eval scenarios) 5 escalations came from grounding dropping quotes that were not verbatim (Namith's
+   step 2) and your verifier marked nothing unsupported, so check that #6 shows the verifier itself catching an
+   unsupported answer.
 4. **Settle the RDA question with Nishkal** and write the outcome into your test values doc. It decides whether
    demo #10 can ever be `met`/`unmet`.
 5. Extras left: RAGAS cross-check with judge calibration, and the eval regression gate in CI.
 
-**If this does not happen:** the L3 before/after has no numbers (and neither does Namith's L2 comparison), and
-demos #5, #6 and #10 are shown only on the fake LLM.
+**If this does not happen:** L3 has no before/after numbers (and Namith's L2 has no comparison), and demos #5, #6
+and #10 are shown only on the fake LLM.
 
 ## Your mission
 You make the system **trustworthy at both ends**:
