@@ -20,13 +20,14 @@ LD_PASSAGE = next(p for p in FAKE_PASSAGES if p.passage_id == "fake-ld-nutrition
 
 class ScriptedLLM:
     """Replies by step name ("act" or "draft"), in order. An Exception instance is raised."""
-    def __init__(self, acts=(), drafts=()):
-        self.q = {"act": list(acts), "draft": list(drafts)}
+    def __init__(self, acts=(), drafts=(), repairs=()):
+        self.q = {"act": list(acts), "draft": list(drafts), "draft_repair": list(repairs)}
         self.calls = []
 
     def complete(self, messages, ctx, *, agent, step, prompt=None, json_mode=False):
         self.calls.append((step, messages))
-        reply = self.q[step].pop(0) if self.q[step] else '{"action": {"tool": "finish", "args": {}}}'
+        fallback = "still not json" if step == "draft_repair" else '{"action": {"tool": "finish", "args": {}}}'
+        reply = self.q[step].pop(0) if self.q[step] else fallback
         if isinstance(reply, Exception):
             raise reply
         ctx.record(agent=agent, kind="llm", name=step, prompt_name=prompt.name, prompt_version=prompt.version)
@@ -179,8 +180,25 @@ def test_reference_value_guard_downgrades_a_percent_of_rda_condition(monkeypatch
 
 
 def test_draft_failure_gives_a_signal_not_a_guess():
-    d, _ = run(researcher(ScriptedLLM(drafts=["not json"])))
+    llm = ScriptedLLM(drafts=["not json"])
+    d, _ = run(researcher(llm))
     assert not d.findings and any("could not be drafted" in s for s in d.escalation_signals)
+    assert [c[0] for c in llm.calls].count("draft_repair") == 1  # one repair attempt, then the signal
+
+
+def test_a_malformed_draft_is_repaired_once_and_the_run_goes_on():
+    llm = ScriptedLLM(drafts=["Sure! Here are my findings: ..."], repairs=[draft()])
+    d, _ = run(researcher(llm))
+    assert not any("could not be drafted" in s for s in d.escalation_signals)
+    assert [c[0] for c in llm.calls].count("draft_repair") == 1
+    repair_messages = next(m for step, m in llm.calls if step == "draft_repair")
+    assert repair_messages[-2].role == "assistant" and "not usable" in repair_messages[-1].content
+
+
+def test_a_malformed_act_reply_is_not_repaired_it_falls_back_to_the_suggestions():
+    llm = ScriptedLLM(acts=["no json here"])
+    run(researcher(llm))
+    assert "act_repair" not in [c[0] for c in llm.calls]
 
 
 def test_nothing_retrieved_gives_a_signal():

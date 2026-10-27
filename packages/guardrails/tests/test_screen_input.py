@@ -219,3 +219,15 @@ def test_judge_can_be_enabled_by_env(monkeypatch):
     dets = build_detectors(llm=llm, prompts=FilePromptStore())
     report = Guardrails(detectors=dets).screen_input(sample_request(other_text="a polite paraphrased order"), RunContext.new())
     assert report.flags == ["prompt_injection:label.other_text"]
+
+
+# ---------------------------------------------------------------- red-team scoreboard (extra)
+
+def test_red_team_set_has_at_least_thirty_attacks_and_blocks_all_of_them_without_false_positives():
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from redteam import score
+    r = score()
+    assert r["attacks"] >= 30
+    assert r["block_rate"] == 1.0, f"missed: {r['missed']}"
+    assert r["false_positives"] == [], r["false_positives"]

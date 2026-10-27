@@ -43,6 +43,7 @@ from fssai_contracts.schemas import (
 from . import tools
 from .common import data_block, request_facts
 from .grounding import cross_references, ground_citations
+from .structured import ask_structured, parse_json
 
 AGENT = "researcher"
 LD, AC = Regulation.LABELLING_2020.value, Regulation.CLAIMS_2018.value
@@ -88,14 +89,7 @@ def _sig(tool: str, args: dict) -> str:
     return tool + ":" + json.dumps(args, sort_keys=True)
 
 
-def _json(text: str) -> dict | None:
-    text = text.strip()
-    fenced = re.match(r"^```(?:json)?\s*(.*?)\s*```$", text, flags=re.DOTALL)
-    try:
-        data = json.loads(fenced.group(1) if fenced else text)
-    except ValueError:
-        return None
-    return data if isinstance(data, dict) else None
+_json = parse_json  # kept under its old name for callers and tests
 
 
 _QUERY_LINE = re.compile(r"^(?P<q>.*?)(?: \[(?P<reg>FSS-[A-Z]+-\d{4})\])?$", re.DOTALL)
@@ -313,8 +307,8 @@ class LangGraphResearcher:
             iterations_left=state["max_iter"] - state["iteration"],
             input=claims)  # `input` keeps the registry's placeholder prompt (FakePromptStore) working
         ctx.check_budget()
-        resp = self.llm.complete(messages, ctx, agent=AGENT, step="act", prompt=prompt, json_mode=True)
-        data = _json(resp.text) or {}
+        data, _ = ask_structured(self.llm, messages, ctx, agent=AGENT, step="act", prompt=prompt, repair=False)
+        data = data or {}  # an unusable act reply falls back to the next suggested search (see _choose)
         notes = list(state["notes"])
         if isinstance(data.get("reflection"), str) and data["reflection"].strip():
             notes.append(_clip(data["reflection"].strip(), 300))
@@ -404,8 +398,8 @@ class LangGraphResearcher:
             not_researched=", ".join(skipped) or "(none)",
             input=claims)
         ctx.check_budget()
-        resp = self.llm.complete(messages, ctx, agent=AGENT, step="draft", prompt=prompt, json_mode=True)
-        data = _json(resp.text)
+        data, _ = ask_structured(self.llm, messages, ctx, agent=AGENT, step="draft", prompt=prompt,
+                                 check=lambda d: None if isinstance(d.get("findings"), list) else "it has no findings list")
         if not data or not isinstance(data.get("findings"), list):
             signals.append("findings could not be drafted from the retrieved passages")
             return {"findings": [], "signals": signals}

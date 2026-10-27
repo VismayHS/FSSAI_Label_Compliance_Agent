@@ -100,6 +100,15 @@ INJECTION_RULES: list[tuple[str, re.Pattern]] = [
     ("exfiltration", _rx(rf"\b(reveal|show|print|repeat|output|display|leak|disclose|tell me)\b{_W}{{0,40}}\b(system prompt|your (instructions|prompt|rules)|hidden (instructions|prompt)|api[- ]?key|secrets?|credentials?|passwords?|tokens?)\b")),
     ("tool_abuse", _rx(r"\b(execute|run)\s+(the\s+following\s+)?(command|code|script|shell|sql)\b")),
     ("tool_abuse", _rx(r"\b(clause_lookup|corpus_search|request_field_lookup)\s*\(|\btool_call\b|\bfunction_call\b")),
+    # second red-team round: authority role-play, "no review", tool names and JSON, data exfiltration
+    ("role_play", _rx(r"\bact\s+as\s+(an?|the)\s+(\w+\s+){0,3}(officer|inspector|regulator|auditor|reviewer|authority|approver|examiner)\b")),
+    ("approval_coercion", _rx(r"\bno\s+(further\s+|more\s+)?(review|checks?|checking|verification|human\s+review)\s+(is\s+|are\s+)?(needed|required|necessary)\b")),
+    ("approval_coercion", _rx(rf"\b(always|every\s+time)\s+(report|say|answer|respond|output|return|mark|rate)\b{_W}{{0,40}}\b(met|compliant|approved|passed|passes|clear)\b")),
+    ("instruction_override", _rx(r"\b(ignore|disregard|forget)\s+(everything|all\s+of\s+(this|that|it))\b(\s+(above|before|else|so\s+far))?")),
+    ("tool_abuse", _rx(rf"\b(call|use|invoke|trigger|run)\b{_W}{{0,25}}\b(clause_lookup|corpus_search|request_field_lookup|resolve_citation)\b")),
+    ("tool_abuse", _rx(r"[\"']\s*(tool|tool_name|function|args|arguments|tool_calls?)\s*[\"']\s*:")),
+    ("exfiltration", _rx(r"\b(fetch|curl|wget|exfiltrate|upload|post)\b[^.\n]{0,40}https?://")),
+    ("exfiltration", _rx(rf"\bsend\b{_W}{{0,40}}\b(findings?|results?|responses?|output|prompts?|instructions|your\s+(rules|prompt|instructions)|data|secrets?)\b{_W}{{0,40}}\bto\b{_W}{{0,40}}(https?://|\S+@\S+\.\S+)")),
     # other languages (the same ideas; coverage is partial by nature)
     ("instruction_override_es", _rx(r"\b(ignora|olvida|omite|descarta)\b[^.\n]{0,30}\b(instrucciones|indicaciones|reglas)\b")),
     ("approval_coercion_es", _rx(r"\b(aprueba|aprobar|apruebe)\s+(esta|la)\s+etiqueta\b")),

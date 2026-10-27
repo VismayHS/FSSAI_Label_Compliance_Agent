@@ -36,6 +36,8 @@ passages and must change strategy (clause lookup instead of search, the other re
 Bounds (A1): 25 steps, 15 tool calls, 90 s wall clock per run, 3 research attempts, all from `.env`.
 Tool arguments are checked against an allowlist before a call is made.
 
+Structured output: every reply that must be JSON goes through `ask_structured`: parse, check the shape, and if it is unusable show the model its own reply and what was wrong, once, only if the step budget allows. Outcomes are counted (`valid`, `repaired`, `failed`, `skipped`) and drawn on the agents dashboard. The draft step repairs; the act step does not, because an unusable act reply already falls back to the next suggested search.
+
 Grounding: citation quotes are repaired to verbatim spans of the cited passage or dropped. A finding that
 loses all its citations becomes `cannot_determine` with an escalation signal. The agent never uses remembered rules.
 
@@ -46,8 +48,8 @@ variants), a toxicity lexicon with an optional model, and an optional LLM judge.
 wording, never moves a route toward `clear-for-print`, requires an accepted verdict for it, and drops
 citations that do not resolve to this run's trace. Structural defences do not depend on detection: label
 text is only ever passed inside data blocks and tool arguments are allowlisted.
-Red-team set: 29 attacks flagged in the field they were placed in, 11 pieces of real label copy not flagged.
-Known gap: an unseen paraphrased instruction passes the heuristics; the judge is the second layer.
+Red-team set (`packages/guardrails/tests/attacks.yaml`): 44 attacks, each placed in one field and required to be flagged in that field, and 16 pieces of real label copy that must not be flagged. The attacks cover instruction override, role-play, authority role-play, fake system lines and chat tokens, delimiter escape, base64, leetspeak, zero-width and full-width tricks, six languages, tool-call text and tool JSON, and data exfiltration. CI prints the block rate on every run (`blocked 44/44 (100%); false positives 0/16`) and a test fails if either figure moves. The second round of attacks found five gaps in the first rule set (authority role-play, "no review needed", tool names in prose, tool JSON, exfiltration); each got a rule and a clean-copy fixture so ordinary wording such as "Visit https://..." or "Send your feedback to care@..." stays allowed.
+Known gap: an unseen paraphrased instruction passes the heuristics; the judge is the second layer, and the structural defences (data blocks, allowlisted tool arguments, verbatim citations, an output filter that can only lower a route) hold even when detection fails.
 
 ## 5. Prompt versions (L2)
 
@@ -66,12 +68,16 @@ on the same evaluation set with the same model.
 
 Result: TODO (which variant, on which metric, by how much; see `docs/decisions/` comparison record).
 
+How the comparison is run: `python -m fssai_agents.compare run` runs the evaluation set once per variant with the researcher and its draft prompt pinned together, paced for the provider's token limit and resumable; `python -m fssai_agents.compare report --write` fills this table and writes the decision record, picking the winner by safety metrics first (unsafe clears, hallucination rate), then correctness, then cost.
+
 ## 6. Per-agent metrics and runbook (A6, D8)
 
 Prometheus metrics labelled by `agent`: runs and successes, steps and tool calls per run, per-step and
 end-to-end latency, retries; dashboard `infra/observability/grafana/dashboards/agents.json`.
 `docs/runbook.md` covers provider rate-limited or down (breaker open) and index missing or stale.
 Incident log: `docs/incidents/2026-10-26-namith-diverged-branch-merge.md`.
+
+Demo rehearsal: `python -m fssai_agents.demo --api http://localhost:8000` runs demo 2 (a valid request, every citation checked against the passages in its trace, both regulations cited for a claim label) and demo 7 (an injection in `front_of_pack_text`: flagged field, no LLM or tool step, report that does not echo the attack).
 
 ## 7. Decisions and what was rejected
 
