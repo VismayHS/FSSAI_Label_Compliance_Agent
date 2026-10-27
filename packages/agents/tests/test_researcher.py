@@ -67,15 +67,15 @@ def tool_steps(ctx):
 
 # ---------------------------------------------------------------- the 4.1 path
 
-def test_claim_leads_to_a_search_in_the_claims_regulation_after_the_labelling_search():
+def test_claim_leads_to_searches_in_both_regulations():
     llm = ScriptedLLM(
         acts=[act("corpus_search", query="nutritional information declared", regulation="FSS-LD-2020"),
               act("corpus_search", query="source of protein claim", regulation="FSS-AC-2018"),
               {"reflection": "enough", "action": {"tool": "finish", "args": {}}}],
         drafts=[draft(protein_finding())])
     d, ctx = run(researcher(llm))
-    regs = [s.input.get("regulation") for s in tool_steps(ctx)]
-    assert regs[0] == "FSS-LD-2020" and "FSS-AC-2018" in regs[1:]
+    regs = {s.input.get("regulation") for s in tool_steps(ctx)}
+    assert {"FSS-LD-2020", "FSS-AC-2018"} <= regs
     assert any(p.regulation == Regulation.CLAIMS_2018 for p in d.passages)
 
 
@@ -287,4 +287,87 @@ def test_prompt_versions_are_recorded(monkeypatch, version):
     monkeypatch.setenv("PROMPT_RESEARCHER_VERSION", version)
     llm = ScriptedLLM(drafts=[draft(protein_finding())])
     _, ctx = run(researcher(llm))
-    assert ctx.prompt_versions["researcher"] == version and ctx.prompt_versions["researcher_draft"] == "1.0.0"
+    assert ctx.prompt_versions["researcher"] == version and ctx.prompt_versions["researcher_draft"] == "1.1.0"
+
+
+# ---------------------------------------------------------------- the sweep: every requirement is searched for
+
+def lbl(rid, status="cannot_determine", explanation="checked"):
+    return {"requirement_id": rid, "requirement": rid, "status": status, "explanation": explanation, "citations": []}
+
+
+def test_sweep_searches_every_labelling_requirement_even_if_the_model_finishes_at_once():
+    """The lazy-researcher bug: a real LLM chose finish after two searches, then wrote findings for
+    allergen, ingredients, licence and date marking without ever searching for them."""
+    from fssai_agents.researcher import required_topics
+    llm = ScriptedLLM(acts=[{"reflection": "done", "action": {"tool": "finish", "args": {}}}], drafts=[draft()])
+    _, ctx = run(researcher(llm))
+    searched = {(s.input["query"], s.input["regulation"]) for s in tool_steps(ctx)}
+    for t in required_topics(sample_request()):
+        assert (t["args"]["query"], t["args"]["regulation"]) in searched, t["id"]
+    assert any(reg == "FSS-AC-2018" for _, reg in searched)  # and the claim condition
+
+
+def test_sweep_needs_no_llm_step():
+    llm = ScriptedLLM(acts=[{"reflection": "done", "action": {"tool": "finish", "args": {}}}], drafts=[draft()])
+    _, ctx = run(researcher(llm))
+    first_llm = next(i for i, s in enumerate(ctx.steps) if s.kind == "llm")
+    assert first_llm >= 5 and all(s.kind == "tool" for s in ctx.steps[:first_llm])
+
+
+def test_findings_for_requirements_nobody_searched_are_dropped(monkeypatch):
+    monkeypatch.setenv("RESEARCHER_SWEEP", "0")  # no sweep, model finishes at once: only the claim search runs
+    llm = ScriptedLLM(acts=[{"reflection": "done", "action": {"tool": "finish", "args": {}}}],
+                      drafts=[draft(protein_finding(), lbl("LBL-ALLERGEN"), lbl("LBL-DATE-MARKING"), lbl("MADE-UP"),
+                                    signals=())])
+    d, _ = run(researcher(llm))
+    assert [f.requirement_id for f in d.findings] == ["CLM-PROTEIN-SOURCE"]
+    assert not any("MADE-UP" in s or "dropped" in s for s in d.escalation_signals)  # an invented finding is logged, not escalated
+    assert any("LBL-DATE-MARKING: not researched" in s for s in d.escalation_signals)
+
+
+def test_searched_requirement_keeps_its_finding():
+    llm = ScriptedLLM(drafts=[draft(protein_finding(), lbl("LBL-ALLERGEN", explanation="searched; nothing on it"))])
+    d, _ = run(researcher(llm))
+    assert {f.requirement_id for f in d.findings} == {"CLM-PROTEIN-SOURCE", "LBL-ALLERGEN"}
+
+
+def test_draft_prompt_lists_researched_and_not_researched_requirements():
+    llm = ScriptedLLM(drafts=[draft(protein_finding())])
+    run(researcher(llm))
+    user_msg = next(m for step, m in llm.calls if step == "draft")[1].content
+    assert "Researched requirements" in user_msg and "LBL-ALLERGEN" in user_msg and "LBL-DATE-MARKING" in user_msg
+
+
+def test_sweep_leaves_budget_for_an_act_round_and_the_draft():
+    ctx = RunContext.new(limits=RunLimits(max_steps=14, max_tool_calls=15))
+    llm = ScriptedLLM(drafts=[draft(protein_finding())])
+    d, ctx = run(researcher(llm), ctx=ctx)  # must finish without BudgetExceeded
+    assert len(ctx.steps) <= 14
+    assert any("not researched" in s for s in d.escalation_signals)  # the budget could not cover every topic
+
+
+def test_retry_does_not_repeat_the_sweep():
+    r = researcher(ScriptedLLM(drafts=[draft(protein_finding())]))
+    d1, ctx = run(r)
+    n = len(tool_steps(ctx))
+    run(researcher(ScriptedLLM(drafts=[draft(protein_finding())])), ctx=ctx, retry_hint="look again", previous=d1)
+    new = tool_steps(ctx)[n:]
+    old = {(s.input.get("query"), s.input.get("regulation")) for s in tool_steps(ctx)[:n]}
+    assert all((s.input.get("query"), s.input.get("regulation")) not in old for s in new)
+
+
+def test_an_extra_requirement_is_kept_only_if_it_cites_retrieved_text():
+    extra = {"requirement_id": "LBL-IRRADIATION", "requirement": "Irradiated food logo", "status": "met",
+             "explanation": "ok", "citations": [{"passage_id": "fake-ld-nutrition", "quote": LD_PASSAGE.text}]}
+    llm = ScriptedLLM(drafts=[draft(protein_finding(), extra, lbl("LBL-WHOLE-GRAIN"))])
+    d, _ = run(researcher(llm))
+    ids = {f.requirement_id for f in d.findings}
+    assert "LBL-IRRADIATION" in ids and "LBL-WHOLE-GRAIN" not in ids
+
+
+def test_passage_text_in_the_draft_prompt_is_capped_as_passages_grow():
+    from fssai_agents.researcher import _per_passage_chars
+    assert _per_passage_chars(5, 18000, 2000, 450) == 2000      # few passages: full length
+    assert _per_passage_chars(30, 18000, 2000, 450) == 600      # many: shared out
+    assert _per_passage_chars(100, 18000, 2000, 450) == 450     # never so short a clause is unreadable

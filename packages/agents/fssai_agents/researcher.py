@@ -1,14 +1,18 @@
 """LangGraphResearcher: the research agent, a LangGraph subgraph (docs/contexts/Namith.md M2.1).
 
-Graph:  plan -> act <-> run_tool -> coverage -> draft -> finalize
+Graph:  plan -> sweep -> act <-> run_tool -> coverage -> draft -> finalize
 
 - plan      deterministic: seed suggested searches from the claims and package (no LLM step).
+- sweep     deterministic: one search for every claim condition and every labelling requirement that
+            applies to this label (REQUIREMENT_TOPICS), so the model cannot skip a requirement by
+            finishing early. Costs one tool step each, no LLM step; capped by what the budget allows.
 - act       the LLM reflects ("does anything I have read modify, condition or exempt something?") and
             chooses the next tool, or finish. Retrieval is a tool the model chooses, not a fixed stage.
 - run_tool  executes the validated call (budget check first, "tool" step with the full passages).
 - coverage  safety net: a detected claim whose condition was never searched for in the Claims
             regulation gets one such search, even if the model chose to finish early.
 - draft     the LLM writes findings from retrieved passages only; every quote is made verbatim or dropped.
+            A finding is kept only for a requirement that was actually searched (see _only_researched).
 - finalize  assembles the ResearchDossier.
 
 Rules (interface: fssai_contracts.interfaces.Researcher; conformance.check_researcher):
@@ -123,6 +127,12 @@ def _format_passages(passages: dict[str, Passage], limit: int) -> str:
                      for p in passages.values())
 
 
+def _per_passage_chars(n: int, total: int, high: int, low: int) -> int:
+    """Characters shown per passage so that n passages together stay near `total` (a free-tier token limit
+    applies to the whole prompt). A quote is a span of what is shown, so it is still verbatim in the passage."""
+    return max(low, min(high, total // max(1, n)))
+
+
 def _claim_words(claim: DetectedClaim) -> str:
     return " ".join(w for w in re.findall(r"[a-z]+", claim.text.lower())
                     if w in {"source", "high", "rich", "low", "free", "reduced", "light", "lite", "zero",
@@ -136,6 +146,32 @@ def _claim_query(claim: DetectedClaim) -> str:
     return f"{base} claim conditions"
 
 
+# Labelling requirements the researcher may report on, grouped into a few broad searches so a full run
+# stays inside the step and tool-call limits (the verifier needs tool calls and steps of its own).
+# A finding for an LBL-* id is kept only if the search that covers it ran in this run, so "no passage was
+# provided" findings for requirements nobody searched for cannot appear. Order = priority when budget is short.
+REQUIREMENT_GROUPS: list[dict] = [
+    {"ids": ["LBL-NUTRITION"], "query": "nutritional information per 100 g declaration"},
+    {"ids": ["LBL-ALLERGEN", "LBL-VEG-MARK"], "query": "allergen declaration and vegetarian non-vegetarian logo on the label"},
+    {"ids": ["LBL-INGREDIENTS", "LBL-NET-QUANTITY"], "query": "list of ingredients and net quantity declaration"},
+    {"ids": ["LBL-DATE-MARKING", "LBL-BATCH"], "query": "date marking best before and batch number"},
+    {"ids": ["LBL-FSSAI-LICENCE", "LBL-MANUFACTURER"], "query": "FSSAI logo licence number and name and address of manufacturer"},
+    {"ids": ["LBL-SMALL-PACK"], "query": "exemption small package surface area",
+     "when": lambda req: req.package.total_surface_area_cm2 is not None
+     and req.package.total_surface_area_cm2 <= SMALL_PACK_LOOKUP_CM2},
+]
+
+
+def required_topics(request: LabelCheckRequest) -> list[dict]:
+    """The labelling searches that apply to this request: {"ids": [requirement ids covered], "tool", "args"}."""
+    return [{"ids": list(g["ids"]), "tool": "corpus_search", "args": {"query": g["query"], "regulation": LD}}
+            for g in REQUIREMENT_GROUPS if "when" not in g or g["when"](request)]
+
+
+def _env_k() -> int:
+    return _env_int("RESEARCHER_SWEEP_K", 5)
+
+
 def suggest_actions(request: LabelCheckRequest, claims: list[DetectedClaim], attempt: int, hint: str) -> list[dict]:
     """Deterministic hints for the first steps. The model may follow, reorder or ignore them."""
     out: list[dict] = []
@@ -143,14 +179,7 @@ def suggest_actions(request: LabelCheckRequest, claims: list[DetectedClaim], att
         out.append({"tool": "corpus_search", "args": {"query": _clip(hint, 200), "regulation": None}})
     for c in claims:
         out.append({"tool": "corpus_search", "args": {"query": _claim_query(c), "regulation": AC}})
-    out += [
-        {"tool": "corpus_search", "args": {"query": "nutritional information per 100 g declaration", "regulation": LD}},
-        {"tool": "corpus_search", "args": {"query": "allergen declaration on the label", "regulation": LD}},
-        {"tool": "corpus_search", "args": {"query": "vegetarian non-vegetarian logo mark", "regulation": LD}},
-    ]
-    area = request.package.total_surface_area_cm2
-    if area is not None and area <= SMALL_PACK_LOOKUP_CM2:
-        out.append({"tool": "corpus_search", "args": {"query": "exemption small package surface area", "regulation": LD}})
+    out += [{"tool": t["tool"], "args": t["args"]} for t in required_topics(request)]
     return out
 
 
@@ -181,7 +210,7 @@ class LangGraphResearcher:
             "calls": _calls_from_queries(previous.queries) if previous else [], "history": seed_calls, "suggested": [], "notes": [], "signals": [], "iteration": 0,
             "max_iter": self._iteration_cap(ctx, attempt), "action": None, "findings": [],
         }
-        out = self.graph.invoke(state, config={"recursion_limit": 8 + 4 * (state["max_iter"] + len(classification.claims))})
+        out = self.graph.invoke(state, config={"recursion_limit": 10 + 4 * (state["max_iter"] + len(classification.claims))})
         return ResearchDossier(findings=out["findings"], passages=list(out["passages"].values()),
                                queries=out["queries"], escalation_signals=out["signals"], attempt=attempt)
 
@@ -190,12 +219,14 @@ class LangGraphResearcher:
     def _build(self):
         g = StateGraph(State)
         g.add_node("plan", self._plan)
+        g.add_node("sweep", self._sweep)
         g.add_node("act", self._act)
         g.add_node("run_tool", self._run_tool)
         g.add_node("coverage", self._coverage)
         g.add_node("draft", self._draft)
         g.set_entry_point("plan")
-        g.add_edge("plan", "act")
+        g.add_edge("plan", "sweep")
+        g.add_edge("sweep", "act")
         g.add_conditional_edges("act", lambda s: "coverage" if s["action"] is None else "run_tool",
                                 {"coverage": "coverage", "run_tool": "run_tool"})
         g.add_edge("run_tool", "act")
@@ -207,7 +238,7 @@ class LangGraphResearcher:
 
     def _iteration_cap(self, ctx: RunContext, attempt: int) -> int:
         """How many act/tool rounds fit in what is left of the step budget (each round is two steps)."""
-        reserve = _env_int("RESEARCHER_STEP_RESERVE", 5)  # verifier, router, output filter
+        reserve = self._reserve(ctx, attempt)  # verifier, router, output filter, and the attempts that could follow
         left = ctx.limits.max_steps - len(ctx.steps) - reserve - 2  # minus the draft call and a coverage search
         cap = _env_int("RESEARCHER_MAX_ITERATIONS", 5)
         if attempt > 1:
@@ -219,6 +250,46 @@ class LangGraphResearcher:
     def _plan(self, state: State) -> State:
         suggested = suggest_actions(state["request"], state["claims"], state["attempt"], state["retry_hint"])
         return {"suggested": suggested}
+
+    @staticmethod
+    def _reserve(ctx: RunContext, attempt: int) -> int:
+        """Steps to hold back: the tail (verifier, router, output filter; RESEARCHER_STEP_RESERVE) plus what each
+        research attempt that could still follow needs (a draft call and a verification: RESEARCHER_RETRY_STEPS)."""
+        later = max(0, ctx.limits.max_research_attempts - attempt)
+        return _env_int("RESEARCHER_STEP_RESERVE", 5) + later * _env_int("RESEARCHER_RETRY_STEPS", 3)
+
+    def _sweep_allowance(self, ctx: RunContext, attempt: int = 1) -> int:
+        """How many sweep searches fit, always leaving room for one act round (two steps, one tool call),
+        the coverage safety net, the draft call and the steps later agents need."""
+        reserve = self._reserve(ctx, attempt)
+        tool_reserve = _env_int("RESEARCHER_TOOL_RESERVE", 3)  # the verifier's clause_lookups count as tool calls
+        tool_left = ctx.limits.max_tool_calls - ctx.tool_calls - tool_reserve
+        steps_left = ctx.limits.max_steps - len(ctx.steps) - reserve - 2  # minus the draft call and a coverage search
+        return max(0, min(tool_left - 1, steps_left - 2))
+
+    def _sweep(self, state: State) -> State:
+        """One search per claim condition and per applicable labelling requirement, no LLM step.
+        Retrieval coverage is decided here, in code; the model only adds the follow-up searches."""
+        if os.environ.get("RESEARCHER_SWEEP", "1") == "0":
+            return {}
+        cur = dict(state)
+        update: State = {}
+        todo = [{"tool": "corpus_search", "args": {"query": _claim_query(c), "regulation": AC}} for c in state["claims"]]
+        todo += [{"tool": t["tool"], "args": t["args"]} for t in required_topics(state["request"])]
+        budget = self._sweep_allowance(state["ctx"], state["attempt"])
+        for item in todo:
+            args = tools.validate(item["tool"], item["args"], state["request"])
+            if _sig(item["tool"], args) in cur["calls"]:
+                continue  # an earlier attempt already ran it
+            if budget <= 0:
+                break
+            budget -= 1
+            step = self._call(cur, item["tool"], args, k=_env_k())
+            cur = {**cur, **step}
+            update.update(step)
+        # the act loop gets whatever budget the sweep left
+        update["max_iter"] = self._iteration_cap(state["ctx"], state["attempt"])
+        return update
 
     def _act(self, state: State) -> State:
         ctx = state["ctx"]
@@ -234,7 +305,8 @@ class LangGraphResearcher:
             facts=json.dumps(facts), claims_block=data_block("claims", claims),
             strategy=STRATEGIES.get(min(state["attempt"], 3), STRATEGIES[3]),
             retry_hint=state["retry_hint"] or "(none, first attempt)",
-            retrieved=_format_passages(state["passages"], 500),
+            retrieved=_format_passages(state["passages"], _per_passage_chars(
+                len(state["passages"]), _env_int("RESEARCHER_ACT_CHARS", 9000), 500, 200)),
             history="\n".join(state["history"]) or "(none)",
             open_refs=", ".join(open_refs[:8]) or "(none)",
             suggested="\n".join(f"- {s['tool']} {json.dumps(s['args'])}" for s in pending[:4]) or "(none)",
@@ -274,9 +346,9 @@ class LangGraphResearcher:
     def _run_tool(self, state: State) -> State:
         return self._call(state, state["action"]["tool"], state["action"]["args"])
 
-    def _call(self, state: State, tool: str, args: dict) -> State:
+    def _call(self, state: State, tool: str, args: dict, k: int | None = None) -> State:
         ctx = state["ctx"]
-        result = tools.execute(tool, args, retriever=self.retriever, request=state["request"], ctx=ctx)
+        result = tools.execute(tool, args, retriever=self.retriever, request=state["request"], ctx=ctx, k=k)
         passages = dict(state["passages"])
         new = [p for p in result.passages if p.passage_id not in passages]
         for p in result.passages:
@@ -322,10 +394,15 @@ class LangGraphResearcher:
             return {"findings": [], "signals": signals}
         prompt = self.prompts.get("researcher_draft")
         claims = "\n".join(f"- {c.text}" for c in state["claims"]) or "(no claims)"
+        researched, skipped = self._researched_topics(state)
         messages = prompt.render(
             facts=json.dumps(request_facts(state["request"])), claims_block=data_block("claims", claims),
             retry_hint=state["retry_hint"] or "(none, first attempt)",
-            retrieved=_format_passages(passages, 2000), input=claims)
+            retrieved=_format_passages(passages, _per_passage_chars(
+                len(passages), _env_int("RESEARCHER_DRAFT_CHARS", 18000), 2000, 450)),
+            researched=", ".join(researched) or "(none)",
+            not_researched=", ".join(skipped) or "(none)",
+            input=claims)
         ctx.check_budget()
         resp = self.llm.complete(messages, ctx, agent=AGENT, step="draft", prompt=prompt, json_mode=True)
         data = _json(resp.text)
@@ -333,8 +410,11 @@ class LangGraphResearcher:
             signals.append("findings could not be drafted from the retrieved passages")
             return {"findings": [], "signals": signals}
         findings, notes = self._ground(data["findings"], passages)
+        findings, scope_signals, scope_log = self._only_researched(findings, researched, skipped, bool(state["claims"]))
+        for line in [*scope_log, *getattr(self, "_last_log", [])]:
+            ctx.event("researcher_note", detail=line)
         signals += [str(s)[:300] for s in data.get("escalation_signals", []) if isinstance(s, (str, int))]
-        signals += notes
+        signals += notes + scope_signals
         for claim in state["claims"]:
             if not self._claim_covered(claim, passages):
                 signals.append(f"no condition found in the corpus for claim '{claim.text}'")
@@ -342,11 +422,47 @@ class LangGraphResearcher:
         signals += rda_notes
         return {"findings": findings, "signals": list(dict.fromkeys(signals))}
 
+    # ---- which requirements this run actually searched for
+
+    @staticmethod
+    def _researched_topics(state: State) -> tuple[list[str], list[str]]:
+        """(requirement ids searched, requirement ids not searched) for this request, by the calls the run made."""
+        done = set(state["calls"])
+        researched, skipped = [], []
+        for t in required_topics(state["request"]):
+            sig = _sig(t["tool"], tools.validate(t["tool"], t["args"], state["request"]))
+            (researched if sig in done else skipped).extend(t["ids"])
+        return researched, skipped
+
+    @staticmethod
+    def _only_researched(findings: list[Finding], researched: list[str], skipped: list[str],
+                         has_claims: bool) -> tuple[list[Finding], list[str], list[str]]:
+        """Keep a finding only for a requirement the run searched for: an LBL-* id that a search covered, a
+        CLM-* id when the label has claims, or any finding that cites a passage retrieved in this run (for
+        example one the model found with its own follow-up search). Returns (kept, signals, log). Only gaps that stop a label being
+        cleared are escalation signals (a requirement never searched, or searched but never written up);
+        a dropped invented finding is only logged, because the router sends every signal to review."""
+        kept, signals, log = [], [], []
+        for f in findings:
+            grounded = bool(f.citations)  # a verbatim quote from a passage this run retrieved: it was searched for
+            if f.requirement_id in researched or (has_claims and f.requirement_id.startswith("CLM-")) or grounded:
+                kept.append(f)
+            else:
+                log.append(f"{f.requirement_id}: dropped, no search was run for this requirement")
+        for rid in skipped:
+            signals.append(f"{rid}: not researched in this run (step or tool budget); a person must check it")
+        covered = {f.requirement_id for f in kept}
+        for rid in researched:
+            if rid not in covered:
+                signals.append(f"{rid}: searched, but no finding was drafted for it; a person must check it")
+        return kept, signals, log
+
     # ---- grounding the draft
 
     def _ground(self, raw_findings: list, passages: dict[str, Passage]) -> tuple[list[Finding], list[str]]:
         findings: list[Finding] = []
         notes: list[str] = []
+        log: list[str] = []
         seen: set[str] = set()
         for item in raw_findings:
             if not isinstance(item, dict):
@@ -365,10 +481,11 @@ class LangGraphResearcher:
                 status = FindingStatus.CANNOT_DETERMINE
                 notes.append(f"{rid}: no verbatim citation survived grounding, so it cannot be determined")
                 explanation = (explanation + " (No supporting passage could be cited.)").strip()
-            elif dropped:
-                notes.append(f"{rid}: dropped {len(dropped)} citation(s) that did not resolve")
+            elif dropped:  # the finding still has a verbatim citation; the verifier judges it, no escalation
+                log.append(f"{rid}: dropped {len(dropped)} citation(s) that did not resolve")
             findings.append(Finding(requirement_id=rid, requirement=str(item.get("requirement", rid))[:300] or rid,
                                     status=status, explanation=explanation, citations=citations))
+        self._last_log = log
         return findings, notes
 
     def _reference_guard(self, findings: list[Finding], passages: dict[str, Passage]) -> tuple[list[Finding], list[str]]:

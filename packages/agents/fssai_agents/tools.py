@@ -103,7 +103,8 @@ def _lookup_field(request: LabelCheckRequest, path: str) -> object:
     return node
 
 
-def execute(tool: str, args: dict, *, retriever, request: LabelCheckRequest, ctx: RunContext) -> ToolResult:
+def execute(tool: str, args: dict, *, retriever, request: LabelCheckRequest, ctx: RunContext,
+            k: int | None = None) -> ToolResult:
     """Run one validated call. BudgetExceeded propagates; any other tool failure is recorded and returned."""
     ctx.check_budget(tool_call=True)
     t0 = time.monotonic()
@@ -111,7 +112,7 @@ def execute(tool: str, args: dict, *, retriever, request: LabelCheckRequest, ctx
     try:
         if tool == "corpus_search":
             reg = _REGULATIONS[args["regulation"]] if args.get("regulation") else None
-            result.passages = list(retriever.search(args["query"], ctx, k=search_k(), regulation=reg))
+            result.passages = list(retriever.search(args["query"], ctx, k=k or search_k(), regulation=reg))
         elif tool == "clause_lookup":
             hit = retriever.get_clause(_REGULATIONS[args["regulation"]], args["clause_id"], ctx)
             result.passages = [hit] if hit is not None else []
