@@ -1,7 +1,7 @@
 """Assemble the final report (S4.3) from each owner's section, the decision records and the incident log.
 
     python tools/scripts/build_report.py            # writes docs/report/REPORT.md
-    python tools/scripts/build_report.py --strict   # also fails while any section is still missing (use for the final)
+    python tools/scripts/build_report.py --strict   # also fails while a section is missing or still has a TODO/pending number (use for the final)
 
 Sections are included verbatim with their headings moved one level down; nothing is written for a missing
 section except a visible "pending" line naming its owner. Links stay valid because REPORT.md sits beside them.
@@ -26,6 +26,7 @@ SECTIONS = [
 ]
 
 _FENCE = re.compile(r"^\s*(```|~~~)")
+_PLACEHOLDER = re.compile(r"\bTODO\b|\bpending\b", re.IGNORECASE)  # a number or result still to fill in
 _STATUS = re.compile(r"\*\*Status:\*\*\s*([^·\n.,;(]+)", re.IGNORECASE)  # "Accepted, built (...)" -> "Accepted"
 _AUTHOR = re.compile(r"\*\*(?:Author|Owner):\*\*\s*([^·\n]+)", re.IGNORECASE)
 
@@ -40,6 +41,22 @@ def demote(markdown: str, levels: int = 1) -> str:
             line = "#" * levels + line
         out.append(line)
     return "\n".join(out)
+
+
+def placeholders(report_dir: Path = REPORT_DIR) -> list[str]:
+    """`file:line` of every TODO or pending marker left in a section, outside fenced code."""
+    found = []
+    for name, _, _ in SECTIONS:
+        path = report_dir / name
+        if not path.exists():
+            continue
+        fenced = False
+        for n, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
+            if _FENCE.match(line):
+                fenced = not fenced
+            elif not fenced and _PLACEHOLDER.search(line):
+                found.append(f"{name}:{n}")
+    return found
 
 
 def title_of(markdown: str) -> str:
@@ -110,7 +127,7 @@ def build(report_dir: Path = REPORT_DIR) -> tuple[str, list[str]]:
 
 def main(argv: list[str] | None = None) -> int:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--strict", action="store_true", help="fail while any section is missing")
+    p.add_argument("--strict", action="store_true", help="fail while a section is missing or has a TODO/pending marker")
     p.add_argument("--report-dir", type=Path, default=REPORT_DIR, help=argparse.SUPPRESS)
     p.add_argument("--out", type=Path, default=OUT)
     args = p.parse_args(argv)
@@ -119,7 +136,10 @@ def main(argv: list[str] | None = None) -> int:
     print(f"wrote {args.out.relative_to(ROOT) if args.out.is_relative_to(ROOT) else args.out}")
     for name in missing:
         print(f"  pending: docs/report/{name}")
-    return 1 if args.strict and missing else 0
+    todo = placeholders(args.report_dir)
+    for where in todo:
+        print(f"  still to fill: docs/report/{where}")
+    return 1 if args.strict and (missing or todo) else 0
 
 
 if __name__ == "__main__":

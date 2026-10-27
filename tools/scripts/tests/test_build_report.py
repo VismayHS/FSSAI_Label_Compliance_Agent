@@ -55,3 +55,17 @@ def test_strict_mode_fails_while_sections_are_missing(tmp_path):
     for name in ("retrieval-and-performance.md", "verification-and-evaluation.md"):
         (report / name).write_text("# Done\n", encoding="utf-8")
     assert br.main(["--strict", "--report-dir", str(report), "--out", str(out)]) == 0
+
+
+def test_strict_mode_fails_on_numbers_still_to_fill_but_not_inside_code(tmp_path):
+    report, out = tree(tmp_path), tmp_path / "REPORT.md"
+    for name in ("retrieval-and-performance.md", "verification-and-evaluation.md"):
+        (report / name).write_text("# Done\n", encoding="utf-8")
+    (report / "agent-design.md").write_text(
+        "# Agents\n\n| Route accuracy | TODO | TODO(LLM) |\n\n*Pending the load test.*\n\n```bash\n# TODO in code\n```\n",
+        encoding="utf-8")
+    assert br.placeholders(report) == ["agent-design.md:3", "agent-design.md:5"]
+    assert br.main(["--report-dir", str(report), "--out", str(out)]) == 0      # a draft still builds
+    assert br.main(["--strict", "--report-dir", str(report), "--out", str(out)]) == 1
+    (report / "agent-design.md").write_text("# Agents\n\n| Route accuracy | 0.80 |\n", encoding="utf-8")
+    assert br.main(["--strict", "--report-dir", str(report), "--out", str(out)]) == 0
