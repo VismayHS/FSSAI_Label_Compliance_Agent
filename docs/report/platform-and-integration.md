@@ -2,7 +2,7 @@
 
 Owner: Vismay. Report sections: problem and scope; architecture with deployment boundaries; asynchronous
 execution and reliability; cost per 100 runs. Sources: decisions 301–304, `docs/architecture.md`, and the
-measurements cited inline. Numbers marked *pending* are filled in from real-provider runs before submission.
+measurements cited inline.
 
 ## Problem and scope
 A regulatory affairs analyst checks a packaged-food label before print against two FSSAI regulations that
@@ -90,29 +90,42 @@ Cost is computed at call time from the provider's token counts and `LLM_PRICE_*_
 dashboard show cost per 100 runs, cost by step and agent, and the largest single driver, all from the same
 table.
 
-First measurement, 26 Oct 2026: 8 real runs on the Compose stack (the three load-test payloads, run one at a time),
-priced at the provider's published list price for the primary model, $0.15 per million prompt tokens and $0.60 per
-million completion tokens (Groq's model documentation). On the free tier we actually pay $0.
+All figures are priced at the provider's published list price for the primary model, $0.15 per million prompt tokens
+and $0.60 per million completion tokens (Groq's model documentation). On the free tier we actually pay $0.
 
-| | Value |
-|---|---|
-| Runs measured | 8 (`python tools/scripts/cost_report.py --since 2026-10-26T16:00`) |
-| Mean cost per run | $0.002759 (p95 $0.003539) |
-| **Cost per 100 runs** | **$0.28** at list price |
-| Largest single cost driver (step) | the researcher's `act` step: 64% of spend (23 calls, 49,367 tokens); the researcher as a whole is 91% |
+Measured twice on the Compose stack with all 11 parts real, runs one at a time about a minute apart (Groq's free tier
+allows 8,000 tokens a minute):
+
+| | 26 Oct: researcher before decision 102 | **27 Oct: researcher with the sweep (decision 102)** |
+|---|---|---|
+| Runs | 8 (the three load-test payloads) | 8 eval scenarios: §4.1, fibre, sugar, fat, allergen, all declarations, small pack, out of scope |
+| Mean cost per run | $0.002759 (p95 $0.003539) | $0.002645 (p95 $0.004334) |
+| **Cost per 100 runs** | $0.28 | **$0.26** |
+| Largest single cost driver | `act` (researcher): 64% | **`draft` (researcher): 56%** (7 calls, 35,601 tokens) |
+| Researcher share of spend | 91% | 92% |
+
+27 Oct by step (`python tools/scripts/cost_report.py --since 2026-10-27T18:04:50`):
 
 | LLM step | Calls | Prompt tokens | Completion tokens | Cost | Share |
 |---|---|---|---|---|---|
-| `act` (researcher) | 23 | 34,266 | 15,101 | $0.0142 | 64% |
-| `draft` (researcher) | 5 | 7,717 | 7,868 | $0.0059 | 27% |
-| `classify` (classifier) | 8 | 3,586 | 2,431 | $0.0020 | 9% |
+| `draft` (researcher) | 7 | 21,185 | 14,416 | $0.0118 | 56% |
+| `act` (researcher) | 8 | 33,063 | 4,307 | $0.0075 | 36% |
+| `classify` (classifier) | 8 | 3,498 | 2,101 | $0.0018 | 8% |
 
 What this does and does not show:
-- The sample is small, and in all 8 runs the researcher stopped after a few searches (Namith is fixing that), so a
-  run that searches every requirement will cost more. The number is re-measured on the eval set once that lands.
-- The driver is clear either way: the researcher's reasoning loop (`act`), whose prompt grows with every passage it
-  has read. Cheaper options, in order of effect: fewer `act` rounds (`RESEARCHER_MAX_ITERATIONS`), passing passage
-  ids instead of full text back into the loop, and the smaller fallback model for the classifier.
+- **The sweep moved the cost, not the total.** Searching every requirement deterministically replaced most `act`
+  rounds (23 calls on 26 Oct, 8 now), and the draft now reads passages for every requirement, so its prompt and its
+  reply (one finding per requirement) are the largest items.
+- **The mean hides the mix.** A run that researches and drafts costs $0.0034–0.0046 (mean $0.0037, so about $0.37 per
+  100 such runs). An out-of-scope run stops after the classifier ($0.0002). The two runs that hit the 90 s limit
+  stopped before their draft ($0.0010–0.0013). A workload of only in-scope labels sits near $0.37 per 100.
+- **Cheaper options, in order of effect:** fewer passage characters in the draft (`RESEARCHER_DRAFT_CHARS`, which
+  also helps the 90 s limit), passage ids instead of full text in `act`, and the smaller fallback model for the
+  classifier. The whole eval set (30 scenarios) is measured by the prompt-comparison run pair (Namith, Vihaan).
+- **Not a quality result.** All 8 runs ended in `regulatory-review` (safe: none was wrongly cleared). Five escalated
+  because grounding dropped quotes that were not verbatim (14 of the 42 drafted quotes were shortened with "..."), and
+  two hit the 90 s wall-clock limit while waiting for Groq's per-minute token budget. The verifier marked nothing
+  unsupported. Both causes are on the team's critical path (`docs/contexts/LLM_Context.md` §9).
 - On the fakes and the stub every recorded cost is $0, and the report says so instead of inventing a number.
 
 ## What did not work, and what we changed
