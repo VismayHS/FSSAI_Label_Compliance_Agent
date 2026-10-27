@@ -369,3 +369,9 @@ The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `
   for your recall numbers. Change it back if you disagree; it is your section.
 
 - 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).
+
+- 2026-10-27 (Nishkal): merged `origin/main` (new layout, decision 305). Stub replies written for the five agent prompts
+  (`classifier`, `guardrail_judge`, `researcher`, `researcher_draft`, `verifier_support`) with `apps/stub_llm/tests/test_fixtures.py`.
+  They are hand-written to each prompt's reply schema, **not** copied from a live trace: replace them with real replies
+  (ask Namith and Vihaan) before the numbers are used. Fixed the §4.1 P3 page (table body is on p. 16, heading on p. 15).
+  Not done here: N3.5, N3.6 and N4.1 need Docker and the full stack, which was not available in the session; they are next.

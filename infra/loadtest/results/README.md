@@ -3,8 +3,9 @@
 Owner: Nishkal. Target declared first in [`../SLO.md`](../SLO.md): **full_run p95 ≤ 60 s at 5 concurrent
 runs, ≤ 1 % failed**, with the stub LLM (mean 1.5 s, p95 4 s).
 
-> **Status (2026-10-25): not yet measured on the full stack.** The root `docker-compose.yml` (api,
-> worker, redis, postgres) is not on `main` yet (Vismay S1.2). The tooling is built and has been
+> **Status (2026-10-27): not yet measured on the full stack.** The full Compose stack is on `main` now,
+> so the matrix can be run as soon as the stub-LLM replies are in (`apps/stub_llm/fssai_stub_llm/fixtures/`).
+> The tooling is built and has been
 > smoke-tested end to end against the API in inline mode on the fake pipeline. Those smoke numbers are
 > not SLO results and are deliberately not recorded here. Fill in the tables below from real runs;
 > every number must come from a folder in this directory.
