@@ -1,0 +1,17 @@
+# Redis (owner Vismay): the run queue (RQ), the retrieval cache, rate-limit counters and circuit-breaker
+# state. Append-only file on a volume, so queued jobs survive a Redis restart.
+services:
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--save", ""]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  redis-data:

@@ -15,7 +15,7 @@ timeline, expandable passages.
 
 ## Decision
 Option 2.
-- TypeScript types mirror `contracts/fssai_contracts/schemas.py`, so a contract change shows up as a
+- TypeScript types mirror `packages/contracts/fssai_contracts/schemas.py`, so a contract change shows up as a
   compile error instead of a blank field during the demo.
 - React fits the stateful parts (polling, timeline, disclosure) without hand-written DOM code, and lets
   us use React Bits' agent-status components (`StatusMark`, `CallChip`, `ThoughtLine`, `LatticeLoader`)
@@ -28,5 +28,5 @@ Option 2.
   no CORS configuration is needed; `/config.js` supplies runtime settings.
 
 ## Consequences
-- The design rules live in `services/web/DESIGN.md` and `skills/project/fssai-frontend`.
+- The design rules live in `apps/web/DESIGN.md` and `tools/skills/project/fssai-frontend`.
 - `npm run check` (types, lint, tests, build) is part of the definition of done for web changes.

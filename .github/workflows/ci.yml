@@ -1,0 +1,92 @@
+# CI (owner Vismay): on every push to a personal branch and every PR into main.
+#   python   - every package's tests on Python 3.11 (the containers' version), with a real Postgres
+#   web      - typecheck, lint, tests and build of the web client
+#   compose  - PRs into main only: build the stack from a clean checkout, boot it, run the smoke test (demo #1)
+# A red check means "don't merge"; main must always boot (LLM_Context §8.1).
+name: ci
+
+on:
+  push:
+    branches: [nishkal, namith, vihaan, vismay]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      FSSAI_TEST_DATABASE_URL: postgresql://postgres:test@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-python@v5.6.0
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Every file compiles on Python 3.11
+        run: python -m compileall -q packages apps tools/scripts infra/loadtest data/corpus/tools
+      - name: No credentials, endpoints or model ids (D4)
+        run: python tools/scripts/audit_secrets.py
+      - name: Install every package (CPU-only torch for the retriever's embeddings)
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch>=2.4,<3"
+          pip install -e "packages/contracts[test]" -e "packages/observability[test]" -e "packages/retrieval[test,embeddings]" \
+            -e "packages/ingest[test]" -e "packages/llm_gateway[test]" -e "packages/run_store[test]" -e "packages/prompts[test]" \
+            -e "packages/guardrails[test]" -e "packages/agents[test]" -e "packages/gate[test]" -e "packages/verification[test]" \
+            -e "packages/eval[test]" -e "apps/stub_llm[test]" -e "apps/worker[test]" -e "apps/api[test]"
+      - name: Tests, one process per package
+        run: python tools/scripts/test_all.py
+
+  web:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - uses: actions/setup-node@v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm run check
+
+  compose:
+    if: github.event_name == 'pull_request'
+    needs: [python, web]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4.2.2
+      - name: cp .env.example .env (exactly what a clean clone gets)
+        run: cp .env.example .env
+      # No --wait: it counts the indexer's exit 1 (EMBEDDING_MODEL is empty on a clean clone) as a failure,
+      # although the worker's dependency on it is optional. smoke.py waits for /readyz itself.
+      - name: docker compose up
+        run: docker compose up -d --build api worker web
+      - name: Smoke test (demo #1)
+        run: python3 tools/scripts/smoke.py --timeout 300
+      - name: Logs on failure
+        if: failure()
+        run: docker compose ps -a && docker compose logs --tail=80 api worker indexer
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

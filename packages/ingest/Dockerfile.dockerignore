@@ -1,0 +1,9 @@
+# Build context is the repo root; send only what the indexer image copies.
+*
+!packages/contracts/
+!packages/observability/
+!packages/retrieval/
+!packages/ingest/
+**/__pycache__
+**/*.egg-info
+**/tests

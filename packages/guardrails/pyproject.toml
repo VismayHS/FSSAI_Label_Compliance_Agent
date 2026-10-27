@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fssai-guardrails"
+version = "0.1.0"
+description = "Input screening (injection, toxicity, length) and output filtering"
+requires-python = ">=3.11"
+# Add each real dependency with bounds as a task needs it, e.g. "faiss-cpu>=1.8,<2".
+dependencies = ["fssai-contracts"]
+
+[project.optional-dependencies]
+test = ["pytest>=9", "pyyaml>=6,<7", "fssai-prompts"]
+# optional: a transformers toxicity model (GUARDRAIL_TOXICITY_MODEL); the lexicon is the offline default
+model = ["transformers>=4.40"]
+
+[tool.setuptools.packages.find]
+include = ["fssai_guardrails*"]

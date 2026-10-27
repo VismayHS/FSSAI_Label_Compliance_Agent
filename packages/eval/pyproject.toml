@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fssai-eval"
+version = "0.1.0"
+description = "Eval set runner, metrics and live scoring"
+requires-python = ">=3.11"
+dependencies = [
+    "fssai-contracts",
+    "fssai-verification",   # citation resolution + numeric re-derivation, shared with the verifier (faithfulness)
+    "fssai-gate",           # tools/check_scenarios.py and tools/export_schema.py use the gate's own rules
+    "pyyaml>=6,<7",         # judge prompt files
+    "psycopg[binary]>=3.2,<4",  # live scores, feedback candidates
+]
+
+[project.optional-dependencies]
+test = ["pytest>=9"]
+# TruLens feedback functions for groundedness and context relevance (--judge trulens). Not installed by default:
+# it pins openai<2 and is only needed for judged runs. RAGAS is not used: see docs/decisions/203-vihaan-eval-judges.md.
+trulens = ["trulens-core>=2.16,<3", "trulens-providers-openai>=2.16,<3"]
+
+[tool.setuptools.packages.find]
+include = ["fssai_eval*"]
+
+[tool.setuptools.package-data]
+fssai_eval = ["prompts/*/*.yaml"]

@@ -5,7 +5,7 @@
 ## Context
 A4 needs a queue or task runner between submission and execution. A7 needs
 `docker compose up --scale worker=3` to work. Redis is already in the stack for the retrieval cache,
-rate-limit counters and the shared circuit-breaker state. The agent interfaces in `contracts/` are
+rate-limit counters and the shared circuit-breaker state. The agent interfaces in `packages/contracts/` are
 synchronous (`Pipeline.run(request, ctx) -> RunResult`).
 
 ## Options
@@ -31,7 +31,7 @@ RQ on Redis, queue `fssai-runs`, job id = run id, job timeout = `RUN_MAX_WALL_S 
   ready in queue mode with an in-memory run store (workers could never update it).
 
 ## Consequences
-- Queue mode needs a shared `RunStore` (Postgres, `libs/run_store`) before Compose can serve runs.
+- Queue mode needs a shared `RunStore` (Postgres, `packages/run_store`) before Compose can serve runs.
 - A failed enqueue (Redis down) saves the run as `failed` and returns `503`: an honest error, not a lost run.
 - Local Windows development uses inline mode; the queue worker runs in its Linux container (it also
   starts on Windows thanks to a timer-based job timeout, for debugging).

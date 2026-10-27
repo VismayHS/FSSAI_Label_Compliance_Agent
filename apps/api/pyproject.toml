@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fssai-api"
+version = "0.1.0"
+description = "FastAPI service: submit label checks (202 + run id), poll status, read the full run trace"
+requires-python = ">=3.11"
+dependencies = [
+    "fssai-contracts",
+    "fssai-worker",
+    "fssai-observability",
+    "fastapi>=0.162,<1",
+    "uvicorn[standard]>=0.54,<1",
+    "prometheus-client>=0.26,<1",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=9", "httpx2>=2.16,<3", "fakeredis>=2.40,<3"]
+
+[tool.setuptools.packages.find]
+include = ["app*"]

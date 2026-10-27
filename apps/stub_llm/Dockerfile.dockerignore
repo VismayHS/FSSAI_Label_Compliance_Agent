@@ -1,0 +1,6 @@
+*
+!packages/observability/
+!apps/stub_llm/
+**/__pycache__
+**/*.egg-info
+**/tests
