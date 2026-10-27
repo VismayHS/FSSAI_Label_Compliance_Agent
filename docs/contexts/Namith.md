@@ -234,7 +234,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   opt-in test that runs the §4.1 request end to end with DevLLMClient and the real retriever if
   IMPL_RETRIEVER is set.
   ```
-- [ ] **M2.3 Switch it on.** Set `IMPL_PIPELINE`, `IMPL_CLASSIFIER` and `IMPL_RESEARCHER` in `.env.example` (commented examples), and tell Vismay to flip them in the shared `.env`.
+- [x] **M2.3 Switch it on.** Set `IMPL_PIPELINE`, `IMPL_CLASSIFIER` and `IMPL_RESEARCHER` in `.env.example` (commented examples), and tell Vismay to flip them in the shared `.env`.
 
 ## Phase 3: all requirements
 
@@ -298,16 +298,12 @@ output-authorisation guardrails."*
 
 ## Notes / log
 - 2026-10-25: M1.1 prompt store (FilePromptStore + `python -m fssai_prompts list`) and M1.2 classifier (LLM JSON, repair retry, rule fallback) done; conformance passes, xfail markers removed. researcher prompt `0.1.0` is a placeholder until M2.1.
- vismay
 - 2026-10-26 (Vismay): **everything in this file is now due by Fri 30 Oct** (the first review), not over five weeks; see LLM_Context §9. Do it all as fast as you can. Only the phase headings changed (the week numbers are gone).
 - 2026-10-26 (Vismay): `IMPL_PROMPTS` and `IMPL_CLASSIFIER` are switched on in `.env.example` (after your PR #4), so
   that half of M2.3 is done; only `IMPL_RESEARCHER` and `IMPL_PIPELINE` remain. M0.2 and M1.3 are committed but
   still unticked above: tick them if they're done.
 
 - 2026-10-26: M2.1 researcher built (LangGraph: plan, act, run_tool, coverage, draft). Prompts `researcher` and `researcher_draft` 1.0.0. Checked against the real index with a scripted LLM; not yet against a real LLM. RDA guard on by default (open team question).
- namith
 - 2026-10-26: M2.2 LangGraphPipeline built (screen, classify, research, verify with retry edge, route, finish). Parity tests run the reference pipeline's scenarios through both pipelines and compare route, verdict, findings and step sequence. Opt-in slow e2e test for section 4.1 (real LLM + real index). M2.3: IMPL_* examples added to .env.example; still to tell Vismay to flip them in the shared .env.
 - 2026-10-26: M3.3 per-agent metrics (`fssai_agents.metrics`, derived from the run's step trace and hooked into the pipeline) and the `agents.json` dashboard done. M3.4 runbook (`docs/runbook.md`) done. M4.3 incident entry written (`2026-10-26-namith-diverged-branch-merge`). Still open: M2.3 (Vismay flips the `IMPL_*` switches), M3.2 prompt comparison (needs a real LLM key and Vihaan's eval set), M4.1, M4.2.
-
- main
- main
+- 2026-10-27: researcher fix (decision 102): deterministic `sweep` searches every claim condition and labelling requirement before the model acts, draft prompt 1.1.0 limits findings to searched requirements, step reserve covers retries. Scripted full-run check: 15 steps when verified, 23 when the verifier rejects twice, 25 with a busy model (limits unchanged). M2.3 ticked. Still open: M3.2 comparison (needs Groq key), 90 s check with real latency, M4.1 rehearsal, report numbers.

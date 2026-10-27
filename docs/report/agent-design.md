@@ -81,5 +81,6 @@ Incident log: `docs/incidents/2026-10-26-namith-diverged-branch-merge.md`.
 
 ## 8. What did not work
 
-- TODO fill from real-LLM runs (for example weak models stopping early, which is why `coverage` exists).
+- A real LLM stopped after two searches and drafted 11 findings, nine of them "no passage was provided"; `coverage` only covered claims, so every label ended in review. Fixed by a deterministic `sweep` that searches every claim condition and labelling requirement first, and by limiting findings to searched requirements (decision 102). One query per requirement did not fit the shared tool-call limit once the verifier ran in every run, so the searches are grouped.
+- Giving the model a checklist (prompt 1.1.0) did not make it search more; moving coverage into code did.
 - The RDA reference value is not in either regulation, so the 4.1 finding is `cannot_determine` unless the team supplies it (open team question).

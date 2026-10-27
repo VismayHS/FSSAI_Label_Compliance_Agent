@@ -48,11 +48,12 @@ never sees how the Researcher searched, only what it retrieved and cited.
 
 ## 3. The Researcher's loop (spec section 5)
 
-Nodes: `plan` → `act` ⇄ `run_tool` → `coverage` → `draft`.
+Nodes: `plan` → `sweep` → `act` ⇄ `run_tool` → `coverage` → `draft`.
 
 1. **plan:** deterministic, no LLM step. Seeds suggested searches from the detected claims, the nutrition panel and the package size. The model may follow, reorder or ignore them.
 2. **act:** the LLM first writes a short reflection ("does anything I have read modify, condition, define or exempt something? which regulation would hold it?") and then picks one tool, or `finish`. The prompt also lists clause and schedule names mentioned inside retrieved passages that have not been looked up yet. Arguments are validated against an allowlist (regulation must be a known code, `path` must be a field of `LabelCheckRequest`, query length is capped). An invalid or repeated call is replaced by the next unused suggestion, or by `finish`.
 3. **run_tool:** `ctx.check_budget(tool_call=True)` first, then the call, then a `tool` step with the full passages (this is what lets a run be rebuilt from its trace, D5). A failing tool is recorded with its error and the loop goes on; it does not kill the run.
+3a. **sweep (runs before `act`):** one search per claim condition (Claims regulation) and five broad searches that together cover the mandatory labelling requirements (nutrition; allergen and veg mark; ingredients and net quantity; date marking and batch; FSSAI licence and manufacturer), plus the small-pack exemption when the pack is small. No LLM step. It costs 6 to 7 tool steps and is cut back to what the budget allows, always leaving one `act` round, the draft, and the steps of the verifier and of any retry. The draft may only write findings for requirements a search covered; a requirement the sweep could not cover becomes an escalation signal, never a "no passage was provided" finding.
 4. **coverage:** a safety net for weak models. Every detected claim must have a search that reached the Claims regulation for its condition. If the model finished without one, this node runs it.
 5. **draft:** the LLM writes one `Finding` per requirement from the retrieved passages only. Every citation quote is made a verbatim span of the cited passage (whitespace and quote-mark differences are repaired to the passage's own text; paraphrases are dropped). A met or unmet finding that loses all its citations becomes `cannot_determine` with an escalation signal.
    Conflicts, possible exemptions, a missing condition, or a needed value that is not in the corpus go into `escalation_signals`.
@@ -110,6 +111,7 @@ It returns `complete=false`, route `regulatory-review`, and the reason.
 | LLM provider down or breaker open, in Researcher or Verifier | `ProviderUnavailable` | No further model calls; nothing partial is trusted | `complete=false`, `regulatory-review` (demo item 8) |
 | Retriever fails, or the index is missing or empty | exception, or zero passages | Researcher records the tool error; with no passages it cannot ground a finding | `cannot_determine` + escalation signal, so `regulatory-review` |
 | A tool call returns nothing useful | empty `passages` | the next `act` step changes the query or regulation; repeated misses end in an escalation signal | Escalate, never a guess |
+| Model finishes after two searches (seen live, run a4702e8f) | sweep already searched every requirement before `act` | The draft is told which requirements were researched; findings for others are dropped | Run continues; labels with covered requirements can clear |
 | Model stops searching early, or answers with bad JSON | parse failure, or `finish` with a claim uncovered | Next suggested search runs instead; `coverage` still searches the Claims regulation for each claim | Run continues, noted in the trace |
 | Researcher produces a citation that is not verbatim | Researcher's own quote check, then Verifier | Repaired or dropped; if the finding loses its support it becomes `cannot_determine` | Verifier `retry` or `escalate` |
 | Verifier says `retry` | `Verdict.action` | Researcher re-runs in retry mode with the hint | Up to 3 attempts |
