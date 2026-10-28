@@ -693,6 +693,60 @@
           "sort": "desc"
         }
       }
+    },
+    {
+      "id": 13,
+      "type": "timeseries",
+      "title": "Structured-output outcomes",
+      "description": "LLM replies that had to be a JSON object: valid, repaired (one retry fixed it), failed (caller falls back or escalates), skipped (repair off or no budget).",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum by (agent, step, outcome) (increase(fssai_structured_output_total[$__rate_interval]))",
+          "legendFormat": "{{agent}}/{{step}} {{outcome}}",
+          "range": true
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 8,
+            "showPoints": "never",
+            "spanNulls": true
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "bottom",
+          "calcs": [
+            "lastNotNull",
+            "max"
+          ]
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "desc"
+        }
+      }
     }
   ]
 }
