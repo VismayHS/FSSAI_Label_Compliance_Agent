@@ -1,7 +1,7 @@
 # Evaluation 1: project plan
 
 Owner: Vismay (S1.3), assembled from the team's own documents; each section links its source, which stays
-the authority. **Evaluation 1 (first review): 30 October 2026.** Status as of **2026-10-25**. Sections marked *pending* fill in as their owners merge.
+the authority. **Review: Friday 6 November 2026** (moved from 30 October). Status as of **2026-10-25**. Sections marked *pending* fill in as their owners merge.
 
 ## 1. Problem and scope
 We check a proposed packaged-food label (as text) and its package specification against two FSSAI
@@ -85,7 +85,7 @@ variables, and every seam has a conformance check (`packages/contracts/fssai_con
 
 ## 10. Plan
 Phases and milestones: [LLM_Context §9](../contexts/LLM_Context.md). The whole project is due by
-**Fri 30 October 2026**. Next, in order:
+**Fri 6 November 2026**. Next, in order:
 1. Confirm decision 001 and the RDA question.
 2. Namith's researcher and Vihaan's gate, verifier and router behind their conformance tests, with the §4.1
    case on the real stack.

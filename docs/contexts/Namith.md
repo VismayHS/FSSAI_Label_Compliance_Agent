@@ -3,7 +3,9 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 30 October (written by Vismay, 2026-10-27)
+## Next steps to 6 November (written by Vismay, 2026-10-27)
+
+**Deadline moved (2026-10-29): the review is on Fri 6 November, not 30 October.** The steps below are unchanged; use the extra week to finish them properly, not to start late.
 
 **Where you are (27 Oct evening).** PR #12 (the researcher sweep, decision 102) is on `main`, and Vismay checked it
 on the full Compose stack with all 11 parts real and Groq: `smoke.py` passes. On your branch, CI green, not on
