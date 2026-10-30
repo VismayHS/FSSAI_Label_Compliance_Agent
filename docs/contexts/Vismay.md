@@ -384,3 +384,15 @@ the web client."*
   project plan and every *Next steps* heading (with a one-line note in each teammate's). Older log entries keep 30 Oct.
 - Since 27 Oct: only Namith's PR #14 (red team, structured output, compare and demo tools) merged on 28 Oct. No
   commits from anyone since 27 Oct; the critical path in §9 is unchanged.
+
+**2026-10-30**
+- Started the L2/L3 comparison on real Groq (researcher 1.0.0 vs 1.1.0), with Namith's elided-quote grounding fix
+  applied locally. 16 of 30 baseline scenarios scored: all completed in 17-52 s, every citation resolved. Then
+  Groq's **daily** cap (200,000 tokens per model, about 16 runs) stopped it; it resumes from the scored rows.
+  Incident `2026-10-30-vismay-groq-daily-token-cap`, LLM_Context §4 updated.
+- The 1.0.0 baseline sends every label to review (R3): its draft prompt never lists the requirements that were
+  searched, so the model writes 2-3 findings and the rest are flagged "searched, but no finding was drafted".
+  1.1.0 lists them. That is the difference the comparison measures.
+- Decision 306: `RUN_MAX_WALL_S=180` on the real provider, 90 for load tests.
+- Prepared patches for teammates (their paths, applied by them): Namith (elided quotes), Nishkal (stub gateway
+  test), Vihaan (eval tests on Windows).

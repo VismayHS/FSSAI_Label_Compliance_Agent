@@ -22,3 +22,4 @@ The report's "design decisions and what was rejected" section is written from th
 | [303](303-vismay-web-client-stack.md) | Web client: React + Vite + TypeScript, plain CSS tokens, React Bits for state | Vismay | Accepted |
 | [304](304-vismay-deployment-boundaries.md) | Deployment boundaries: a Compose service per scaling, failure and release profile | Vismay | Accepted |
 | [305](305-vismay-repository-layout.md) | Repository layout: six top-level folders by purpose (apps, packages, infra, data, docs, tools) | Vismay | Accepted |
+| [306](306-vismay-run-wall-clock.md) | Run wall clock: 180 s on the real free-tier provider, 90 s for load tests | Vismay | Accepted |
