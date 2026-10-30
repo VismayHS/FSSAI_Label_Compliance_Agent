@@ -460,7 +460,7 @@ We develop on both. Everything runs in Linux containers, so most differences dis
 
 ## 9. Phases and milestones
 
-**Deadline: everything is due by Friday 30 October 2026, the first review (Evaluation 1).** The team decided on
+**Deadline: everything is due by Friday 6 November 2026, the review** (moved from 30 Oct on 2026-10-29). The team decided on
 2026-10-26 to finish the **whole project** by then: every task in every personal file, all 22 requirements, all 10 demo
 items, the report sections and the rehearsals. There are no intermediate deadlines. Finish as fast as you can; finishing
 early is better. The phases below are only the order of work, because each one builds on the one before.
@@ -472,14 +472,14 @@ early is better. The phases below are only the order of work, because each one b
 | **2. Real end-to-end** | Real index, retriever, LangGraph researcher, verifier, router and LLM gateway switched in with `IMPL_*`. The §4.1 case runs on the real stack. |
 | **3. All 22 requirements** | Guardrails, eval + before/after, prompt comparison, caching, rate limits, breaker, cost, observability, Locust + scaling, feedback, runbook. |
 | **4. Hardening + extras** | Clean-clone test, report sections, two rehearsals of all 10 demo items, and the extras (§11). |
-| **5. Freeze** | Review day, 30 Oct. Only bug fixes, no new features. `main` must boot from a clean clone. |
+| **5. Freeze** | Review day, Fri 6 Nov. Only bug fixes, no new features. `main` must boot from a clean clone. |
 
 What this means in practice:
 - **Merge often.** Open a PR into `main` whenever you have finished work. There is no daily limit, so don't sit on finished work.
 - **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
 - **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
 
-**Critical path (checked 2026-10-27).** Each person's file starts with *Next steps to 30 October*. What blocks the most:
+**Critical path (checked 2026-10-29).** Each person's file starts with *Next steps to 6 November*. What blocks the most:
 
 | Waiting on | What is blocked until then |
 |---|---|
@@ -489,7 +489,7 @@ What this means in practice:
 | One eval run pair with the Groq key (`python -m fssai_agents.compare run`, researcher 1.0.0 vs 1.1.0): Namith + Vihaan, one slot, nobody else on the key | Namith's L2 comparison, Vihaan's L3 before/after, cost per 100 runs on the whole eval set (L5) |
 | Nishkal's Locust runs (his branch CI first) | Demo #9 and the D6, A7 and D7 numbers; nobody else can produce them |
 | The team's RDA decision (Nishkal + Vihaan) | Whether §4.1 (demo #10) can ever be `met`/`unmet`; until then the correct answer is `cannot_determine` |
-| Two rehearsals of all 10 demos (everyone, Vismay leads) | Evaluation on 30 Oct |
+| Two rehearsals of all 10 demos (everyone, Vismay leads) | The review on Fri 6 Nov |
 
 `python tools/scripts/build_report.py --strict` lists every `TODO` and *pending* number still left in the report sections.
 

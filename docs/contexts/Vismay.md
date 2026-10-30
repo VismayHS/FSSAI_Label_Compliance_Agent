@@ -3,7 +3,7 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file** (and `LLM_Context.md`). Tick
 > boxes as you go, and add notes at the bottom.
 
-## Next steps to 30 October (2026-10-27)
+## Next steps to 6 November (2026-10-27; the review moved from 30 Oct to Fri 6 Nov on 2026-10-29)
 
 What is left of my part:
 1. **Two rehearsals of all 10 demos with the team (S4.3).** Run `python tools/scripts/clean_clone_test.py` before
@@ -378,3 +378,9 @@ the web client."*
   merge of the layout move and the Windows test reads. LLM_Context §9 critical path updated.
 - Local tests on Windows: Application Control blocks the `_xxhash` and `_uuid_utils` DLLs, so `pytest` needs
   `-p no:langsmith_plugin` and retrieval, ingest and agents fail to import locally; CI on Linux is the check.
+
+**2026-10-29**
+- The review moved from Fri 30 Oct to **Fri 6 Nov**. Updated LLM_Context §9 (deadline, freeze, critical path), the
+  project plan and every *Next steps* heading (with a one-line note in each teammate's). Older log entries keep 30 Oct.
+- Since 27 Oct: only Namith's PR #14 (red team, structured output, compare and demo tools) merged on 28 Oct. No
+  commits from anyone since 27 Oct; the critical path in §9 is unchanged.
