@@ -7,6 +7,7 @@
 | [`architecture.md`](architecture.md) | Architecture diagram with deployment boundaries | Vismay |
 | [`agent-topology.md`](agent-topology.md) | The three agents, their tools, hand-offs and failure behaviour (A2) | Namith |
 | [`runbook.md`](runbook.md) | What to do when the top failure modes happen (D8) | Namith |
+| [`demo-script.md`](demo-script.md) | The 10 demo items in order: lead, command, what to show, real-LLM runs used | Vismay |
 | `data-contract.md` | The published request contract (D1, F1) | Vihaan |
 | [`decisions/`](decisions/) | Decision records (ADRs), one file each, numbered by owner | each author |
 | [`incidents/`](incidents/) | Incident log: real things that broke, and what we learned (D8) | each author |
