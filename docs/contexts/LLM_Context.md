@@ -194,10 +194,12 @@ what happens if any of them fails mid-run.
 Studio, OpenRouter's free models). The base URL, key and model id live **only** in `.env`. Set a
 spending limit on the account.
 
-**We use Groq's free tier.** It allows **8,000 tokens per minute per model** and 1,000 requests a day (read from its
-response headers), and one real run uses about 8,000 to 12,500 tokens. So run real-LLM checks **one at a time, about
-a minute apart**, and plan the eval set as at least half an hour per prompt variant. The fallback model has its own
-token budget. Load tests always use the stub LLM. See incident `2026-10-26-vismay-groq-free-tier-rate-limit`.
+**We use Groq's free tier.** It allows **8,000 tokens per minute per model**, 1,000 requests a day (read from its
+response headers) and **200,000 tokens a day per model** (found 2026-10-30; only the 429 says so). One real run uses
+about 8,000 to 12,500 tokens, so **one key manages about 16 real runs a day**. Run real-LLM checks **one at a time,
+about a minute apart**, and plan the eval set as several days per prompt pair on one key (the runner resumes where it
+stopped), or split it across keys. The fallback model has its own token budgets. Runs are bounded at 180 s on the
+real provider (decision 306). Load tests always use the stub LLM. See incident `2026-10-26-vismay-groq-free-tier-rate-limit`.
 
 **Out of scope:** model training, cloud deployment, and images (labels arrive as text only).
 
