@@ -66,3 +66,30 @@ def test_missing_results_say_what_to_run(tmp_path):
 def test_load_reads_a_results_file(tmp_path):
     (tmp_path / "researcher-1.0.0.json").write_text(json.dumps(results("1.0.0")), encoding="utf-8")
     assert compare.load("1.0.0", tmp_path)["tag"] == "researcher-1.0.0"
+
+
+def test_run_passes_the_same_scenario_subset_to_both_variants(monkeypatch):
+    from fssai_agents import compare
+    calls = []
+
+    class Done:
+        returncode = 0
+
+    monkeypatch.setattr(compare, "RUNNER", lambda cmd, cwd, env: calls.append((cmd, env)) or Done())
+    assert compare.main(["run", "--scenarios", "a,b", "--pause-s", "0"]) == 0
+    assert [env["PROMPT_RESEARCHER_VERSION"] for _, env in calls] == list(compare.VARIANTS)
+    for cmd, env in calls:
+        assert cmd[cmd.index("--only") + 1] == "a,b"
+        assert env["PROMPT_RESEARCHER_DRAFT_VERSION"] == env["PROMPT_RESEARCHER_VERSION"]
+
+
+def test_run_without_a_subset_runs_the_whole_set(monkeypatch):
+    from fssai_agents import compare
+    calls = []
+
+    class Done:
+        returncode = 0
+
+    monkeypatch.setattr(compare, "RUNNER", lambda cmd, cwd, env: calls.append(cmd) or Done())
+    compare.main(["run", "--only", "1.0.0", "--pause-s", "0"])
+    assert len(calls) == 1 and "--only" not in calls[0]
