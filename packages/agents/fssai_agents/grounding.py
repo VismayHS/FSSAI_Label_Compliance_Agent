@@ -16,24 +16,20 @@ _QUOTES = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": 
 
 
 def _squash(text: str) -> tuple[str, list[int]]:
-    """Lower-case, fold quotes/dashes, collapse whitespace; keep a map back to original indexes."""
-    out, index, prev_space = [], [], True
+    """Lower-case, fold quotes/dashes and drop all whitespace; keep a map back to original indexes.
+    Whitespace is dropped, not collapsed, because the PDF text splits words ("dis played", "non -retail") and the
+    model quotes them whole. The characters still have to match one for one, so different words never do."""
+    out, index = [], []
     for i, ch in enumerate(text.translate(_QUOTES)):
-        if ch.isspace():
-            if not prev_space:
-                out.append(" ")
-                index.append(i)
-            prev_space = True
-        else:
+        if not ch.isspace():
             out.append(ch.lower())
             index.append(i)
-            prev_space = False
-    return "".join(out).rstrip(), index
+    return "".join(out), index
 
 
 def _find(needle: str, hay: str, index: list[int], text: str, start: int = 0) -> tuple[str, int] | None:
     """Find a squashed needle in the squashed passage from `start`; return the original span and where it ends."""
-    needle = needle.strip(" .")
+    needle = needle.strip(".")
     pos = hay.find(needle, start) if len(needle) >= _MIN_QUOTE_CHARS else -1
     if pos < 0:
         return None
@@ -71,7 +67,7 @@ def exact_spans(quote: str, passage: Passage) -> list[str] | None:
     hay, index = _squash(passage.text)
     spans, cursor = [], 0
     for part in parts:
-        needle = _squash(part)[0].strip(" .")
+        needle = _squash(part)[0].strip(".")
         if len(needle) >= _MIN_QUOTE_CHARS:
             found = _find(needle, hay, index, passage.text, cursor)
             if found is None:

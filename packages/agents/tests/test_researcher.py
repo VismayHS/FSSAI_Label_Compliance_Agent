@@ -208,6 +208,37 @@ def test_a_shortened_quote_with_only_tiny_parts_is_not_a_citation():
     assert cits == []
 
 
+# The PDF text extraction splits words ("dis played", "pac kaged", "non -retail"); the model quotes the clean words.
+# Real passages and quotes from a 6 Nov run on Groq (missing-allergen), both of which used to be dropped.
+LICENCE_PASSAGE = Passage(
+    passage_id="FSS-LD-2020:5(7)", regulation=Regulation.LABELLING_2020, clause_id="5(7)", doc_version="t",
+    text="(7)FSSAI logo and license number.- (a) The FSSAI logo and license number under the Act shall be dis played "
+         "on the label of the food package in contrast color to the background as below: Lic. No. XXXXXXXXXXXXXX")
+NON_RETAIL_PASSAGE = Passage(
+    passage_id="FSS-LD-2020:10(1)", regulation=Regulation.LABELLING_2020, clause_id="10(1)", doc_version="t",
+    text="(1) Every pac kaged food meant for non -retail sale shall provide the following mandatory information either "
+         "on the container or pasted on the label thereto: (a) Name of the food; (e) Name and address of the "
+         "manufacturer or packer (including country of origin for imported packages).")
+
+
+def test_a_quote_of_a_word_the_pdf_split_resolves_to_the_passages_own_text():
+    quote = ("(7)FSSAI logo and license number.- (a) The FSSAI logo and license number under the Act shall be "
+             "displayed on the label of the food package.")
+    span = exact_span(quote, LICENCE_PASSAGE)
+    assert span and span in LICENCE_PASSAGE.text and "dis played" in span
+
+
+def test_a_shortened_quote_over_split_words_keeps_its_parts():
+    quote = "(1) Every packaged food ... shall provide ... (e) Name and address of the manufacturer or packer ..."
+    cits, dropped = ground_citations([{"passage_id": "x", "quote": quote}], {"x": NON_RETAIL_PASSAGE})
+    assert not dropped and len(cits) == 3 and all(c.quote in NON_RETAIL_PASSAGE.text for c in cits)
+    assert cits[0].quote == "(1) Every pac kaged food"
+
+
+def test_ignoring_whitespace_still_rejects_different_words():
+    assert exact_span("The FSSAI logo shall be printed in gold on the lid of the package.", LICENCE_PASSAGE) is None
+
+
 def test_a_shortened_quote_keeps_the_finding_met_in_the_researcher():
     req_passage = NUTRITION_PASSAGE
     finding = {"requirement_id": "LBL-NUTRITION", "requirement": "Nutrition information", "status": "met",
