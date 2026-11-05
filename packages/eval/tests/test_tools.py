@@ -45,11 +45,11 @@ def test_checker_on_the_real_eval_set_with_a_mini_index(tmp_path):
 
 
 def test_checker_flags_a_fabricated_quote(tmp_path):
-    line = json.loads((ROOT / "packages" / "eval" / "scenarios.jsonl").read_text().splitlines()[0])
+    line = json.loads((ROOT / "packages" / "eval" / "scenarios.jsonl").read_text(encoding="utf-8").splitlines()[0])
     line["supporting"] = [{"regulation": "FSS-LD-2020", "clause_id": "5(14)", "quote": "a made-up regulation sentence"}]
-    (tmp_path / "s.jsonl").write_text(EvalScenario.model_validate(line).model_dump_json() + "\n")
+    (tmp_path / "s.jsonl").write_text(EvalScenario.model_validate(line).model_dump_json() + "\n", encoding="utf-8")
     (tmp_path / "idx").mkdir()
-    (tmp_path / "idx" / "passages.jsonl").write_text("".join(json.dumps(p) + "\n" for p in PASSAGES))
+    (tmp_path / "idx" / "passages.jsonl").write_text("".join(json.dumps(p) + "\n" for p in PASSAGES), encoding="utf-8")
     problems = check_scenarios.check(tmp_path / "s.jsonl", tmp_path / "idx")
     assert len(problems) == 1 and "not verbatim" in problems[0]
 
