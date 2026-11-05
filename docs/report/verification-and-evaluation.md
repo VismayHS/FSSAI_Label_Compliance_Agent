@@ -1,8 +1,7 @@
 # Verification, data contract, evaluation and feedback
 
-Owner: Vihaan · Requirements: F1, F2, F6, F7, A3, D1, D7 (rate limiting), L3, L6 · Status: draft. The design and
-the harness are final. The before/after numbers marked **TODO(LLM)** need a free-tier key in `.env` and are filled
-from `packages/eval/results/` (decision 205).
+Owner: Vihaan · Requirements: F1, F2, F6, F7, A3, D1, D7 (rate limiting), L3, L6 · Status: final. The before/after
+numbers were measured on 6 Nov 2026 with the real LLM, from `packages/eval/results/` (decision 205).
 
 ## 1. Problem and scope of this part
 
@@ -149,17 +148,34 @@ verifier/router effect, *not* model quality, because the fake researcher only ch
 The rise in escalation recall is rule R6: claims the fake researcher never checked against FSS-AC-2018 are no
 longer cleared.
 
-**Before/after, one deliberate change** (decision 205: researcher prompt 1.0.0 → 1.1.0, everything else fixed,
-`--judge llm`): **TODO(LLM)**. The table is produced by
-`python -m fssai_eval compare researcher-1.0.0 researcher-1.1.0`.
+**Before/after, one deliberate change** (decision 205: researcher prompt 1.0.0 → 1.1.0, everything else fixed).
+Real LLM (Groq), 8 of the 30 scenarios per variant, the same 8 for both, reference judge. The table is produced by
+`python -m fssai_eval compare packages/eval/results/researcher-1.0.0.json packages/eval/results/researcher-1.1.0.json`.
 
 | Metric | 1.0.0 | 1.1.0 | Δ |
 |---|---|---|---|
-| Groundedness | TODO | TODO | |
-| Context relevance | TODO | TODO | |
-| Faithfulness | TODO | TODO | |
-| Hallucination rate | TODO | TODO | |
-| Route accuracy | TODO | TODO | |
+| Groundedness | 1.000 | 1.000 | 0 |
+| Context relevance | 0.155 | 0.155 | 0 |
+| Faithfulness | 1.000 (1 of 29 statements judged) | 1.000 (1 of 42 judged) | 0 |
+| Hallucination rate | 0.000 | 0.000 | 0 |
+| Route accuracy | 0.500 | 0.500 | 0 |
+| Finding accuracy | 0.462 | 0.385 | −0.077 |
+| Unsafe clear rate | 0.000 | 0.000 | 0 |
+
+**What it shows.** The deliberate change moved none of the four L3 metrics. Every citation in both variants was a
+verbatim span of a retrieved passage (groundedness and citation resolution 1.000), no response stated anything
+unsupported, and no label was cleared that should not have been. 1.1.0 got about one finding fewer right, which is
+inside the noise of 8 scenarios.
+
+**Limits, stated rather than hidden.**
+- *8 scenarios, not 30:* 16 real runs is one free-tier key's daily token budget (200,000 tokens per model per day).
+- *Reference judge, not `--judge llm`:* no budget was left for a judge model. The reference judge only decides
+  faithfulness for statements it can check without a model, here 1 in each variant, so that row is weak evidence.
+  Groundedness, hallucination rate and route accuracy are fully measured.
+- *Route accuracy 0.500 measures a bug, not the prompts:* the 4 scenarios expected to clear or to be revised all
+  escalated with R1 in both variants, because grounding dropped quotes of words the PDF text splits ("dis played").
+  That was fixed straight after (incident `2026-11-06-vismay-grounding-dropped-real-quotes`); the 4 expected
+  escalations were all right. Rerun on the whole set after the fix to see the prompts' real effect on routes.
 
 ## 6. Feedback and live quality (L6)
 

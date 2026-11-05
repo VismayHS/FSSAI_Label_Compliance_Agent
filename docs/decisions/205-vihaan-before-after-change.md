@@ -1,7 +1,8 @@
 # 205: Before/after experiment: researcher prompt 1.0.0 → 1.1.0
 
-- **Owner:** Vihaan (with Namith) · **Status:** Proposed. The harness is ready; the measured numbers need a
-  free-tier LLM key in `.env` (the fakes cannot exercise a prompt).
+- **Owner:** Vihaan (with Namith) · **Status:** Accepted. Measured 6 Nov 2026 on an 8-scenario subset per variant (one key's daily
+  token budget), with the offline reference judge; numbers and limits in decision 103 and
+  `docs/report/verification-and-evaluation.md` section 5.
 - **Requirement:** L3 (measure before and after one deliberate change, all four metrics with deltas), L2 (compare
   ≥ 2 prompt variants)
 
