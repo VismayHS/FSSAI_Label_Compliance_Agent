@@ -1,0 +1,99 @@
+{
+  "started_at": "20261105T195833Z",
+  "host": "http://localhost:8000",
+  "users": [
+    1,
+    2,
+    5,
+    10,
+    20
+  ],
+  "duration": "5m",
+  "warmup": "30s",
+  "scales": [
+    1,
+    3
+  ],
+  "label": "cache-on",
+  "git_commit": "ef1c605",
+  "machine": {
+    "os": "Windows 11",
+    "machine": "AMD64",
+    "cpu": "Intel64 Family 6 Model 154 Stepping 3, GenuineIntel",
+    "cpu_count": 12,
+    "python": "3.13.12",
+    "docker": {
+      "memory_gb": 7.6,
+      "cpus": 12,
+      "version": "29.6.1"
+    }
+  },
+  "settings": {
+    "STUB_LATENCY_MEAN_S": null,
+    "STUB_LATENCY_P95_S": null,
+    "CACHE_ENABLED": null,
+    "RETRIEVAL_MODE": null,
+    "RATE_LIMIT_PER_MIN": null,
+    "RUN_DISPATCH": null
+  },
+  "readyz": {
+    "ready": true,
+    "checks": {
+      "dispatch": {
+        "ok": true,
+        "detail": "queue 'fssai-runs' reachable, 0 job(s) waiting"
+      },
+      "run_store": {
+        "ok": true,
+        "detail": "PostgresRunStore"
+      }
+    },
+    "components": {
+      "gate": {
+        "impl": "fssai_gate.gate:RequestGate",
+        "stand_in": false
+      },
+      "retriever": {
+        "impl": "fssai_retrieval.faiss_retriever:FaissRetriever",
+        "stand_in": false
+      },
+      "llm": {
+        "impl": "fssai_llm_gateway.client:GatewayLLMClient",
+        "stand_in": false
+      },
+      "prompts": {
+        "impl": "fssai_prompts.store:FilePromptStore",
+        "stand_in": false
+      },
+      "guardrails": {
+        "impl": "fssai_guardrails.guardrails:Guardrails",
+        "stand_in": false
+      },
+      "classifier": {
+        "impl": "fssai_agents.classifier:LLMClassifier",
+        "stand_in": false
+      },
+      "researcher": {
+        "impl": "fssai_agents.researcher:LangGraphResearcher",
+        "stand_in": false
+      },
+      "verifier": {
+        "impl": "fssai_verification.verifier:AgentVerifier",
+        "stand_in": false
+      },
+      "router": {
+        "impl": "fssai_verification.router:RuleRouter",
+        "stand_in": false
+      },
+      "pipeline": {
+        "impl": "fssai_agents.graph:LangGraphPipeline",
+        "stand_in": false
+      },
+      "run_store": {
+        "impl": "fssai_run_store.postgres:PostgresRunStore",
+        "stand_in": false
+      }
+    }
+  },
+  "finished_at": "20261105T210244Z"
+}
