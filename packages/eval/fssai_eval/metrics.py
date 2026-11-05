@@ -166,6 +166,7 @@ class ResponseScore:
     llm_calls: int = 0
     tool_calls: int = 0
     tags: list[str] = field(default_factory=list)
+    routing_reason: str = ""        # the router's own words ("[R1] ..."): why a wrong route happened, without a re-run
 
     def as_dict(self) -> dict:
         return asdict(self)
@@ -179,6 +180,7 @@ def score_response(result: RunResult, request: LabelCheckRequest, judge: Judge,
     retrieved = retrieved_passages(result)
     row = ResponseScore(scenario_id=scenario.scenario_id if scenario else result.run_id,
                         route=result.routing.route.value, complete=result.complete,
+                        routing_reason=result.routing.reason[:500],
                         expected_route=scenario.expected_route.value if scenario else None,
                         passages_retrieved=len(retrieved), cost_usd=result.totals.cost_usd,
                         latency_ms=result.totals.latency_ms, llm_calls=result.totals.llm_calls,
