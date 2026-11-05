@@ -89,15 +89,34 @@ be used …").
 **Method.** Locust users submit, poll every 0.5 s and report `full_run` from submission to terminal
 state. Steps of 1, 2, 5, 10 and 20 users, 5 minutes each, at 1 and 3 workers, cache on and off.
 
-**Results.** *Pending the full-stack run (see `infra/loadtest/results/README.md`).* The tooling has been
-verified end to end against the API on the fake pipeline. Those numbers measure the fakes, not the
-system, and are not reported.
+**Results** (full Compose stack in queue mode, every real implementation on, stub LLM; Windows 11, 12
+CPUs, Docker 7.6 GB; 5–6 Nov 2026, commit `e224c5a`; raw data and both full tables in
+`infra/loadtest/results/`). Cache on:
 
-**Expected bottleneck, to confirm or refute with the results.** Each RQ worker runs one job at a time,
-so with one worker, concurrent runs queue. If p95 at C users is close to C times the single-run time, the
-queue is the bottleneck, and three workers should move the failure point out about three times. The
-dashboard separates queue wait (client `full_run` minus worker run time) from worker CPU and stub
-latency, so the cause can be named rather than assumed.
+| Workers | Users | Runs/s | p50 (s) | p95 (s) | Failed | SLO |
+|---:|---:|---:|---:|---:|---:|---|
+| 1 | 1 | 0.21 | 4.2 | 8.4 | 0 % | met |
+| 1 | 5 | 0.24 | 20.0 | **30.0** | 0 % | **met** |
+| 1 | 10 | 0.21 | 45.0 | 57.0 | 0 % | met |
+| 1 | 20 | 0.20 | 97.0 | 117.0 | 0 % | missed |
+| 3 | 5 | 0.63 | 7.4 | 13.0 | 0 % | met |
+| 3 | 10 | 0.65 | 15.0 | 21.0 | 0 % | met |
+| 3 | 20 | 0.62 | 31.0 | 40.0 | 0 % | met |
+
+- **The SLO is met:** p95 30 s at 5 concurrent runs on one worker, against 60 s, with no failed run in
+  any step of either matrix.
+- **Failure concurrency:** 20 users on one worker (p95 117 s). On three workers the SLO still holds at
+  20 users (40 s), so the failure point is beyond the largest step we ran.
+- **Effect of `--scale worker=3`:** throughput ≈ 3× (0.21 → 0.63 runs/s), and at 20 users p95 falls
+  from 117 s to 40 s. Workers hold no state, so this needed no code change (A7).
+
+**Bottleneck: queue wait behind one serial worker,** as predicted, now measured rather than assumed. With
+one worker, throughput stays at about 0.21 runs/s whatever the load, and p50 grows by roughly one
+single-run time (≈ 4.5 s) per user ahead in the queue. One slow run's trace from the 20-user step shows
+89.3 s of queue wait against 3.9 s of execution: 96 % of the run was waiting. The 3.9 s itself is almost
+all stub-LLM latency (classifier 1.8 s, researcher 2.0 s), and submission stayed under 0.19 s p95, so
+neither retrieval, Postgres nor the API is the limit. The lever is the worker count. With a real
+provider, the next limit is the free tier's tokens per minute, not our hardware.
 
 ## 5. Caching (D7)
 
@@ -110,8 +129,13 @@ return verdicts made with older prompts or indexes, and would skip the verificat
 **Measured at the retrieval level** (real model, 28 queries × 5): a search takes 15.7 ms p50 and
 18.8 ms p95 uncached, and 0.18 ms and 0.22 ms on a cache hit. That saves about 15 ms per search, or
 under 0.2 s per run, against several seconds of model calls. So retrieval caching cuts worker CPU but is
-not a p95 lever, and it saves no LLM cost. The run-level effect on p95 and cost per run comes from the
-cache-on/cache-off load matrix (pending, section 4). The expected result is a change within noise.
+not a p95 lever, and it saves no LLM cost.
+
+**Measured at the run level** (the same load matrix with `CACHE_ENABLED=0`): the change is within noise
+and goes both ways. One worker: p95 36 s vs. 30 s cached at 5 users, but 51 vs. 57 s at 10 and 100 vs.
+117 s at 20. Three workers: 12 vs. 13 s, 19 vs. 21 s, 36 vs. 40 s. Throughput is the same. Cost per run is
+unchanged, because LLM responses are not cached. That is the honest result: the cache is kept for the
+worker CPU it saves and for repeat searches inside a run, not as a latency or cost lever.
 
 ## 6. Observability (D5)
 

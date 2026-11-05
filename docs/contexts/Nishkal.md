@@ -145,7 +145,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 0: setup
 
-- [ ] **N0.1 Set up and prove the loop.** Clone the repo and run `python tools/scripts/setup_dev.py nishkal` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
+- [x] **N0.1 Set up and prove the loop.** Clone the repo and run `python tools/scripts/setup_dev.py nishkal` (CONTRIBUTING.md §2). Your package skeletons already exist (see *Start here*), so this is only:
   1. Check that setup ended with your tests showing `xfailed` and nothing `failed`.
   2. Read the three package READMEs and `fssai_contracts/conformance.py` (`check_retriever`).
   3. Make one small commit of your own on `nishkal` (e.g. a dated line in *Notes / log* below), `git push`, and open your first PR (`main` ← `nishkal`), so you've done the whole loop once.
@@ -255,7 +255,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   - Latency is configurable: a log-normal distribution with mean and p95 from env.
   - It reports realistic `usage` token counts.
   - `STUB_FAIL_RATE` and `STUB_DOWN=1` let Vismay demo the circuit breaker.
-- [ ] **N3.5 Run the Locust load test (D6, A7).**
+- [x] **N3.5 Run the Locust load test (D6, A7).**
   - `infra/loadtest/locustfile.py` submits a run and then **polls until it reaches a terminal state**. It reports full-run latency as a custom Locust event, not just the POST.
   - Step up the concurrency (e.g. 1, 2, 5, 10, 20) to find where p95 breaks the SLO.
   - Use the traces and dashboards to name the component responsible (queue wait? worker CPU? embedding? Postgres?).
@@ -271,14 +271,14 @@ Each package README lists its files and commands. `conformance.sample_request()`
   infra/loadtest/results/<timestamp>/. Add a small script that turns the CSVs into a table of RPS/p50/p95 per
   setting against the SLO in infra/loadtest/SLO.md.
   ```
-- [ ] **N3.6 Measure the effect of caching.** Run the same Locust settings with the cache on and off. Report the change in p95 and in **cost per run**: get the per-run cost from `RunResult.totals` against the real provider for a few runs, and from Vismay's cost dashboard.
+- [x] **N3.6 Measure the effect of caching.** Run the same Locust settings with the cache on and off. Report the change in p95 and in **cost per run**: get the per-run cost from `RunResult.totals` against the real provider for a few runs, and from Vismay's cost dashboard.
 
 ## Phase 4: hardening, extras, report
 
 - [ ] **N4.1 Run the §4.1 rehearsal (you lead demo item 10).** On the real stack, check that the trace shows the claims condition being found *after* the labelling search, and that both regulations are cited.
 - [x] **N4.2 Write your report section** in `docs/report/retrieval-and-performance.md`.
 - [x] **N4.3 Write at least one incident entry** in `docs/incidents/`.
-- [ ] **Extras** (pick in order):
+- [x] **Extras** (pick in order):
   - [x] hybrid BM25 + dense retrieval with a cross-encoder reranker, and measure the difference
   - [x] recall@k against the eval set's supporting passages
   - [x] claim-trigger map: a YAML file mapping claim wordings to Claims-regulation clause ids, used as a retrieval hint
@@ -376,3 +376,21 @@ The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `
   They are hand-written to each prompt's reply schema, **not** copied from a live trace: replace them with real replies
   (ask Namith and Vihaan) before the numbers are used. Fixed the §4.1 P3 page (table body is on p. 16, heading on p. 15).
   Not done here: N3.5, N3.6 and N4.1 need Docker and the full stack, which was not available in the session; they are next.
+
+- 2026-11-06 (Vismay, doing the remaining measurement for the review): **N3.5 and N3.6 done**, numbers in
+  `infra/loadtest/results/README.md` and section 4–5 of the report, raw data in
+  `infra/loadtest/results/20261105T195833Z-cache-on/` and `20261105T210335Z-cache-off/` (full stack, queue mode,
+  stub LLM 1.5 s mean / 4 s p95, commit `e224c5a`).
+  - SLO **met**: p95 30 s at 5 users on one worker, 0 % failed in every step.
+  - Fails at 20 users on one worker (p95 117 s); still met at 20 on three workers (40 s).
+  - Bottleneck: queue wait behind the single serial worker. Throughput flat at 0.21 runs/s on one worker; a 20-user
+    run's trace had 89.3 s queue wait vs 3.9 s execution. Three workers ≈ 3× throughput.
+  - Cache on vs off: within noise, both directions; cost per run unchanged (LLM replies are not cached). Real-Groq
+    cost per run on the 8-scenario eval subset: mean $0.003 (`packages/eval/results/researcher-1.0.0.json`).
+  - N0.1 and the *Extras* parent box ticked (both were already done).
+  - **N4.1 partly done:** both §4.1 scenarios ran on real Groq on 6 Nov (eval comparison, decision 103) and routed
+    `regulatory-review`, the expected answer while the RDA question is open. Still for you: the live rehearsal
+    reading the trace (claims condition found after the labelling search, both regulations cited) and the RDA
+    decision with Vihaan. Use a fresh Groq key; mine reached its daily token cap on 6 Nov.
+  - Real stub replies (step 4) not done: the fixtures are still hand-written. The load numbers measure latency and
+    throughput, which do not depend on reply wording.
