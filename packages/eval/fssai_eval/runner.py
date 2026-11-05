@@ -40,8 +40,13 @@ def config_snapshot() -> dict:
     keep = ("IMPL_", "PROMPT_", "RETRIEVAL_", "RESEARCHER_", "VERIFIER_", "RUN_MAX_", "EMBEDDING_MODEL",
             "CHUNK_MAX_CHARS", "CORPUS_CATEGORIES", "EVAL_JUDGE")
     secret = ("KEY", "PASSWORD", "SECRET", "TOKEN", "URL")
-    return {k: v.split("#", 1)[0].strip() for k, v in sorted(os.environ.items())
-            if k.startswith(keep) and not any(s in k for s in secret)}
+    out = {}
+    for k, v in sorted(os.environ.items()):
+        if k.startswith(keep) and not any(s in k for s in secret):
+            v = v.split("#", 1)[0].strip()
+            # model ids and local paths are not committed (D4; the audit rejects them): say only whether they were set
+            out[k] = ("(set)" if v else "") if k.endswith(("_MODEL", "_DIR")) else v
+    return out
 
 
 def _provider_failed(result) -> bool:

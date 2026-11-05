@@ -130,3 +130,14 @@ def test_checkpoint_after_every_scenario():
     run_eval(load_scenarios(SCENARIOS)[:2], "c", judge=ReferenceJudge(), pipeline=ReferencePipeline.from_registry(),
              checkpoint=lambda res: seen.append(len(res["scenarios"])))
     assert seen == [1, 2]
+
+
+def test_config_snapshot_never_records_a_model_id_or_a_local_path(monkeypatch):
+    from fssai_eval.runner import config_snapshot
+    monkeypatch.setenv("EMBEDDING_MODEL", "some-org/some-model")
+    monkeypatch.setenv("EVAL_JUDGE_CACHE_DIR", "/home/someone/cache")
+    monkeypatch.setenv("EVAL_JUDGE_MODEL", "")
+    monkeypatch.setenv("IMPL_ROUTER", "fssai_verification.router:RuleRouter")
+    snap = config_snapshot()
+    assert snap["EMBEDDING_MODEL"] == "(set)" and snap["EVAL_JUDGE_CACHE_DIR"] == "(set)"
+    assert snap["EVAL_JUDGE_MODEL"] == "" and snap["IMPL_ROUTER"] == "fssai_verification.router:RuleRouter"

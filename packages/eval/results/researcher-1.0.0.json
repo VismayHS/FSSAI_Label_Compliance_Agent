@@ -7,9 +7,9 @@
   "config": {
     "CHUNK_MAX_CHARS": "1200",
     "CORPUS_CATEGORIES": "breakfast-cereals",
-    "EMBEDDING_MODEL": "sentence-transformers/all-MiniLM-L6-v2",
+    "EMBEDDING_MODEL": "(set)",
     "EVAL_JUDGE": "reference",
-    "EVAL_JUDGE_CACHE_DIR": "C:\\Users\\LENOVO\\AppData\\Local\\Temp\\claude\\2cc040eb44df7ffe\\b5364ddf-b4ee-4bae-b6cc-224f1fa1325d\\scratchpad\\eval-cache",
+    "EVAL_JUDGE_CACHE_DIR": "(set)",
     "EVAL_JUDGE_MODEL": "",
     "IMPL_CLASSIFIER": "fssai_agents.classifier:LLMClassifier",
     "IMPL_GATE": "fssai_gate.gate:RequestGate",
