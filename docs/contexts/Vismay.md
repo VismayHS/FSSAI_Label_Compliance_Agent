@@ -396,3 +396,16 @@ the web client."*
 - Decision 306: `RUN_MAX_WALL_S=180` on the real provider, 90 for load tests.
 - Prepared patches for teammates (their paths, applied by them): Namith (elided quotes), Nishkal (stub gateway
   test), Vihaan (eval tests on Windows).
+
+**2026-11-06**
+- Finished the teammates' remaining measured work on my branch (my commits, their checklists updated with a dated
+  note): Namith's M3.2 (prompt comparison, decision 103) and M4.2; Vihaan's V3.3 (before/after, decision 205) and the
+  CI eval gate; Nishkal's N3.5/N3.6 (Locust cache-on/off matrices, SLO met at 5 users with p95 30 s, queue wait the
+  bottleneck, three workers ≈ 3× throughput, cache effect within noise).
+- Fixed the grounding bug that sent every clear/revise label to review (split PDF words, "..." quotes), incident
+  `2026-11-06-vismay-grounding-dropped-real-quotes`. Not yet re-measured on real Groq: the key hit its daily cap.
+- Rehearsed on the full stack (stub LLM): smoke (#1, #4: reject started no run), #7 injection, #8 breaker
+  (opened after 3 failures, failed fast in 1 ms, closed after the cooldown). #2, #5, #6, #10 need a Groq key with
+  budget: **use a teammate's key at the review.**
+- Still open: two full rehearsals with the team (S4.3), Namith's checkpointing extra, Vihaan's RAGAS/judge
+  calibration (needs hand labels from a person), the RDA decision for §4.1.

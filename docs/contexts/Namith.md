@@ -316,3 +316,8 @@ output-authorisation guardrails."*
   clear/revise scenario escalated with R1 (incident `2026-11-06-vismay-grounding-dropped-real-quotes`). The 90 s
   question was settled by decision 306 (180 s on the real provider). Still open: M4.1 rehearsal on the real stack,
   and the checkpointing extra (reason above).
+- 2026-11-06 (Vismay): **demo #7 rehearsed on the full Compose stack** (`python -m fssai_agents.demo --api
+  http://localhost:8000 --only 7`): flagged `prompt_injection:label.front_of_pack_text`, the report names the field
+  without echoing the attack, a `screen_input` step is in the trace, no LLM or tool step ran, routed
+  `regulatory-review`. All six checks OK. Demo #2 still needs one real-Groq run (`--only 2`) with a key that has
+  budget left; mine hit the daily cap on 6 Nov. M4.1 stays open until #2 is shown.
