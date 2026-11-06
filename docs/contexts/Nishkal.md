@@ -275,7 +275,14 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **N4.1 Run the §4.1 rehearsal (you lead demo item 10).** On the real stack, check that the trace shows the claims condition being found *after* the labelling search, and that both regulations are cited.
+- [x] **N4.1 Run the §4.1 rehearsal (you lead demo item 10).** On the real stack, check that the trace shows the claims condition being found *after* the labelling search, and that both regulations are cited.
+  - *Done 2026-11-06 (Vismay, real Groq, runs `b3884616…` 8 g and `a957d84f…` 14 g):*
+    - The researcher finds FSS-AC-2018 Schedule I item 11 and searches FSS-LD-2020 for the labelling requirements.
+    - The 14 g run searched again with a query built from what it had read ("protein RDA per 100 g").
+    - The claim finding is `cannot_determine`, cited to Schedule I item 11, because the RDA is not in the corpus.
+      The route is `regulatory-review`, as the demo script expects until the RDA decision.
+    - One difference from the wording above: the claim-condition search runs **first** (the researcher's sweep,
+      decision 102), not after the labelling search.
 - [x] **N4.2 Write your report section** in `docs/report/retrieval-and-performance.md`.
 - [x] **N4.3 Write at least one incident entry** in `docs/incidents/`.
 - [x] **Extras** (pick in order):

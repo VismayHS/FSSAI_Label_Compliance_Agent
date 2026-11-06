@@ -272,7 +272,11 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **M4.1 Rehearse demo items 2 and 7.** For #2, show a valid request whose citations resolve in the trace. For #7, show an injection in `front_of_pack_text` with the guardrail report visible in the result and the trace.
+- [x] **M4.1 Rehearse demo items 2 and 7.** For #2, show a valid request whose citations resolve in the trace. For #7, show an injection in `front_of_pack_text` with the guardrail report visible in the result and the trace.
+  - *Done 2026-11-06 (Vismay):*
+    - #7 on the full stack (all 6 checks).
+    - #2 on real Groq with the grounding fix deployed: 10 of 10 citations resolve against the 30 passages
+      in the trace, and the claim label cites both regulations (run `e037da7b…`).
 - [x] **M4.2 Write your report section** in `docs/report/agent-design.md`.
 - [x] **M4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**

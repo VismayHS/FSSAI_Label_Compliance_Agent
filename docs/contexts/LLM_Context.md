@@ -335,6 +335,13 @@ The owner is Vismay unless noted. The request and response bodies are the Pydant
 | `GET /v1/quarantine?limit=` | | Rejected records with field-level errors (Vihaan) |
 | `GET /healthz` · `GET /readyz` · `GET /metrics` | | On **every** HTTP service: liveness, dependency readiness, Prometheus metrics |
 
+- **API keys** (decision 307, `docs/security.md`): when `API_KEYS` is set, every `/v1` call needs `X-API-Key` (or
+  `Authorization: Bearer`), else `401`.
+  - The key fixes `X-Client-Id`.
+  - An `analyst` key sees only its own runs; another client's run answers `404`.
+  - `/v1/quarantine` is reviewer-only (`403`).
+  - Health, readiness, metrics and `/openapi.json` stay open.
+  - Empty `API_KEYS` (the `.env.example` default) means open.
 - Run ids are 32-character hex. Every response carries `X-Correlation-Id` (the caller's, if it is a
   safe 1–128 character id, otherwise a new one); the same id is on the run, its job, every step and
   every log line.

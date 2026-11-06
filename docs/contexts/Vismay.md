@@ -409,3 +409,30 @@ the web client."*
   budget: **use a teammate's key at the review.**
 - Still open: two full rehearsals with the team (S4.3), Namith's checkpointing extra, Vihaan's RAGAS/judge
   calibration (needs hand labels from a person), the RDA decision for §4.1.
+
+**2026-11-06 (later, new Groq key)**
+- **Stale image.** The first real smoke run still dropped three citations: the worker image predated the grounding
+  fix (incident `2026-11-06-vismay-stale-worker-image`). Rebuilt it.
+- **Real-Groq demos after the rebuild:**
+  - #1 smoke passed.
+  - #2: 10/10 citations resolve, both regulations cited.
+  - #4 passed.
+  - #5: all three cases `regulatory-review` with a reason, no claim decided without its condition.
+  - #10 / §4.1: Schedule I item 11 found, `cannot_determine` on the missing RDA.
+  - #6 live: the run hit the per-minute token limit (429s, 31–38 s back-offs) and reached the deadline before the
+    verifier. `demo_trust.py` now spaces real runs 60 s apart and has `--only`. `--in-process` shows the
+    retry-then-verify path, and run `e037da7b…` shows the verifier checking 10 citations and escalating the
+    unsupported ones.
+- **Prompt pin.** Pinned `PROMPT_RESEARCHER_DRAFT_VERSION=1.0.0` in `.env.example`. It was empty, meaning "newest"
+  (1.1.0), so a clean clone ran a pair decision 103 never compared.
+- **API security** (decision 307, `docs/security.md`):
+  - hashed API keys with analyst and reviewer roles, object- and function-level checks;
+  - the key fixes the client id;
+  - security headers, no stack traces, docs switchable off;
+  - nginx: strict CSP, a per-IP rate limit and a body cap.
+  - Verified with 20 API tests, 4 web tests and live probes: 401, 403, 404 on another client's run, 429 under load.
+- **Web client:**
+  - a **How it works** page (the problem, every step of a check, how to verify an answer, what it never does, how
+    it's protected);
+  - an API-key box that appears only after a 401, with the key kept in `sessionStorage`.
+- **Groq budget used today on the new key:** 8 real runs (about half the daily cap).

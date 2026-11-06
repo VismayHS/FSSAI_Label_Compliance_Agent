@@ -99,6 +99,23 @@ against the stub, with breaker state in Redis:
 - `/readyz` refuses readiness in queue mode with an in-memory run store.
 - A failed index build no longer stops the stack from booting (incident `2026-10-25-vismay-indexer-py311-worker-crashloop`).
 
+### Security (API and web client)
+- **Authentication and roles.** Off by default, so a clean clone boots with no credentials; on as soon as
+  `API_KEYS` is set (decision 307). When on:
+  - every `/v1` call needs an API key, and the server keeps only SHA-256 hashes;
+  - an `analyst` key sees only its own runs: another client's run answers 404, like an unknown id;
+  - a `reviewer` key also sees the quarantine;
+  - the key fixes the client id, so the per-client rate limit can't be dodged.
+- **Headers and limits.**
+  - Every response carries security headers.
+  - The web page has a strict Content-Security-Policy and loads nothing from other origins.
+  - The proxy adds a per-IP rate limit and a body cap.
+  - Errors never contain a stack trace.
+- **Verified.** 20 API tests and 2 web tests, plus live probes on the full stack on 6 Nov:
+  - no key → 401, analyst on the quarantine → 403, analyst on another client's run → 404;
+  - 18 of 120 parallel requests through the proxy → 429.
+- **OWASP mapping.** Each of the OWASP API Security Top 10 is mapped to code and a test in `docs/security.md`.
+
 ### Cost per 100 runs (L5)
 Cost is computed at call time from the provider's token counts and `LLM_PRICE_*_PER_1K`, recorded on each
 `llm` step, and stored per step in `run_steps`. `tools/scripts/cost_report.py` and the Grafana `Cost (L5)`
@@ -638,6 +655,7 @@ Each record gives the context, the options considered, the decision and its cons
 | 304 | [Deployment boundaries: one Compose service per scaling, failure and release profile](../decisions/304-vismay-deployment-boundaries.md) | Accepted | Vismay |
 | 305 | [Repository layout: six top-level folders by what a thing is for](../decisions/305-vismay-repository-layout.md) | Accepted | Vismay |
 | 306 | [Run wall clock: 180 s on the real free-tier provider, 90 s for load tests](../decisions/306-vismay-run-wall-clock.md) | Accepted | Vismay |
+| 307 | [API authentication with hashed API keys and two roles (Vismay)](../decisions/307-vismay-api-keys.md) | Accepted | Vismay |
 
 ## 6. What did not work
 
@@ -655,3 +673,4 @@ Real incidents from development: what broke, how it was noticed, the cause, the 
 | 2026-10-26 | [back-to-back real runs hit Groq's free-tier token limit and ended incomplete](../incidents/2026-10-26-vismay-groq-free-tier-rate-limit.md) | Vismay |
 | 2026-10-30 | [the eval comparison ran into Groq's daily token cap after 16 runs](../incidents/2026-10-30-vismay-groq-daily-token-cap.md) | Vismay |
 | 2026-11-06 | [grounding dropped correct quotes, so labels that should clear or be revised all escalated](../incidents/2026-11-06-vismay-grounding-dropped-real-quotes.md) | Vismay |
+| 2026-11-06 | [the grounding fix was merged but the running worker still had the old code](../incidents/2026-11-06-vismay-stale-worker-image.md) | Vismay |
