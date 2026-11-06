@@ -49,11 +49,14 @@ class Analyst(HttpUser):
     def on_start(self) -> None:
         # One client id per simulated analyst, so per-client rate limits (D7) apply per user as in real use.
         self.client_id = f"locust-{uuid.uuid4().hex[:10]}"
+        # With API keys on (docs/security.md), every simulated analyst uses FSSAI_API_KEY. The key then fixes the
+        # client id, so per-client rate limiting applies to them together: raise RATE_LIMIT_PER_MIN as usual.
+        self.auth = {"X-API-Key": os.environ["FSSAI_API_KEY"]} if os.environ.get("FSSAI_API_KEY") else {}
 
     @task
     def full_run(self) -> None:
         payload = random.choice(PAYLOADS)
-        headers = {"X-Client-Id": self.client_id, "X-Correlation-Id": f"lt-{uuid.uuid4().hex[:16]}"}
+        headers = {"X-Client-Id": self.client_id, "X-Correlation-Id": f"lt-{uuid.uuid4().hex[:16]}", **self.auth}
         t0 = time.perf_counter()
         with self.client.post("/v1/runs", json=payload, headers=headers, name="POST /v1/runs",
                               catch_response=True) as resp:
@@ -67,7 +70,8 @@ class Analyst(HttpUser):
         state, body = None, {}
         while time.perf_counter() - t0 < RUN_TIMEOUT_S:
             time.sleep(POLL_S)  # locust patches time.sleep under gevent
-            with self.client.get(f"/v1/runs/{run_id}", name="GET /v1/runs/{id}", catch_response=True) as poll:
+            with self.client.get(f"/v1/runs/{run_id}", name="GET /v1/runs/{id}", headers=self.auth,
+                                 catch_response=True) as poll:
                 if poll.status_code != 200:
                     poll.failure(f"HTTP {poll.status_code}")
                     continue

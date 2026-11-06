@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -95,7 +96,8 @@ class Stack:
     def _call(self, method, path, body=None):
         data = None if body is None else json.dumps(body).encode()
         req = urllib.request.Request(self.api + path, data=data, method=method,
-                                     headers={"Content-Type": "application/json", "X-Client-Id": CLIENT})
+                                     headers={"Content-Type": "application/json", "X-Client-Id": CLIENT,
+                                              **({"X-API-Key": os.environ["FSSAI_API_KEY"]} if os.environ.get("FSSAI_API_KEY") else {})})  # API keys on: docs/security.md
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 return r.status, json.loads(r.read().decode())
