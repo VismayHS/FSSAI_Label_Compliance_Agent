@@ -1,5 +1,6 @@
 // The HTTP contract of docs/contexts/LLM_Context.md §7. Every outcome the UI must show is a typed result,
 // so no screen has to guess what a status code meant.
+import { authHeaders, signalAuthRequired } from "../lib/apiKey";
 import { clientId } from "../lib/clientId";
 import type { FieldError, Readiness, Route, RunStatus, RunSummary, RunTrace } from "./types";
 
@@ -17,6 +18,8 @@ export type SubmitOutcome =
   | { kind: "rate_limited"; retryAfterS: number }
   | { kind: "error"; message: string };
 
+export const KEY_NEEDED = "This service needs an API key. Enter it in the box at the top of the page.";
+
 export class ApiError extends Error {
   constructor(message: string, readonly status?: number) {
     super(message);
@@ -26,10 +29,14 @@ export class ApiError extends Error {
 async function getJson<T>(path: string, signal?: AbortSignal): Promise<T> {
   let res: Response;
   try {
-    res = await fetch(`${base()}${path}`, { signal, headers: { Accept: "application/json" } });
+    res = await fetch(`${base()}${path}`, { signal, headers: { Accept: "application/json", ...authHeaders() } });
   } catch (err) {
     if ((err as Error).name === "AbortError") throw err;
     throw new ApiError("The service is unreachable. Check that the API is running.");
+  }
+  if (res.status === 401) {
+    signalAuthRequired();
+    throw new ApiError(KEY_NEEDED, 401);
   }
   if (!res.ok) {
     const detail = await res.json().then((b: { detail?: unknown }) => b.detail).catch(() => undefined);
@@ -43,7 +50,7 @@ export async function submitRun(body: unknown, clientId: string): Promise<Submit
   try {
     res = await fetch(`${base()}/v1/runs`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Client-Id": clientId },
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Client-Id": clientId, ...authHeaders() },
       body: typeof body === "string" ? body : JSON.stringify(body),
     });
   } catch {
@@ -58,6 +65,9 @@ export async function submitRun(body: unknown, clientId: string): Promise<Submit
                correlationId: data.correlation_id ?? "" };
     case 429:
       return { kind: "rate_limited", retryAfterS: Number(data.retry_after_s ?? res.headers.get("Retry-After") ?? 1) };
+    case 401:
+      signalAuthRequired();
+      return { kind: "error", message: KEY_NEEDED };
     default:
       return { kind: "error", message: typeof data.detail === "string" ? data.detail : `The service answered ${res.status}.` };
   }
@@ -98,11 +108,15 @@ export async function sendFeedback(runId: string, satisfactory: boolean, reason:
   try {
     res = await fetch(`${base()}/v1/runs/${runId}/feedback`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Client-Id": clientId() },
+      headers: { "Content-Type": "application/json", Accept: "application/json", "X-Client-Id": clientId(), ...authHeaders() },
       body: JSON.stringify({ satisfactory, reason }),
     });
   } catch {
     throw new ApiError("The service is unreachable. Your feedback was not sent.");
+  }
+  if (res.status === 401) {
+    signalAuthRequired();
+    throw new ApiError(KEY_NEEDED, 401);
   }
   if (!res.ok) {
     const detail = await res.json().then((b: { detail?: unknown }) => b.detail).catch(() => undefined);

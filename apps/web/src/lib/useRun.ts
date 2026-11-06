@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { ApiError, getRun, runEventsUrl } from "../api/client";
+import { apiKey } from "./apiKey";
 import { TERMINAL_STATES, type RunStatus } from "../api/types";
 
 export interface RunPoll {
@@ -18,6 +19,7 @@ const MAX_ERROR_MS = 8000;
 /** Follows a run until it is completed or failed. Where the browser has EventSource it listens to
  * GET /v1/runs/{id}/events, so each change arrives at once; if the stream fails it falls back to polling
  * GET /v1/runs/{id} (decision 301), backing off from 0.5 s to 2 s while it runs and further on errors.
+ * With an API key it always polls: EventSource can't send headers, and a key never goes in a URL (logs, history).
  * Stops on unmount. Mount it under `key={runId}` so a new run starts from a clean state. */
 export function useRun(runId: string | null): RunPoll {
   const [poll, setPoll] = useState<RunPoll>({ status: null, error: null, reconnecting: false });
@@ -38,6 +40,10 @@ export function useRun(runId: string | null): RunPoll {
         timer = setTimeout(tick, delay);
       } catch (err) {
         if (abort.signal.aborted) return;
+        if (err instanceof ApiError && err.status === 401) {
+          setPoll({ status: null, error: err.message, reconnecting: false });
+          return;
+        }
         if (err instanceof ApiError && err.status === 404) {
           setPoll({ status: null, error: "No run with this id. It may have been lost when the API restarted.", reconnecting: false });
           return;
@@ -48,7 +54,7 @@ export function useRun(runId: string | null): RunPoll {
       }
     };
     let source: EventSource | null = null;
-    if (typeof EventSource === "undefined") {
+    if (typeof EventSource === "undefined" || apiKey()) {
       void tick();
     } else {
       source = new EventSource(runEventsUrl(runId));

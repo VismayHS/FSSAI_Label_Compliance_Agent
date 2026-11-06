@@ -2,6 +2,8 @@ import { useCallback, useState } from "react";
 
 import type { LabelCheckRequest } from "./api/types";
 
+import { About } from "./components/About";
+import { AccessKey } from "./components/AccessKey";
 import { Header } from "./components/Header";
 import { RecentRuns } from "./components/RecentRuns";
 import { ReviewQueue } from "./components/ReviewQueue";
@@ -27,9 +29,12 @@ export default function App() {
     <>
       <a className="skip-link" href="#main">Skip to the check</a>
       <Header view={view} ready={ready} />
+      <AccessKey />
       <main id="main" className={view.name === "check" ? "layout" : "layout layout--single"}>
         {view.name === "runs" ? (
           <RecentRuns />
+        ) : view.name === "about" ? (
+          <About />
         ) : view.name === "review" ? (
           <ReviewQueue runId={view.runId} />
         ) : (
