@@ -28,6 +28,8 @@ CHECKS: list[tuple[str, re.Pattern[str]]] = [
     ("token (Hugging Face)", re.compile(r"\bhf_[A-Za-z0-9]{30,}")),
     ("AWS access key", re.compile(r"\bAKIA[0-9A-Z]{16}\b")),
     ("private key", re.compile(r"-----BEGIN (?:[A-Z]+ )?PRIVATE KEY-----")),
+    ("API key (this service's own, make_api_key.py)", re.compile(r"\bfssai_[A-Za-z0-9_-]{40,}")),
+    ("API key hashes in an env template", re.compile(r"^\s*API_KEYS\s*=\s*[^\s#]+")),
     ("a key value in an env template", re.compile(r"^\s*[A-Z_]*API_KEY\s*=\s*[^\s#]+")),
     # provider endpoints
     ("LLM provider endpoint", re.compile(r"(?i)\b(?:api\.openai\.com|api\.groq\.com|generativelanguage\.googleapis\.com"

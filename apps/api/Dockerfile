@@ -18,4 +18,4 @@ RUN pip install /src/contracts /src/libs/observability /src/libs/run_store /src/
 USER app
 WORKDIR /home/app
 EXPOSE 8000
-CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--no-access-log"]
+CMD ["uvicorn", "app.main:create_app", "--factory", "--host", "0.0.0.0", "--port", "8000", "--no-access-log", "--no-server-header"]

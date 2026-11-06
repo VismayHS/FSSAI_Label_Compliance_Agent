@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -54,7 +55,8 @@ def call(method: str, url: str, body: dict | None = None, client: str = "smoke")
     """(status, JSON body, headers). Header lookups ignore case, as HTTP requires."""
     data = json.dumps(body).encode() if body is not None else None
     req = urllib.request.Request(url, data=data, method=method,
-                                 headers={"Content-Type": "application/json", "X-Client-Id": client})
+                                 headers={"Content-Type": "application/json", "X-Client-Id": client,
+                                          **({"X-API-Key": os.environ["FSSAI_API_KEY"]} if os.environ.get("FSSAI_API_KEY") else {})})  # API keys on: docs/security.md
     try:
         with urllib.request.urlopen(req, timeout=15) as resp:
             return resp.status, json.loads(resp.read() or b"{}"), resp.headers
@@ -98,6 +100,9 @@ def run(base: str, timeout: float, expect_route: str | None) -> None:
     client = f"smoke-{uuid.uuid4().hex[:8]}"
 
     status, accepted, headers = call("POST", f"{base}/v1/runs", request_body(), client)
+    if status == 401:
+        raise Failed("the API has keys on (API_KEYS): set FSSAI_API_KEY to a key from tools/scripts/make_api_key.py "
+                     "and run again")
     check(status == 202 and len(accepted.get("run_id", "")) == 32, f"valid request accepted (202, run {accepted.get('run_id')})")
     check(headers.get("Location") == accepted["status_url"], "Location header points at the status URL")
 

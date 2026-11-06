@@ -18,6 +18,8 @@ FAKE = "x" * 32  # never a real secret: the patterns only need the shape
     ("LLM_MODEL=llama-3.1-8b-instant", "model id"),  # audit: allow (test data)
     ("EMBEDDING_MODEL=sentence-transformers/all-MiniLM-L6-v2", "embedding model id"),  # audit: allow (test data)
     ("LLM_FALLBACK_API_KEY=abc123", "env template"),
+    (f"X-API-Key: fssai_{FAKE}{FAKE}", "this service's own"),
+    (f"API_KEYS=analyst-1:{'0' * 64}:analyst", "API key hashes"),
     ("the primary was gpt-oss-120b", "model id"),  # audit: allow (test data)
     ("LLM_FALLBACK_MODEL=openai/gpt-oss-20b", "model id"),  # audit: allow (test data)
     ("we tried moonshotai/kimi-k2-instruct", "model id"),  # audit: allow (test data)
