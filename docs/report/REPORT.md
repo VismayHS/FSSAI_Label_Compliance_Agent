@@ -98,6 +98,13 @@ against the stub, with breaker state in Redis:
 - A crash inside the pipeline saves the run as `failed` with its error type.
 - `/readyz` refuses readiness in queue mode with an in-memory run store.
 - A failed index build no longer stops the stack from booting (incident `2026-10-25-vismay-indexer-py311-worker-crashloop`).
+- **A worker that dies mid-run.**
+  - Its job is re-queued once (RQ retry of an abandoned job). The run resumes from its LangGraph checkpoint at the
+    node it had reached (decision 308).
+  - If the retry's worker also dies, a failure callback marks the run `failed` with a reason, so it never stays
+    `running`.
+  - Workers look for dead workers' jobs every 60 s. With RQ's defaults that took up to 7 min: the measured resume
+    took 456 s, so the worker now sets `worker_ttl` to match the interval.
 
 ### Security (API and web client)
 - **Authentication and roles.** Off by default, so a clean clone boots with no credentials; on as soon as
@@ -186,6 +193,11 @@ Three agents with different prompts, tools and state, joined only by typed hand-
 (`LabelCheckRequest`, `Classification`, `ResearchDossier`, `Verdict`). Guardrails, router and the
 retry edge are deterministic. Full diagram, per-agent table and the failure table are in
 `docs/agent-topology.md`.
+
+**Checkpointing.** The graph state is saved in Postgres after every node, under the run id (decision 308). If a
+worker dies mid-run, RQ re-queues the job once. The pipeline then continues at the interrupted node with the trace
+restored, so finished LLM calls are not paid for again on the free tier. Shown on the stack: a worker killed 2 s
+into research; the run resumed and completed with one classification step in its trace.
 
 | Agent | Tools it chooses | Output |
 |---|---|---|
@@ -656,6 +668,7 @@ Each record gives the context, the options considered, the decision and its cons
 | 305 | [Repository layout: six top-level folders by what a thing is for](../decisions/305-vismay-repository-layout.md) | Accepted | Vismay |
 | 306 | [Run wall clock: 180 s on the real free-tier provider, 90 s for load tests](../decisions/306-vismay-run-wall-clock.md) | Accepted | Vismay |
 | 307 | [API authentication with hashed API keys and two roles (Vismay)](../decisions/307-vismay-api-keys.md) | Accepted | Vismay |
+| 308 | [Run checkpoints: LangGraph's Postgres saver, keyed by run id, resumed by RQ's retry of an abandoned job (Vismay)](../decisions/308-vismay-run-checkpoints.md) | Accepted | Vismay |
 
 ## 6. What did not work
 
@@ -674,3 +687,4 @@ Real incidents from development: what broke, how it was noticed, the cause, the 
 | 2026-10-30 | [the eval comparison ran into Groq's daily token cap after 16 runs](../incidents/2026-10-30-vismay-groq-daily-token-cap.md) | Vismay |
 | 2026-11-06 | [grounding dropped correct quotes, so labels that should clear or be revised all escalated](../incidents/2026-11-06-vismay-grounding-dropped-real-quotes.md) | Vismay |
 | 2026-11-06 | [the grounding fix was merged but the running worker still had the old code](../incidents/2026-11-06-vismay-stale-worker-image.md) | Vismay |
+| 2026-11-08 | [a resumed run crashed because the researcher's inner graph had been checkpointed too](../incidents/2026-11-08-vismay-resume-rebuilt-context-as-dict.md) | Vismay |

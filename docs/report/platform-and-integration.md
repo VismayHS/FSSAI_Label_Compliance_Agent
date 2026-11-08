@@ -83,6 +83,13 @@ against the stub, with breaker state in Redis:
 - A crash inside the pipeline saves the run as `failed` with its error type.
 - `/readyz` refuses readiness in queue mode with an in-memory run store.
 - A failed index build no longer stops the stack from booting (incident `2026-10-25-vismay-indexer-py311-worker-crashloop`).
+- **A worker that dies mid-run.**
+  - Its job is re-queued once (RQ retry of an abandoned job). The run resumes from its LangGraph checkpoint at the
+    node it had reached (decision 308).
+  - If the retry's worker also dies, a failure callback marks the run `failed` with a reason, so it never stays
+    `running`.
+  - Workers look for dead workers' jobs every 60 s. With RQ's defaults that took up to 7 min: the measured resume
+    took 456 s, so the worker now sets `worker_ttl` to match the interval.
 
 ## Security (API and web client)
 - **Authentication and roles.** Off by default, so a clean clone boots with no credentials; on as soon as

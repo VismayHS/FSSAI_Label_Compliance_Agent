@@ -280,7 +280,10 @@ Each package README lists its files and commands. `conformance.sample_request()`
 - [x] **M4.2 Write your report section** in `docs/report/agent-design.md`.
 - [x] **M4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
-  - [ ] LangGraph checkpointing (Postgres or Redis saver) so a run interrupted mid-graph can resume, and add this to the A2 failure doc
+  - [x] LangGraph checkpointing (Postgres or Redis saver) so a run interrupted mid-graph can resume, and add this to the A2 failure doc
+    - *Done 2026-11-08 (Vismay):*
+      - Postgres saver, keyed by run id (decision 308); the A2 failure table is updated.
+      - Shown on the stack with real Groq: worker killed 2 s into research; the run resumed at `research` and completed.
   - [x] a red-team suite of 30+ attacks run in CI, reporting the block rate
   - [x] structured-output validation with auto-repair and metrics
 
@@ -325,3 +328,13 @@ output-authorisation guardrails."*
   without echoing the attack, a `screen_input` step is in the trace, no LLM or tool step ran, routed
   `regulatory-review`. All six checks OK. Demo #2 still needs one real-Groq run (`--only 2`) with a key that has
   budget left; mine hit the daily cap on 6 Nov. M4.1 stays open until #2 is shown.
+- 2026-11-08 (Vismay): **checkpointing extra done** (decision 308).
+  - **State.** The `RunContext` is now LangGraph's runtime context (`context_schema`), never part of `RunState`.
+    The state is contract models plus `steps`/`prompt_versions`, saved after every node by the Postgres saver
+    (`fssai_agents.checkpoints`, `PIPELINE_CHECKPOINTS`).
+  - **Resume.** It restores the trace and continues at the interrupted node.
+  - **Researcher.** Its inner graph is compiled with `checkpointer=False`. Otherwise LangGraph checkpoints it
+    too, and a resume rebuilds the context as a dict (incident `2026-11-08-vismay-resume-rebuilt-context-as-dict`;
+    test with the real researcher).
+  - **Worker.** It re-queues a dead worker's job once (RQ retry), and marks the run failed if that dies too.
+  - **Proof.** Run `de30e15a…`, worker killed 2 s into research, completed after the resume.

@@ -18,6 +18,11 @@ Three agents with different prompts, tools and state, joined only by typed hand-
 retry edge are deterministic. Full diagram, per-agent table and the failure table are in
 `docs/agent-topology.md`.
 
+**Checkpointing.** The graph state is saved in Postgres after every node, under the run id (decision 308). If a
+worker dies mid-run, RQ re-queues the job once. The pipeline then continues at the interrupted node with the trace
+restored, so finished LLM calls are not paid for again on the free tier. Shown on the stack: a worker killed 2 s
+into research; the run resumed and completed with one classification step in its trace.
+
 | Agent | Tools it chooses | Output |
 |---|---|---|
 | Classifier | none (rule-based fallback) | category, in-scope flag, detected claims |

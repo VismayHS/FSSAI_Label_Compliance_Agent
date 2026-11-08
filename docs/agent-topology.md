@@ -117,16 +117,20 @@ It returns `complete=false`, route `regulatory-review`, and the reason.
 | Verifier says `retry` | `Verdict.action` | Researcher re-runs in retry mode with the hint | Up to 3 attempts |
 | Still unverified after the last attempt | pipeline | Verdict becomes `escalate` ("still unverified after N attempts") | `regulatory-review` (demo item 6) |
 | Step, tool-call or wall-clock bound hit | `BudgetExceeded` | Loop stops where it is | `complete=false`, `regulatory-review` |
-| Worker process dies mid-graph | queue job times out | The job is re-queued or marked failed by the worker (Vismay's service). Without checkpointing, the run restarts from the beginning | Run status `failed`, never a half answer. Checkpointing is an extra (see below) |
+| Worker process dies mid-graph | RQ finds the job abandoned (a live worker's maintenance pass, every 60 s) | The job is re-queued once under the same run id. The pipeline finds the run's Postgres checkpoint and **resumes at the interrupted node**, with the trace so far restored; finished nodes don't run again (decision 308) | The run completes as normal. If the retry's worker dies too, the run is marked `failed` with a reason, never left `running` |
 | Output filter finds approval wording, or a route that its verdict does not support | `filter_output` | Wording blocked; route forced up to `regulatory-review`. It never moves a route toward `clear-for-print` | Safer route than the one proposed |
 
 **Hand-off failure.** If an agent returns something that does not parse as its output schema, that
 is treated as the agent failing: Classifier falls back to rules; Researcher or Verifier output that
 fails validation counts as an unverified attempt (retry, then escalate).
 
-**Extra (not promised for Evaluation 1):** LangGraph checkpointing in Postgres or Redis so a run
-interrupted mid-graph resumes at its last node instead of restarting. If built, this table's
-"worker dies" row changes to "resumes".
+**Checkpointing (extra, built 8 Nov, decision 308).** `PIPELINE_CHECKPOINTS=postgres` (Compose's worker)
+saves the graph state after every node, under the run id. The live `RunContext` is LangGraph's runtime context,
+not part of the state, so the state is only contract models plus the trace so far. On resume the trace is
+restored, so step and tool budgets count what was already done. An interrupted research attempt is redone from
+its start: the Researcher's inner graph is never checkpointed, because its state holds the live context (incident
+`2026-11-08-vismay-resume-rebuilt-context-as-dict`). Shown on the stack: run `de30e15a…` had its worker killed
+2 s into research, and resumed and completed with one classification step in its trace.
 
 ## 6. What is recorded for every run (D5)
 
