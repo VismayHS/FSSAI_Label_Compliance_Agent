@@ -98,6 +98,7 @@ def test_queue_dispatcher_enqueues_and_an_rq_worker_executes_it(monkeypatch):
     queue = Queue(dispatch.QUEUE_NAME, connection=redis)
     [job] = queue.jobs
     assert job.id == "run-1" and job.func_name == dispatch.JOB_FUNC and job.timeout == 120
+    assert job.retries_left == 1, "a job whose worker dies mid-run is re-queued once"
     assert d.run_store.get("run-1").state == RunState.QUEUED  # nothing ran yet
 
     worker = SimpleWorker([queue], connection=redis)
@@ -136,3 +137,41 @@ def test_payload_carries_trace_context_and_old_payloads_still_run():
     payload.pop("trace")
     d = deps()
     assert execute_run(payload, d) == RunState.COMPLETED.value
+
+
+def _worker_dies(redis, queue):
+    """A worker takes the next job, starts it, and then sends no more heartbeats; a live worker's maintenance pass
+    then cleans the started registry."""
+    from rq.executions import Execution
+    from rq.registry import StartedJobRegistry
+    job, _ = queue.dequeue_any([queue], None, connection=redis)
+    with redis.pipeline() as pipe:
+        Execution.create(job, ttl=1, pipeline=pipe)
+        pipe.execute()
+    StartedJobRegistry(queue=queue, death_penalty_class=TimerDeathPenalty).cleanup(timestamp=10**10)
+
+
+def test_a_job_whose_worker_died_is_requeued_once_then_marked_failed(monkeypatch):
+    redis, d = fakeredis.FakeRedis(), deps()
+    monkeypatch.setattr(jobs, "default_deps", lambda: d)
+    queued(d, "run-2")
+    dispatch.QueueDispatcher(redis, job_timeout_s=120).submit(payload_for("run-2", "c", request()))
+    queue = Queue(dispatch.QUEUE_NAME, connection=redis)
+    d.run_store.save(d.run_store.get("run-2").model_copy(update={"state": RunState.RUNNING}))
+
+    _worker_dies(redis, queue)
+    assert [j.id for j in queue.jobs] == ["run-2"], "re-queued under the same run id"
+    assert d.run_store.get("run-2").state == RunState.RUNNING, "not failed while a retry is left"
+
+    _worker_dies(redis, queue)
+    assert queue.jobs == []
+    final = d.run_store.get("run-2")
+    assert final.state == RunState.FAILED and "stopped" in final.error, "polling ends with an honest error"
+
+
+def test_maintenance_interval_from_env(monkeypatch):
+    from fssai_worker.__main__ import maintenance_interval
+    monkeypatch.delenv("WORKER_MAINTENANCE_S", raising=False)
+    assert maintenance_interval() == 60
+    monkeypatch.setenv("WORKER_MAINTENANCE_S", "15  # fast")
+    assert maintenance_interval() == 15

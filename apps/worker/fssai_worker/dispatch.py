@@ -15,6 +15,7 @@ from .jobs import Deps, execute_run
 
 QUEUE_NAME = "fssai-runs"
 JOB_FUNC = "fssai_worker.jobs.execute_run"
+LOST_FUNC = "fssai_worker.jobs.worker_lost"
 
 
 class Dispatcher(Protocol):
@@ -51,8 +52,13 @@ class QueueDispatcher:
         self.job_timeout_s = job_timeout_s
 
     def submit(self, payload: dict) -> None:
+        """`retry=1`: execute_run never raises, so RQ retries a job only when its worker died mid-run (an abandoned
+        job). The same run id runs once more, and with PIPELINE_CHECKPOINTS it continues at the node it reached.
+        If that worker dies too, `worker_lost` marks the run failed."""
+        from rq import Callback, Retry
         self.queue.enqueue(JOB_FUNC, payload, job_id=payload["run_id"], job_timeout=self.job_timeout_s,
-                           result_ttl=3600, failure_ttl=7 * 24 * 3600)
+                           result_ttl=3600, failure_ttl=7 * 24 * 3600, retry=Retry(max=1),
+                           on_failure=Callback(LOST_FUNC, timeout=30))
         return None
 
     def ready(self) -> tuple[bool, str]:
