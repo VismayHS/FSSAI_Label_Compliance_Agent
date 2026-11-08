@@ -94,3 +94,9 @@ def test_aggregate_route_metrics():
                                scenario(expected_route=Route.REGULATORY_REVIEW))
     a = aggregate([cleared_wrongly, escalated])
     assert a["route_accuracy"] == 0.5 and a["escalation_recall"] == 1.0 and a["unsafe_clear_rate"] == 1.0
+
+
+def test_row_keeps_the_routers_reason():
+    res = result(fibre_met())
+    row = score_response(res, request(), J, scenario())
+    assert row.routing_reason == res.routing.reason and row.as_dict()["routing_reason"]

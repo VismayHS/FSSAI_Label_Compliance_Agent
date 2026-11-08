@@ -256,7 +256,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   the exact computation description. Add `python -m fssai_eval compare <tagA> <tagB>` printing a
   before/after table with deltas. Cache LLM-judge calls to keep free-tier usage low.
   ```
-- [ ] **V3.3 Measure before and after one deliberate change (L3).** Pick **one** deliberate change (with Nishkal or Namith), e.g. chunk size, retrieval k, or researcher prompt v1 → v2. Run before and after, and report all four metrics with deltas. Record which change and why in a decision record.
+- [x] **V3.3 Measure before and after one deliberate change (L3).** Pick **one** deliberate change (with Nishkal or Namith), e.g. chunk size, retrieval k, or researcher prompt v1 → v2. Run before and after, and report all four metrics with deltas. Record which change and why in a decision record.
 - [x] **V3.4 Add feedback and live scoring (L6).**
   - **Feedback endpoint:** `routers/feedback.py` provides `POST /v1/runs/{id}/feedback` (`Feedback` body, persisted in `infra/postgres/init/21-vihaan-feedback.sql`) and `GET /v1/feedback/summary` (satisfactory rate, reasons grouped, by route, over time).
   - **Live scorer:** `python -m fssai_eval live --sample 10` reads recent completed runs (via `RunStore`), scores them with the same metrics and writes a `quality_scores` table.
@@ -274,7 +274,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
 - [x] **V4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [ ] RAGAS cross-check, and calibrate the LLM judge against ~20 hand-labelled findings (report an agreement score such as Cohen's kappa)
-  - [ ] an eval regression gate in CI (fails if hallucination rate rises)
+  - [x] an eval regression gate in CI (fails if hallucination rate rises)
   - [x] a feedback → candidate-scenario pipeline
   - [x] property-based tests for the gate (`hypothesis`)
 
@@ -360,4 +360,12 @@ experiments and live quality monitoring from user feedback."*
   in `.env`. Decision 205 has the commands.
 - Open: the RDA decision with Nishkal (his file still lists it as open). Until it is settled, §4.1 stays
   `cannot_determine` → `regulatory-review` (test values doc, "What changes when the team adopts an RDA").
-
+- 2026-11-06 (Vismay, finishing this workstream before the review): **V3.3 measured** with Namith's comparison
+  (researcher 1.0.0 → 1.1.0, 8 of 30 scenarios each on real Groq, reference judge): no change in groundedness, context
+  relevance, faithfulness, hallucination rate or route accuracy; table and stated limits in
+  `docs/report/verification-and-evaluation.md` section 5, decision 205 Accepted. **Eval regression gate in CI**: the
+  `python` job runs the offline eval set (fakes for the LLM parts; your real gate, guardrails, verifier and router) and
+  `fssai_eval gate` against `packages/eval/results/ci-baseline.json`. Eval rows now keep the router's reason
+  (`routing_reason`). **Next step 1 fixed:** the four eval test files read and write UTF-8, so they pass on Windows.
+  Still open: demos #5/#6 redone on the real LLM (the Groq key hit its daily cap on 6 Nov), the RDA decision, and the
+  RAGAS/judge-calibration extra (it needs ~20 findings labelled by a person; not done rather than labelled by a model).

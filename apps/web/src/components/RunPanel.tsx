@@ -72,13 +72,14 @@ function EmptyRun({ onAccepted, ready }: { onAccepted: (runId: string) => void; 
       </div>
       {error && <p className="banner" data-tone="error" role="alert">{error}</p>}
       <RouteGuide />
+      <p><a href="#/about">How the check works, step by step, and how to verify its answer</a></p>
       <p className="notice">The service never approves a label for print. A regulatory affairs professional decides.</p>
     </section>
   );
 }
 
 /** What each recommendation means, in plain words, before anyone has run a check. */
-function RouteGuide() {
+export function RouteGuide() {
   return (
     <>
     <h3 className="route-guide__title" id="route-guide-title">What the three recommendations mean</h3>

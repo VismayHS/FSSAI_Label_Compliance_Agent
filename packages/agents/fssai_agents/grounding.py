@@ -1,8 +1,9 @@
 """Make every citation quote a verbatim span of a retrieved passage (A3).
 
 The model often copies a quote with different whitespace or quote marks. If the normalised quote
-occurs in the passage, we replace it with the passage's own exact span. Anything else is dropped:
-a paraphrase is never kept as a "quote".
+occurs in the passage, we replace it with the passage's own exact span. A quote shortened with "..."
+is kept only if every part occurs in the passage in order; each part is stored as its own exact span.
+Anything else is dropped: a paraphrase is never kept as a "quote".
 """
 from __future__ import annotations
 
@@ -15,19 +16,25 @@ _QUOTES = str.maketrans({"\u2018": "'", "\u2019": "'", "\u201c": '"', "\u201d": 
 
 
 def _squash(text: str) -> tuple[str, list[int]]:
-    """Lower-case, fold quotes/dashes, collapse whitespace; keep a map back to original indexes."""
-    out, index, prev_space = [], [], True
+    """Lower-case, fold quotes/dashes and drop all whitespace; keep a map back to original indexes.
+    Whitespace is dropped, not collapsed, because the PDF text splits words ("dis played", "non -retail") and the
+    model quotes them whole. The characters still have to match one for one, so different words never do."""
+    out, index = [], []
     for i, ch in enumerate(text.translate(_QUOTES)):
-        if ch.isspace():
-            if not prev_space:
-                out.append(" ")
-                index.append(i)
-            prev_space = True
-        else:
+        if not ch.isspace():
             out.append(ch.lower())
             index.append(i)
-            prev_space = False
-    return "".join(out).rstrip(), index
+    return "".join(out), index
+
+
+def _find(needle: str, hay: str, index: list[int], text: str, start: int = 0) -> tuple[str, int] | None:
+    """Find a squashed needle in the squashed passage from `start`; return the original span and where it ends."""
+    needle = needle.strip(".")
+    pos = hay.find(needle, start) if len(needle) >= _MIN_QUOTE_CHARS else -1
+    if pos < 0:
+        return None
+    span = text[index[pos]:index[pos + len(needle) - 1] + 1]
+    return (span, pos + len(needle)) if span and span in text else None
 
 
 def exact_span(quote: str, passage: Passage) -> str | None:
@@ -38,15 +45,41 @@ def exact_span(quote: str, passage: Passage) -> str | None:
     if quote in passage.text:
         return quote
     hay, index = _squash(passage.text)
-    needle, _ = _squash(quote)
-    needle = needle.strip(" .")
-    pos = hay.find(needle) if len(needle) >= _MIN_QUOTE_CHARS else -1
-    if pos < 0:
+    found = _find(_squash(quote)[0], hay, index, passage.text)
+    return found[0] if found else None
+
+
+# "...", "\u2026", ". . ." and "[...]": how a model marks text it left out of a quote.
+_ELLIPSIS = re.compile(r"\s*(?:\[\s*(?:\.\s*){3}\]|\[\s*\u2026\s*\]|(?:\.\s*){3,}|\u2026)\s*")
+
+
+def exact_spans(quote: str, passage: Passage) -> list[str] | None:
+    """Like exact_span, but a quote shortened with an ellipsis is accepted when every part occurs in the
+    passage, in order. Each part long enough to stand alone becomes its own verbatim span; short parts are
+    only checked. One part that is not in the passage (or is out of order) rejects the whole quote."""
+    span = exact_span(quote, passage)
+    if span is not None:
+        return [span]
+    parts = [p.strip().strip("\"'\u201c\u201d") for p in _ELLIPSIS.split(quote.strip())]
+    parts = [p for p in parts if p.strip(" .")]
+    if len(parts) < 2:
         return None
-    start = index[pos]
-    end = index[pos + len(needle) - 1] + 1
-    span = passage.text[start:end]
-    return span if span and span in passage.text else None
+    hay, index = _squash(passage.text)
+    spans, cursor = [], 0
+    for part in parts:
+        needle = _squash(part)[0].strip(".")
+        if len(needle) >= _MIN_QUOTE_CHARS:
+            found = _find(needle, hay, index, passage.text, cursor)
+            if found is None:
+                return None
+            spans.append(found[0])
+            cursor = found[1]
+        else:  # too short to cite alone, but it must still be there, after the previous part
+            pos = hay.find(needle, cursor)
+            if pos < 0:
+                return None
+            cursor = pos + len(needle)
+    return spans or None
 
 
 def ground_citations(raw: list[dict], passages: dict[str, Passage]) -> tuple[list[Citation], list[str]]:
@@ -61,14 +94,16 @@ def ground_citations(raw: list[dict], passages: dict[str, Passage]) -> tuple[lis
         if passage is None:
             dropped.append(f"citation to unretrieved passage '{pid}'")
             continue
-        span = exact_span(quote, passage)
-        if span is None:
+        spans = exact_spans(quote, passage)
+        if spans is None:
             dropped.append(f"quote not found verbatim in {pid}")
             continue
-        if (pid, span) in seen:
-            continue
-        seen.add((pid, span))
-        kept.append(Citation(regulation=passage.regulation, clause_id=passage.clause_id, passage_id=pid, quote=span))
+        for span in spans:
+            if (pid, span) in seen:
+                continue
+            seen.add((pid, span))
+            kept.append(Citation(regulation=passage.regulation, clause_id=passage.clause_id, passage_id=pid,
+                                 quote=span))
     return kept, dropped
 
 

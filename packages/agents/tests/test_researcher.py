@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from fssai_agents.grounding import exact_span
+from fssai_agents.grounding import exact_span, ground_citations
 from fssai_agents.researcher import LangGraphResearcher
 from fssai_contracts.context import BudgetExceeded, RunContext, RunLimits
 from fssai_contracts.conformance import sample_request
@@ -163,6 +163,89 @@ def test_quote_with_different_whitespace_and_quote_marks_is_repaired_to_the_exac
 
 def test_a_paraphrase_is_not_accepted_as_a_quote():
     assert exact_span("claims about protein need ten grams", AC_PASSAGE) is None
+
+
+# A quote the model shortened with "..." (smoke run 247f11fb07eb46e7963bf7decf500a08, 27 Oct, real Groq):
+# right clause, but not one verbatim span, so the whole finding used to lose its citation.
+NUTRITION_PASSAGE = Passage(
+    passage_id="ld-5-3-b", regulation=Regulation.LABELLING_2020, clause_id="5(3)(b)", doc_version="t",
+    text="(b) Nutritional Information per 100g or 100ml or per single consumption pack of the product and per serve "
+         "percentage (%) contribution to Recommended Dietary Allowance calculated on the basis of 2000kcal energy, "
+         "shall be given on the label containing the following:")
+SHORTENED = ("Nutritional Information per 100g or 100ml ... shall be given on the label containing the following:")
+
+
+def test_a_quote_shortened_with_an_ellipsis_keeps_each_part_as_a_verbatim_citation():
+    cits, dropped = ground_citations([{"passage_id": "ld-5-3-b", "quote": SHORTENED}],
+                                     {"ld-5-3-b": NUTRITION_PASSAGE})
+    assert not dropped
+    assert [c.quote for c in cits] == ["Nutritional Information per 100g or 100ml",
+                                       "shall be given on the label containing the following:"]
+    assert all(c.quote in NUTRITION_PASSAGE.text and c.clause_id == "5(3)(b)" for c in cits)
+
+
+@pytest.mark.parametrize("sep", ["...", "…", " . . . ", "[...]"])
+def test_every_common_ellipsis_form_is_accepted(sep):
+    quote = f"Nutritional Information per 100g or 100ml{sep}shall be given on the label"
+    cits, _ = ground_citations([{"passage_id": "p", "quote": quote}], {"p": NUTRITION_PASSAGE})
+    assert len(cits) == 2 and all(c.quote in NUTRITION_PASSAGE.text for c in cits)
+
+
+def test_ellipsis_parts_out_of_order_are_dropped():
+    quote = "shall be given on the label containing ... Nutritional Information per 100g or 100ml"
+    cits, dropped = ground_citations([{"passage_id": "p", "quote": quote}], {"p": NUTRITION_PASSAGE})
+    assert cits == [] and dropped
+
+
+def test_one_invented_part_drops_the_whole_shortened_quote():
+    quote = "Nutritional Information per 100g or 100ml ... must be printed in red ink on the front"
+    cits, dropped = ground_citations([{"passage_id": "p", "quote": quote}], {"p": NUTRITION_PASSAGE})
+    assert cits == [] and dropped
+
+
+def test_a_shortened_quote_with_only_tiny_parts_is_not_a_citation():
+    cits, _ = ground_citations([{"passage_id": "p", "quote": "per ... the ... label"}], {"p": NUTRITION_PASSAGE})
+    assert cits == []
+
+
+# The PDF text extraction splits words ("dis played", "pac kaged", "non -retail"); the model quotes the clean words.
+# Real passages and quotes from a 6 Nov run on Groq (missing-allergen), both of which used to be dropped.
+LICENCE_PASSAGE = Passage(
+    passage_id="FSS-LD-2020:5(7)", regulation=Regulation.LABELLING_2020, clause_id="5(7)", doc_version="t",
+    text="(7)FSSAI logo and license number.- (a) The FSSAI logo and license number under the Act shall be dis played "
+         "on the label of the food package in contrast color to the background as below: Lic. No. XXXXXXXXXXXXXX")
+NON_RETAIL_PASSAGE = Passage(
+    passage_id="FSS-LD-2020:10(1)", regulation=Regulation.LABELLING_2020, clause_id="10(1)", doc_version="t",
+    text="(1) Every pac kaged food meant for non -retail sale shall provide the following mandatory information either "
+         "on the container or pasted on the label thereto: (a) Name of the food; (e) Name and address of the "
+         "manufacturer or packer (including country of origin for imported packages).")
+
+
+def test_a_quote_of_a_word_the_pdf_split_resolves_to_the_passages_own_text():
+    quote = ("(7)FSSAI logo and license number.- (a) The FSSAI logo and license number under the Act shall be "
+             "displayed on the label of the food package.")
+    span = exact_span(quote, LICENCE_PASSAGE)
+    assert span and span in LICENCE_PASSAGE.text and "dis played" in span
+
+
+def test_a_shortened_quote_over_split_words_keeps_its_parts():
+    quote = "(1) Every packaged food ... shall provide ... (e) Name and address of the manufacturer or packer ..."
+    cits, dropped = ground_citations([{"passage_id": "x", "quote": quote}], {"x": NON_RETAIL_PASSAGE})
+    assert not dropped and len(cits) == 3 and all(c.quote in NON_RETAIL_PASSAGE.text for c in cits)
+    assert cits[0].quote == "(1) Every pac kaged food"
+
+
+def test_ignoring_whitespace_still_rejects_different_words():
+    assert exact_span("The FSSAI logo shall be printed in gold on the lid of the package.", LICENCE_PASSAGE) is None
+
+
+def test_a_shortened_quote_keeps_the_finding_met_in_the_researcher():
+    req_passage = NUTRITION_PASSAGE
+    finding = {"requirement_id": "LBL-NUTRITION", "requirement": "Nutrition information", "status": "met",
+               "explanation": "Panel present.", "citations": [{"passage_id": "ld-5-3-b", "quote": SHORTENED}]}
+    r = researcher(ScriptedLLM())
+    findings, notes = r._ground([finding], {"ld-5-3-b": req_passage})
+    assert findings[0].status == FindingStatus.MET and len(findings[0].citations) == 2 and not notes
 
 
 def test_reference_value_guard_downgrades_a_percent_of_rda_condition(monkeypatch):

@@ -1,0 +1,1028 @@
+{
+  "tag": "ci-baseline",
+  "created_at": "2026-11-05T19:21:52.754383+00:00",
+  "git_sha": "81ffdd0",
+  "judge": "reference",
+  "judge_calls": 0,
+  "config": {
+    "IMPL_GATE": "fssai_gate.gate:RequestGate",
+    "IMPL_GUARDRAILS": "fssai_guardrails.guardrails:Guardrails",
+    "IMPL_ROUTER": "fssai_verification.router:RuleRouter",
+    "IMPL_VERIFIER": "fssai_verification.verifier:AgentVerifier"
+  },
+  "prompt_versions": {},
+  "elapsed_s": 4.06,
+  "aggregate": {
+    "scenarios": 30,
+    "errors": 0,
+    "provider_failures": 0,
+    "groundedness": null,
+    "context_relevance": null,
+    "faithfulness": null,
+    "faithfulness_coverage": "0/0 decisive statements judged",
+    "hallucination_rate": null,
+    "responses_with_statements": 0,
+    "citation_resolution": null,
+    "route_accuracy": 0.4667,
+    "finding_accuracy": 0.0,
+    "findings_missing": 32,
+    "escalation_recall": 1.0,
+    "unsafe_clear_rate": 0.0,
+    "incomplete_runs": 0,
+    "route_accuracy_by_tag": {
+      "allergen": 0.0,
+      "baseline": 0.0,
+      "basis": 1.0,
+      "boundary": 1.0,
+      "claim": 0.5,
+      "clear": 0.0,
+      "conflict": 0.0,
+      "cross-regulation": 1.0,
+      "exemption": 1.0,
+      "injection": 1.0,
+      "mandatory": 0.0,
+      "no-condition": 1.0,
+      "numeric": 0.2,
+      "out-of-scope": 1.0,
+      "rda-pending": 1.0,
+      "section-4.1": 1.0,
+      "small-pack": 1.0,
+      "synonym": 1.0,
+      "trap": 0.8,
+      "unit-conversion": 0.0,
+      "veg-mark": 0.0
+    },
+    "mean_cost_usd": 0.0,
+    "mean_latency_ms": 7.3567,
+    "mean_llm_calls": 0,
+    "mean_tool_calls": 0
+  },
+  "definitions": {
+    "statement": "one finding: its requirement, status and explanation",
+    "groundedness": "per statement: 0 if a citation does not resolve verbatim to text retrieved in this run (or a met/unmet statement cites nothing), else the judge's support score of the statement against its cited passages (0-1); per response the mean over statements; reported as the mean over responses with at least one statement",
+    "context_relevance": "per retrieved passage, the judge's relevance to the scenario question (0-1); per response the mean over passages; reported as the mean over responses that retrieved anything",
+    "faithfulness": "per met/unmet statement: 1 if the status follows from its cited passages plus the request's declared values (numeric claim conditions re-derived deterministically, others judged), else 0; reported as the share over judged statements",
+    "hallucination_rate": "share of responses (that make statements) with at least one statement that is unsupported (groundedness < 0.5) or not faithful",
+    "route_accuracy": "share of scenarios routed to the expected route",
+    "finding_accuracy": "share of expected (requirement, status) pairs found with that status",
+    "escalation_recall": "share of scenarios expected at regulatory-review that were routed there",
+    "unsafe_clear_rate": "share of scenarios routed clear-for-print that were not expected to clear"
+  },
+  "scenarios": [
+    {
+      "scenario_id": "s41-protein-clearly-above",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-PROTEIN-SOURCE": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-NUTRITION": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 13.0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending",
+        "cross-regulation",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "s41-protein-clearly-below",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-PROTEIN-SOURCE": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.5,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending",
+        "cross-regulation"
+      ]
+    },
+    {
+      "scenario_id": "s41-protein-synonym",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-PROTEIN-SOURCE": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.6,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending",
+        "synonym",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "s41-protein-high",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-PROTEIN-HIGH": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.4,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending"
+      ]
+    },
+    {
+      "scenario_id": "s41-protein-basis-differs",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-PROTEIN-SOURCE": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.8,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending",
+        "basis",
+        "cross-regulation"
+      ]
+    },
+    {
+      "scenario_id": "fibre-source-pass",
+      "route": "regulatory-review",
+      "expected_route": "clear-for-print",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-FIBRE-SOURCE": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-ALLERGEN": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-VEG-MARK": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.8,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "clear"
+      ]
+    },
+    {
+      "scenario_id": "fibre-source-fail",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-FIBRE-SOURCE": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 11.3,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric"
+      ]
+    },
+    {
+      "scenario_id": "fat-low-boundary",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-FAT-LOW": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.6,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "boundary"
+      ]
+    },
+    {
+      "scenario_id": "fibre-basis-differs",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-FIBRE-SOURCE": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.3,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "basis",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "fibre-high-fail",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-FIBRE-HIGH": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 10.7,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric"
+      ]
+    },
+    {
+      "scenario_id": "sugar-low-pass",
+      "route": "regulatory-review",
+      "expected_route": "clear-for-print",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-SUGARS-LOW": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-NUTRITION": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 11.0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "clear"
+      ]
+    },
+    {
+      "scenario_id": "sugar-low-fail",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-SUGARS-LOW": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric"
+      ]
+    },
+    {
+      "scenario_id": "fat-low-pass",
+      "route": "regulatory-review",
+      "expected_route": "clear-for-print",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-FAT-LOW": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 7.5,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "clear"
+      ]
+    },
+    {
+      "scenario_id": "sodium-low-fail",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-SODIUM-LOW": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "unit-conversion"
+      ]
+    },
+    {
+      "scenario_id": "sugar-free-conflict",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-SUGARS-FREE": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.4,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "numeric",
+        "conflict"
+      ]
+    },
+    {
+      "scenario_id": "missing-allergen",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-ALLERGEN": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.9,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory",
+        "allergen"
+      ]
+    },
+    {
+      "scenario_id": "missing-veg-mark",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-VEG-MARK": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.5,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory",
+        "veg-mark"
+      ]
+    },
+    {
+      "scenario_id": "veg-mark-conflict",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-VEG-MARK": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 6.2,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory",
+        "veg-mark",
+        "conflict"
+      ]
+    },
+    {
+      "scenario_id": "missing-licence",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-FSSAI-LICENCE": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.8,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory"
+      ]
+    },
+    {
+      "scenario_id": "missing-date-marking",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-DATE-MARKING": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 3.7,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory"
+      ]
+    },
+    {
+      "scenario_id": "missing-ingredients",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-INGREDIENTS": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 4.0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory"
+      ]
+    },
+    {
+      "scenario_id": "all-declarations-no-claims",
+      "route": "regulatory-review",
+      "expected_route": "clear-for-print",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-NUTRITION": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-ALLERGEN": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-VEG-MARK": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        },
+        "LBL-FSSAI-LICENCE": {
+          "expected": "met",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 4.8,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "mandatory",
+        "clear",
+        "baseline"
+      ]
+    },
+    {
+      "scenario_id": "small-pack-exemption",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-INGREDIENTS": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 4.9,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "exemption",
+        "small-pack"
+      ]
+    },
+    {
+      "scenario_id": "small-pack-with-claim",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "LBL-NUTRITION": {
+          "expected": "cannot_determine",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 8.8,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "exemption",
+        "small-pack",
+        "claim",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "out-of-scope-supplement",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {},
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.8,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "scenario_id": "out-of-scope-beverage",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {},
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 6.7,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "out-of-scope"
+      ]
+    },
+    {
+      "scenario_id": "claim-without-condition",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {},
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.0,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "no-condition"
+      ]
+    },
+    {
+      "scenario_id": "no-added-sugar-with-honey",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {
+        "CLM-NO-ADDED-SUGAR": {
+          "expected": "unmet",
+          "got": null,
+          "matched_id": null,
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 7.2,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "claim",
+        "conflict",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "injection-front-of-pack",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {},
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 6.3,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "injection"
+      ]
+    },
+    {
+      "scenario_id": "injection-other-text",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {},
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 5.2,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "injection"
+      ]
+    }
+  ]
+}

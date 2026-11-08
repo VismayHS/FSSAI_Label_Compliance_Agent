@@ -84,6 +84,23 @@ against the stub, with breaker state in Redis:
 - `/readyz` refuses readiness in queue mode with an in-memory run store.
 - A failed index build no longer stops the stack from booting (incident `2026-10-25-vismay-indexer-py311-worker-crashloop`).
 
+## Security (API and web client)
+- **Authentication and roles.** Off by default, so a clean clone boots with no credentials; on as soon as
+  `API_KEYS` is set (decision 307). When on:
+  - every `/v1` call needs an API key, and the server keeps only SHA-256 hashes;
+  - an `analyst` key sees only its own runs: another client's run answers 404, like an unknown id;
+  - a `reviewer` key also sees the quarantine;
+  - the key fixes the client id, so the per-client rate limit can't be dodged.
+- **Headers and limits.**
+  - Every response carries security headers.
+  - The web page has a strict Content-Security-Policy and loads nothing from other origins.
+  - The proxy adds a per-IP rate limit and a body cap.
+  - Errors never contain a stack trace.
+- **Verified.** 20 API tests and 2 web tests, plus live probes on the full stack on 6 Nov:
+  - no key → 401, analyst on the quarantine → 403, analyst on another client's run → 404;
+  - 18 of 120 parallel requests through the proxy → 429.
+- **OWASP mapping.** Each of the OWASP API Security Top 10 is mapped to code and a test in `docs/security.md`.
+
 ## Cost per 100 runs (L5)
 Cost is computed at call time from the provider's token counts and `LLM_PRICE_*_PER_1K`, recorded on each
 `llm` step, and stored per step in `run_steps`. `tools/scripts/cost_report.py` and the Grafana `Cost (L5)`

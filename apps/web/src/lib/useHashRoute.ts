@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type View = { name: "check"; runId: string | null; tab?: "trace" } | { name: "runs" }
+export type View = { name: "check"; runId: string | null; tab?: "trace" } | { name: "runs" } | { name: "about" }
   | { name: "review"; runId: string | null };
 
 const RUN = /^#\/runs\/([0-9a-f]{32})(\/trace)?$/;
@@ -8,6 +8,7 @@ const REVIEW = /^#\/review(?:\/([0-9a-f]{32}))?$/;
 
 export function parse(hash: string): View {
   if (hash === "#/runs") return { name: "runs" };
+  if (hash === "#/about") return { name: "about" };
   const review = REVIEW.exec(hash);
   if (review) return { name: "review", runId: review[1] ?? null };
   const match = RUN.exec(hash);
@@ -16,6 +17,7 @@ export function parse(hash: string): View {
 
 export const hrefFor = (view: View) =>
   view.name === "runs" ? "#/runs"
+    : view.name === "about" ? "#/about"
     : view.name === "review" ? `#/review${view.runId ? `/${view.runId}` : ""}`
     : view.runId ? `#/runs/${view.runId}${view.tab ? `/${view.tab}` : ""}` : "#/";
 

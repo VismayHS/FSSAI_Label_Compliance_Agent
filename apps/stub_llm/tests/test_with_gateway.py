@@ -2,6 +2,7 @@
 load test rely on. Skipped where fssai-llm-gateway is not installed."""
 from __future__ import annotations
 
+import json
 import socket
 import threading
 import time
@@ -56,7 +57,9 @@ def test_gateway_gets_tokens_and_cost_from_the_stub(stub_url):
     prompt = PromptTemplate(name="classifier", version="v1", system="[prompt:classifier@v1] s", user_template="{x}")
     resp = _client(stub_url).complete(prompt.render(x="label"), ctx, agent="classifier", step="classify",
                                       prompt=prompt)
-    assert resp.text == "stub response" and resp.prompt_tokens > 0 and resp.completion_tokens > 0
+    # the tagged prompt is answered by fixtures/classifier.json, not the generic "stub response"
+    assert json.loads(resp.text)["category"] == "breakfast-cereals"
+    assert resp.prompt_tokens > 0 and resp.completion_tokens > 0
     assert resp.cost_usd > 0
     (step,) = [s for s in ctx.steps if s.kind == "llm"]
     assert step.prompt_name == "classifier" and step.prompt_version == "v1" and step.error is None

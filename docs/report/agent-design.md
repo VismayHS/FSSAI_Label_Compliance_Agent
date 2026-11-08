@@ -1,6 +1,6 @@
 # Agent design: classifier, researcher, guardrails, prompts
 
-Owner: Namith · Requirements: F3, F4, F5, A1, A2, A6, L2, L4, D8 · Status: draft; the numbers marked TODO come from the evaluation run
+Owner: Namith · Requirements: F3, F4, F5, A1, A2, A6, L2, L4, D8 · Status: final; the prompt comparison was measured on 6 Nov 2026 (section 5, decision 103)
 
 ## 1. Problem and scope of this part
 
@@ -61,12 +61,12 @@ on the same evaluation set with the same model.
 
 | Metric | 1.0.0 | 1.1.0 | Difference |
 |---|---|---|---|
-| Route accuracy | TODO | TODO | TODO |
-| Section 4.1 case reaches FSS-AC-2018 | TODO | TODO | TODO |
-| Mean tool calls per run | TODO | TODO | TODO |
-| Groundedness / faithfulness | TODO | TODO | TODO |
+| Route accuracy | 0.50 | 0.50 | 0 |
+| Section 4.1 case reaches FSS-AC-2018 | 1.00 | 1.00 | 0 |
+| Mean tool calls per run | 5.38 | 5.62 | +0.25 |
+| Groundedness / faithfulness | 1.00 / 1.00 | 1.00 / 1.00 | +0.00 / +0.00 |
 
-Result: TODO (which variant, on which metric, by how much; see `docs/decisions/` comparison record).
+Result: no route or safety difference; researcher 1.0.0 got slightly more findings right (finding accuracy 0.46 vs 0.38) with fewer tool calls (5.38 vs 5.62), so 1.0.0 stays the default. Measured on 8 of the 30 scenarios per variant (one key's daily token budget), on the host with BM25-only retrieval, before the whitespace grounding fix that made every clear/revise scenario escalate in both variants, and with the offline judge. Those limits are spelled out in `docs/decisions/103-namith-prompt-comparison.md`; the gaps are within noise.
 
 How the comparison is run: `python -m fssai_agents.compare run` runs the evaluation set once per variant with the researcher and its draft prompt pinned together, paced for the provider's token limit and resumable; `python -m fssai_agents.compare report --write` fills this table and writes the decision record, picking the winner by safety metrics first (unsafe clears, hallucination rate), then correctness, then cost.
 

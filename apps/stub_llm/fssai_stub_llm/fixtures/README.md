@@ -12,10 +12,16 @@ One file per prompt the agents use, named after the prompt tag that opens its sy
 A file holds either `{"content": "<the assistant text>"}` or any other JSON object, which is returned
 serialised as the assistant text (what a `json_mode` prompt expects).
 
-**Where the contents come from.** Copy a real, well-formed response for each prompt from a trace
-(`GET /v1/runs/{id}/trace`, the `llm` step's output) once Namith's prompts exist, so a load-test run
-exercises the same parsing path as a real one. Until then every call gets `_default.json`, which the
-agents treat as an unusable answer. That is fine for measuring queue, worker and retrieval behaviour,
-and it is what the breaker demo needs. It is not a correctness test.
+**Where the contents come from.** The five agent prompts (`classifier`, `guardrail_judge`,
+`researcher`, `researcher_draft`, `verifier_support`) each have a `<name>.json` fixture, so a load
+test takes the same parse path as a real run. These were written by hand to match each prompt's
+reply schema (`packages/prompts`, `packages/verification`), not copied from a live trace. Replace them
+with trace copies (`GET /v1/runs/{id}/trace`, the `llm` step's output) once a full real run exists.
+`researcher.json` finishes on the first step, so a load-test run is one researcher call long; the
+verifier's support check returns no checks. The eval judges (`judge_*`) are not on the run path and
+fall back to `_default.json`. `_default.json` still answers any unknown prompt, and the agents treat
+it as an unusable answer. That is fine for measuring queue, worker and retrieval behaviour, and it is
+what the breaker demo needs. It is not a correctness test, and `VERIFIER_SUPPORT_CHECK=off` still
+applies if you want the verifier to skip its LLM check.
 
 Never put real regulation text or thresholds in a fixture: the agents must get those from retrieval.

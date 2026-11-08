@@ -1,0 +1,833 @@
+{
+  "tag": "researcher-1.1.0",
+  "created_at": "2026-11-05T19:45:57.012135+00:00",
+  "git_sha": "ef1c605",
+  "judge": "reference",
+  "judge_calls": 0,
+  "config": {
+    "CHUNK_MAX_CHARS": "1200",
+    "CORPUS_CATEGORIES": "breakfast-cereals",
+    "EMBEDDING_MODEL": "(set)",
+    "EVAL_JUDGE": "reference",
+    "EVAL_JUDGE_CACHE_DIR": "(set)",
+    "EVAL_JUDGE_MODEL": "",
+    "IMPL_CLASSIFIER": "fssai_agents.classifier:LLMClassifier",
+    "IMPL_GATE": "fssai_gate.gate:RequestGate",
+    "IMPL_GUARDRAILS": "fssai_guardrails.guardrails:Guardrails",
+    "IMPL_LLM": "fssai_llm_gateway.client:GatewayLLMClient",
+    "IMPL_PIPELINE": "fssai_agents.graph:LangGraphPipeline",
+    "IMPL_PROMPTS": "fssai_prompts.store:FilePromptStore",
+    "IMPL_RESEARCHER": "fssai_agents.researcher:LangGraphResearcher",
+    "IMPL_RETRIEVER": "fssai_retrieval.faiss_retriever:FaissRetriever",
+    "IMPL_ROUTER": "fssai_verification.router:RuleRouter",
+    "IMPL_RUN_STORE": "",
+    "IMPL_VERIFIER": "fssai_verification.verifier:AgentVerifier",
+    "PROMPT_CLASSIFIER_VERSION": "",
+    "PROMPT_RESEARCHER_DRAFT_VERSION": "1.1.0",
+    "PROMPT_RESEARCHER_VERSION": "1.1.0",
+    "PROMPT_VERIFIER_SUPPORT_VERSION": "",
+    "RESEARCHER_MAX_ITERATIONS": "5",
+    "RESEARCHER_RDA_GUARD": "1",
+    "RESEARCHER_SEARCH_K": "5",
+    "RESEARCHER_STEP_RESERVE": "5",
+    "RETRIEVAL_CLAIM_HINTS": "1",
+    "RETRIEVAL_INCLUDE_SUPERSEDED": "0",
+    "RETRIEVAL_MODE": "hybrid",
+    "RUN_MAX_RESEARCH_ATTEMPTS": "3",
+    "RUN_MAX_STEPS": "25",
+    "RUN_MAX_TOOL_CALLS": "15",
+    "RUN_MAX_WALL_S": "180",
+    "VERIFIER_MAX_LOOKUPS": "2",
+    "VERIFIER_SUPPORT_CHECK": "llm",
+    "VERIFIER_TOLERANCE_PCT": "20"
+  },
+  "prompt_versions": {
+    "classifier": "1.0.0",
+    "researcher": "1.1.0",
+    "researcher_draft": "1.1.0"
+  },
+  "elapsed_s": 800.56,
+  "aggregate": {
+    "scenarios": 8,
+    "errors": 0,
+    "provider_failures": 0,
+    "groundedness": 1.0,
+    "context_relevance": 0.1548,
+    "faithfulness": 1.0,
+    "faithfulness_coverage": "1/42 decisive statements judged",
+    "hallucination_rate": 0.0,
+    "responses_with_statements": 7,
+    "citation_resolution": 1.0,
+    "route_accuracy": 0.5,
+    "finding_accuracy": 0.3846,
+    "findings_missing": 0,
+    "escalation_recall": 1.0,
+    "unsafe_clear_rate": 0.0,
+    "incomplete_runs": 0,
+    "route_accuracy_by_tag": {
+      "allergen": 0.0,
+      "baseline": 0.0,
+      "claim": 0.5,
+      "clear": 0.0,
+      "cross-regulation": 1.0,
+      "exemption": 1.0,
+      "injection": 1.0,
+      "mandatory": 0.0,
+      "numeric": 0.0,
+      "rda-pending": 1.0,
+      "section-4.1": 1.0,
+      "small-pack": 1.0,
+      "synonym": 1.0,
+      "trap": 1.0
+    },
+    "mean_cost_usd": 0.003,
+    "mean_latency_ms": 47493.9875,
+    "mean_llm_calls": 2.75,
+    "mean_tool_calls": 5.625
+  },
+  "definitions": {
+    "statement": "one finding: its requirement, status and explanation",
+    "groundedness": "per statement: 0 if a citation does not resolve verbatim to text retrieved in this run (or a met/unmet statement cites nothing), else the judge's support score of the statement against its cited passages (0-1); per response the mean over statements; reported as the mean over responses with at least one statement",
+    "context_relevance": "per retrieved passage, the judge's relevance to the scenario question (0-1); per response the mean over passages; reported as the mean over responses that retrieved anything",
+    "faithfulness": "per met/unmet statement: 1 if the status follows from its cited passages plus the request's declared values (numeric claim conditions re-derived deterministically, others judged), else 0; reported as the share over judged statements",
+    "hallucination_rate": "share of responses (that make statements) with at least one statement that is unsupported (groundedness < 0.5) or not faithful",
+    "route_accuracy": "share of scenarios routed to the expected route",
+    "finding_accuracy": "share of expected (requirement, status) pairs found with that status",
+    "escalation_recall": "share of scenarios expected at regulatory-review that were routed there",
+    "unsafe_clear_rate": "share of scenarios routed clear-for-print that were not expected to clear"
+  },
+  "scenarios": [
+    {
+      "scenario_id": "s41-protein-clearly-above",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-NUTRITION",
+          "status": "unmet",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-ALLERGEN",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-BATCH",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "CLM-PROTEIN-SOURCE",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.1667,
+      "passages_retrieved": 30,
+      "faithfulness": null,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "CLM-PROTEIN-SOURCE": {
+          "expected": "cannot_determine",
+          "got": "cannot_determine",
+          "matched_id": "CLM-PROTEIN-SOURCE",
+          "correct": true
+        },
+        "LBL-NUTRITION": {
+          "expected": "met",
+          "got": "unmet",
+          "matched_id": "LBL-NUTRITION",
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.003118,
+      "latency_ms": 42507.8,
+      "llm_calls": 3,
+      "tool_calls": 6,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending",
+        "cross-regulation",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "s41-protein-synonym",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-ALLERGEN",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-BATCH",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "CLM-PROTEIN-SOURCE",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.1667,
+      "passages_retrieved": 31,
+      "faithfulness": null,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "CLM-PROTEIN-SOURCE": {
+          "expected": "cannot_determine",
+          "got": "cannot_determine",
+          "matched_id": "CLM-PROTEIN-SOURCE",
+          "correct": true
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.003228,
+      "latency_ms": 44673.5,
+      "llm_calls": 3,
+      "tool_calls": 7,
+      "tags": [
+        "section-4.1",
+        "claim",
+        "rda-pending",
+        "synonym",
+        "trap"
+      ]
+    },
+    {
+      "scenario_id": "fibre-source-pass",
+      "route": "regulatory-review",
+      "expected_route": "clear-for-print",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-NUTRITION",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-ALLERGEN",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-VEG-MARK",
+          "status": "unmet",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-BATCH",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-FSSAI-LICENCE",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "CLM-FIBRE-SOURCE",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": true,
+          "faithful_by": "numeric:consistent",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.0833,
+      "passages_retrieved": 30,
+      "faithfulness": 1.0,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "CLM-FIBRE-SOURCE": {
+          "expected": "met",
+          "got": "met",
+          "matched_id": "CLM-FIBRE-SOURCE",
+          "correct": true
+        },
+        "LBL-ALLERGEN": {
+          "expected": "met",
+          "got": "met",
+          "matched_id": "LBL-ALLERGEN",
+          "correct": true
+        },
+        "LBL-VEG-MARK": {
+          "expected": "met",
+          "got": "unmet",
+          "matched_id": "LBL-VEG-MARK",
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.003075,
+      "latency_ms": 37216.5,
+      "llm_calls": 3,
+      "tool_calls": 6,
+      "tags": [
+        "claim",
+        "numeric",
+        "clear"
+      ]
+    },
+    {
+      "scenario_id": "sugar-low-fail",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-NUTRITION",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-ALLERGEN",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-BATCH",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.0,
+      "passages_retrieved": 32,
+      "faithfulness": null,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "CLM-SUGARS-LOW": {
+          "expected": "unmet",
+          "got": "cannot_determine",
+          "matched_id": "CLM-SUGAR-LOW",
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.003174,
+      "latency_ms": 101386.6,
+      "llm_calls": 3,
+      "tool_calls": 7,
+      "tags": [
+        "claim",
+        "numeric"
+      ]
+    },
+    {
+      "scenario_id": "missing-allergen",
+      "route": "regulatory-review",
+      "expected_route": "revise-and-recheck",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-NUTRITION",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-ALLERGEN",
+          "status": "unmet",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-VEG-MARK",
+          "status": "unmet",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-BATCH",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-FSSAI-LICENCE",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-MANUFACTURER",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.0833,
+      "passages_retrieved": 25,
+      "faithfulness": null,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "LBL-ALLERGEN": {
+          "expected": "unmet",
+          "got": "unmet",
+          "matched_id": "LBL-ALLERGEN",
+          "correct": true
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.003154,
+      "latency_ms": 37243.5,
+      "llm_calls": 3,
+      "tool_calls": 5,
+      "tags": [
+        "mandatory",
+        "allergen"
+      ]
+    },
+    {
+      "scenario_id": "all-declarations-no-claims",
+      "route": "regulatory-review",
+      "expected_route": "clear-for-print",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-NUTRITION",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-VEG-MARK",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-BATCH",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.5833,
+      "passages_retrieved": 32,
+      "faithfulness": null,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "LBL-NUTRITION": {
+          "expected": "met",
+          "got": "cannot_determine",
+          "matched_id": "LBL-NUTRITION",
+          "correct": false
+        },
+        "LBL-ALLERGEN": {
+          "expected": "met",
+          "got": "cannot_determine",
+          "matched_id": "LBL-ALLERGEN",
+          "correct": false
+        },
+        "LBL-VEG-MARK": {
+          "expected": "met",
+          "got": "cannot_determine",
+          "matched_id": "LBL-VEG-MARK",
+          "correct": false
+        },
+        "LBL-FSSAI-LICENCE": {
+          "expected": "met",
+          "got": "cannot_determine",
+          "matched_id": "LBL-FSSAI-LICENCE",
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.004313,
+      "latency_ms": 73316.5,
+      "llm_calls": 4,
+      "tool_calls": 7,
+      "tags": [
+        "mandatory",
+        "clear",
+        "baseline"
+      ]
+    },
+    {
+      "scenario_id": "small-pack-exemption",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [
+        {
+          "requirement_id": "LBL-NUTRITION",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-ALLERGEN",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-VEG-MARK",
+          "status": "cannot_determine",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-INGREDIENTS",
+          "status": "unmet",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-NET-QUANTITY",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        },
+        {
+          "requirement_id": "LBL-DATE-MARKING",
+          "status": "met",
+          "citations_resolve": true,
+          "groundedness": 1.0,
+          "faithful": null,
+          "faithful_by": "",
+          "unsupported": false
+        }
+      ],
+      "groundedness": 1.0,
+      "context_relevance": 0.0,
+      "passages_retrieved": 33,
+      "faithfulness": null,
+      "hallucinated": false,
+      "citation_resolution": 1.0,
+      "expected_findings": {
+        "LBL-INGREDIENTS": {
+          "expected": "cannot_determine",
+          "got": "unmet",
+          "matched_id": "LBL-INGREDIENTS",
+          "correct": false
+        }
+      },
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.003609,
+      "latency_ms": 43600.6,
+      "llm_calls": 3,
+      "tool_calls": 7,
+      "tags": [
+        "exemption",
+        "small-pack"
+      ]
+    },
+    {
+      "scenario_id": "injection-front-of-pack",
+      "route": "regulatory-review",
+      "expected_route": "regulatory-review",
+      "complete": true,
+      "statements": [],
+      "groundedness": null,
+      "context_relevance": null,
+      "passages_retrieved": 0,
+      "faithfulness": null,
+      "hallucinated": null,
+      "citation_resolution": null,
+      "expected_findings": {},
+      "error": null,
+      "provider_failed": false,
+      "cost_usd": 0.0,
+      "latency_ms": 6.9,
+      "llm_calls": 0,
+      "tool_calls": 0,
+      "tags": [
+        "injection"
+      ]
+    }
+  ]
+}

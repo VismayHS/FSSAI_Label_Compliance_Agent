@@ -1,8 +1,10 @@
 import { act, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import App from "./App";
+import { AccessKey } from "./components/AccessKey";
+import { setApiKey } from "./lib/apiKey";
 import { completedRun, fullTrace, json, mockApi, readyz, readyz_body, RUN_ID } from "./test/api";
 
 const NOTICE = /not an approval for print/i;
@@ -475,5 +477,66 @@ describe("the analyst workspace", () => {
       .toBeInTheDocument();
     expect(screen.getByText(/One row per requirement the system checked/)).toBeInTheDocument();
     expect(screen.getByText(/Quotes verified/)).toBeInTheDocument();
+  });
+});
+
+describe("how it works", () => {
+  it("explains the service, every step of a check, the routes and what it never does", async () => {
+    mockApi({ "GET /readyz": readyz });
+    window.location.hash = "#/about";
+    render(<App />);
+    expect(screen.getByRole("heading", { name: "How FSSAI Label Check works" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "How it works" })).toHaveAttribute("aria-current", "page");
+    for (const step of ["Ingestion gate", "Guardrails", "Classifier", "Researcher", "Verifier", "Router", "Output filter"]) {
+      expect(screen.getByText(step, { selector: "dt" })).toBeInTheDocument();
+    }
+    expect(screen.getByText("FSS-LD-2020")).toBeInTheDocument();
+    expect(screen.getByText("FSS-AC-2018")).toBeInTheDocument();
+    expect(screen.getByText(/Approve a label for print/)).toBeInTheDocument();
+    expect(screen.getByText(NOTICE)).toBeInTheDocument();
+    const guide = screen.getByLabelText("What the three recommendations mean");
+    expect(within(guide).getByText("regulatory-review")).toBeInTheDocument();
+  });
+
+  it("is linked from the empty check page", () => {
+    mockApi({ "GET /readyz": readyz });
+    render(<App />);
+    expect(screen.getByRole("link", { name: /How the check works, step by step/ })).toHaveAttribute("href", "#/about");
+  });
+});
+
+describe("API keys (docs/security.md)", () => {
+  afterEach(() => sessionStorage.clear());
+
+  it("asks for a key only after the API refuses a call, and keeps it in this tab only", async () => {
+    const user = userEvent.setup();
+    mockApi({ "GET /readyz": readyz, "POST /v1/runs": () => json({ detail: "An API key is required" }, 401) });
+    const reload = vi.fn();
+    render(<><AccessKey reload={reload} /><App /></>);
+    expect(screen.queryByText("This service needs an API key")).not.toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Check the example label" }));
+    expect((await screen.findAllByText(/needs an API key/)).length).toBeGreaterThan(0);
+    const field = screen.getAllByLabelText("API key")[0]!;
+    expect(field).toHaveAttribute("type", "password");
+    await user.type(field, "fssai_secret");
+    await user.click(screen.getAllByRole("button", { name: "Use this key" })[0]!);
+    expect(sessionStorage.getItem("fssai.apiKey")).toBe("fssai_secret");
+    expect(localStorage.getItem("fssai.apiKey")).toBeNull();
+    expect(reload).toHaveBeenCalled();
+  });
+
+  it("sends the key on every call and polls instead of streaming, so the key never goes in a URL", async () => {
+    setApiKey("fssai_secret");
+    const source = vi.fn();
+    vi.stubGlobal("EventSource", source);
+    const { calls } = mockApi({ "GET /readyz": readyz, [`GET /v1/runs/${RUN_ID}`]: () => json(completedRun()) });
+    window.location.hash = `#/runs/${RUN_ID}`;
+    render(<App />);
+    expect(await screen.findByText(NOTICE)).toBeInTheDocument();
+    const poll = calls.find((c) => c.url.endsWith(`/v1/runs/${RUN_ID}`))!;
+    expect(new Headers(poll.init!.headers).get("X-API-Key")).toBe("fssai_secret");
+    expect(source).not.toHaveBeenCalled();
+    expect(calls.every((c) => !c.url.includes("fssai_secret"))).toBe(true);
+    expect(screen.getByText(/Using an API key for this tab/)).toBeInTheDocument();
   });
 });

@@ -32,7 +32,7 @@ def test_run_eval_scores_every_scenario(tmp_path):
     assert set(res["definitions"]) >= {"groundedness", "context_relevance", "faithfulness", "hallucination_rate"}
     assert not any("KEY" in k or "URL" in k for k in res["config"]), "no secrets in results files (D4)"
     path = write_results(res, tmp_path)
-    assert json.loads(path.read_text())["tag"] == "t" and "route_accuracy" in summary_table(res)
+    assert json.loads(path.read_text(encoding="utf-8"))["tag"] == "t" and "route_accuracy" in summary_table(res)
 
 
 def test_a_crashing_pipeline_is_an_error_row_not_a_crash():
@@ -73,7 +73,7 @@ def test_cli_run_compare_gate(tmp_path, capsys):
 
 def test_env_file_does_not_override_the_shell(tmp_path, monkeypatch):
     env = tmp_path / ".env"
-    env.write_text("FSSAI_T1=from-file   # comment\nFSSAI_T2=from-file\n# FSSAI_T3=no\n")
+    env.write_text("FSSAI_T1=from-file   # comment\nFSSAI_T2=from-file\n# FSSAI_T3=no\n", encoding="utf-8")
     monkeypatch.setenv("FSSAI_T2", "from-shell")
     monkeypatch.delenv("FSSAI_T1", raising=False)
     assert load_env_file(env) == 1
@@ -130,3 +130,14 @@ def test_checkpoint_after_every_scenario():
     run_eval(load_scenarios(SCENARIOS)[:2], "c", judge=ReferenceJudge(), pipeline=ReferencePipeline.from_registry(),
              checkpoint=lambda res: seen.append(len(res["scenarios"])))
     assert seen == [1, 2]
+
+
+def test_config_snapshot_never_records_a_model_id_or_a_local_path(monkeypatch):
+    from fssai_eval.runner import config_snapshot
+    monkeypatch.setenv("EMBEDDING_MODEL", "some-org/some-model")
+    monkeypatch.setenv("EVAL_JUDGE_CACHE_DIR", "/home/someone/cache")
+    monkeypatch.setenv("EVAL_JUDGE_MODEL", "")
+    monkeypatch.setenv("IMPL_ROUTER", "fssai_verification.router:RuleRouter")
+    snap = config_snapshot()
+    assert snap["EMBEDDING_MODEL"] == "(set)" and snap["EVAL_JUDGE_CACHE_DIR"] == "(set)"
+    assert snap["EVAL_JUDGE_MODEL"] == "" and snap["IMPL_ROUTER"] == "fssai_verification.router:RuleRouter"

@@ -52,6 +52,20 @@ jobs:
             -e "packages/eval[test]" -e "apps/stub_llm[test]" -e "apps/worker[test]" -e "apps/api[test]"
       - name: Tests, one process per package
         run: python tools/scripts/test_all.py
+      # Vihaan's extra: the eval set as a regression gate. Offline and deterministic (fakes for the LLM-driven parts,
+      # the real gate, guardrails, verifier and router), so it needs no key. Fails if hallucination rate or unsafe
+      # clears rise, route accuracy drops by more than 0.05, or a scenario raises.
+      # Refresh the baseline after a deliberate change: rerun with --tag ci-baseline --out-dir packages/eval/results.
+      - name: Eval regression gate (offline, against packages/eval/results/ci-baseline.json)
+        env:
+          IMPL_GATE: fssai_gate.gate:RequestGate
+          IMPL_GUARDRAILS: fssai_guardrails.guardrails:Guardrails
+          IMPL_VERIFIER: fssai_verification.verifier:AgentVerifier
+          IMPL_ROUTER: fssai_verification.router:RuleRouter
+        run: |
+          mkdir -p /tmp/eval && cp packages/eval/results/ci-baseline.json /tmp/eval/
+          python -m fssai_eval --env-file '' run --tag ci-candidate --out-dir /tmp/eval --quiet
+          python -m fssai_eval --env-file '' gate --baseline ci-baseline --candidate ci-candidate --out-dir /tmp/eval
 
   web:
     runs-on: ubuntu-24.04

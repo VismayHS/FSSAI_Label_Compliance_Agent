@@ -27,6 +27,7 @@ from fssai_worker.jobs import payload_for
 
 from ..models import AgentRollup, Problem, RateLimited, RunAccepted, RunRejected, RunSummary, RunTrace
 from ..observability import event
+from ..security import visible_to
 
 router = APIRouter(prefix="/v1", tags=["runs"])
 
@@ -72,7 +73,8 @@ def _parse(body: bytes) -> tuple[dict, list[FieldError]]:
     openapi_extra={"requestBody": {"required": True, "content": {"application/json": {
         "schema": {"$ref": "#/components/schemas/LabelCheckRequest"}}}}},
 )
-async def submit_run(request: Request, x_client_id: str | None = Header(None, description="Caller id, used for rate limiting"),
+async def submit_run(request: Request, x_client_id: str | None = Header(None, description="Caller id, used for rate "
+                                                                        "limiting. With API keys on, the key's own id."),
                      x_callback_url: str | None = Header(None, description="Optional: POSTed a run-finished notice "
                                                          "when the run ends. Only hosts in WEBHOOK_ALLOWED_HOSTS.")):
     state = request.app.state
@@ -138,11 +140,14 @@ async def submit_run(request: Request, x_client_id: str | None = Header(None, de
 async def list_runs(request: Request, limit: int = Query(20, ge=1, le=100),
                     route: Route | None = Query(None, description="Only runs routed here, e.g. the "
                                                 "regulatory-review queue for the reviewer console")) -> list[RunSummary]:
-    if route is None:
+    principal = getattr(request.state, "principal", None)
+    own_only = principal is not None and not principal.reviewer  # API1: an analyst key lists its own runs only
+    if route is None and not own_only:
         runs = await run_in_threadpool(request.app.state.run_store.recent, limit)
-    else:  # the RunStore seam has no route filter, so look further back and filter here
+    else:  # the RunStore seam has no route or owner filter, so look further back and filter here
         recent = await run_in_threadpool(request.app.state.run_store.recent, min(limit * 10, 500))
-        runs = [r for r in recent if r.result and r.result.routing.route == route][:limit]
+        runs = [r for r in recent if (route is None or (r.result and r.result.routing.route == route))
+                and visible_to(principal, r.client_id)][:limit]
     return [RunSummary(run_id=r.run_id, state=r.state, submitted_at=r.submitted_at, updated_at=r.updated_at,
                        product_name=r.request.label.product_name if r.request else None,
                        route=r.result.routing.route if r.result else None,

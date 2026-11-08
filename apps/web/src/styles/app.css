@@ -1399,3 +1399,112 @@ tbody th {
     color: var(--ink-2);
   }
 }
+
+/* ---------------------------------------------------------------- how it works (#/about) */
+.about {
+  max-width: 880px;
+  margin: 0 auto;
+  width: 100%;
+}
+.about > h2 {
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-stretch: 78%;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+.about__lede {
+  max-width: 68ch;
+  font-size: var(--t-lg);
+  line-height: 1.45;
+}
+.about section {
+  padding-top: var(--s-5);
+  border-top: var(--line);
+}
+.about section > * + * {
+  margin-top: var(--s-3);
+}
+.about h3 {
+  font-size: var(--t-lg);
+}
+.about p {
+  max-width: 72ch;
+}
+.about__list {
+  max-width: 72ch;
+  padding-left: var(--s-5);
+}
+.about__list li + li {
+  margin-top: var(--s-2);
+}
+.about__steps {
+  display: grid;
+  grid-template-columns: minmax(10rem, max-content) minmax(0, 1fr);
+  gap: var(--s-3) var(--s-5);
+  margin: 0;
+}
+.about__steps > div {
+  display: contents;
+}
+.about__steps dt {
+  font-weight: 700;
+}
+.about__steps dd {
+  margin: 0;
+  max-width: 68ch;
+  color: var(--ink-2);
+}
+@media (max-width: 720px) {
+  .about > h2 {
+    font-size: var(--t-xl);
+  }
+  .about__lede {
+    font-size: var(--t-md);
+  }
+  .about__steps {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-1);
+  }
+  .about__steps dd {
+    margin-bottom: var(--s-3);
+  }
+}
+
+/* ---------------------------------------------------------------- API key (only when the API asks) */
+.access {
+  max-width: 1600px;
+  margin: var(--s-4) auto 0;
+  width: calc(100% - 2 * var(--s-6));
+}
+.access__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-3);
+}
+.access__row label {
+  font-weight: 700;
+}
+.access__row input {
+  flex: 1 1 18rem;
+  min-height: 44px;
+  padding: 0 var(--s-3);
+  border: var(--line-ink);
+  background: var(--panel);
+  font-family: var(--font-mono);
+  font-size: var(--t-sm);
+}
+.access__row input:focus-visible {
+  outline: 3px solid var(--path);
+  outline-offset: 1px;
+}
+.access--on {
+  font-size: var(--t-sm);
+  color: var(--ink-2);
+}
+@media (max-width: 720px) {
+  .access {
+    width: calc(100% - 2 * var(--s-4));
+  }
+}

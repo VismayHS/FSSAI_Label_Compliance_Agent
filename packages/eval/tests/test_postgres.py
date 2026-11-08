@@ -96,7 +96,7 @@ def test_every_dashboard_query_runs(db):
     import psycopg
 
     finished(db)
-    dash = json.loads((ROOT / "infra" / "observability" / "grafana" / "dashboards" / "quality.json").read_text())
+    dash = json.loads((ROOT / "infra" / "observability" / "grafana" / "dashboards" / "quality.json").read_text(encoding="utf-8"))
     queries = [t["rawSql"] for p in dash["panels"] for t in p.get("targets", []) if "rawSql" in t]
     assert len(queries) >= 10
     with psycopg.connect(URL, autocommit=True) as conn:

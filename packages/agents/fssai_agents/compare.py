@@ -2,6 +2,7 @@
 
     python -m fssai_agents.compare run                 # both variants, paced for a free tier, resumable
     python -m fssai_agents.compare run --only 1.1.0    # one variant (rerun after a rate limit; finished rows are kept)
+    python -m fssai_agents.compare run --scenarios a,b # the same subset for both variants (daily token cap)
     python -m fssai_agents.compare report              # print the table and the verdict
     python -m fssai_agents.compare report --write      # fill the report table and write the decision record
 
@@ -25,6 +26,7 @@ RESULTS = ROOT / "packages" / "eval" / "results"
 REPORT = ROOT / "docs" / "report" / "agent-design.md"
 DECISION = ROOT / "docs" / "decisions" / "103-namith-prompt-comparison.md"
 VARIANTS = ("1.0.0", "1.1.0")
+RUNNER = subprocess.run  # replaced in tests
 
 # (row label in the report, aggregate key, lower is better)
 METRICS = [
@@ -178,9 +180,9 @@ def _run(args) -> int:
             return 2
         env = dict(os.environ, PROMPT_RESEARCHER_VERSION=version, PROMPT_RESEARCHER_DRAFT_VERSION=version)
         cmd = [sys.executable, "-m", "fssai_eval", "run", "--tag", tag(version), "--pause-s", str(args.pause_s),
-               "--resume"] + (["--judge", args.judge] if args.judge else [])
+               "--resume"] + (["--judge", args.judge] if args.judge else [])             + (["--only", args.scenarios] if getattr(args, "scenarios", None) else [])
         print(f"== researcher {version}: {' '.join(cmd)}")
-        code = subprocess.run(cmd, cwd=ROOT, env=env).returncode
+        code = RUNNER(cmd, cwd=ROOT, env=env).returncode
         if code:
             print(f"researcher {version} did not finish (exit {code}); rerun the same command to resume")
             return code
@@ -208,6 +210,9 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--only", choices=VARIANTS, default=None)
     r.add_argument("--pause-s", type=float, default=60.0, help="seconds between scenarios (free-tier token limit)")
     r.add_argument("--judge", default=None, help="reference | llm | trulens (default: the runner's)")
+    r.add_argument("--scenarios", default=None,
+                   help="comma-separated scenario ids: the same subset for both variants, when the provider's daily "
+                        "token cap cannot fit the whole set (one key: ~16 real runs a day)")
     q = sub.add_parser("report", help="table and verdict from the two results files")
     q.add_argument("--write", action="store_true", help="fill docs/report/agent-design.md and write decision 103")
     q.add_argument("--out-dir", type=Path, default=RESULTS)

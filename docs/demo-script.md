@@ -13,6 +13,14 @@ repo root on the host, with the stack up (`docker compose up -d --build`). `<py>
   - on review day, keep a second teammate's key ready in a spare `.env`.
 - **Clean clone, the evening before:** `python tools/scripts/clean_clone_test.py --remote`. Exit 0 means a stranger's
   clone of `main` boots and serves a request. A failed clean clone means zero marks, so this goes first.
+- **API keys.** If `.env` sets `API_KEYS` (decision 307):
+  - export a **reviewer** key as `FSSAI_API_KEY` in the shell that runs the scripts (#4 reads the quarantine);
+  - paste the same key into the web client when it asks.
+  - To demo the security itself: `curl -i http://localhost:8000/v1/runs` gives 401, an analyst key on
+    `/v1/quarantine` gives 403, and the **How it works** page explains the rest (`docs/security.md`).
+- **Real runs must be spaced.** Runs fired back to back hit the 8,000-tokens-per-minute limit. They back off and can
+  reach the run deadline before the verifier (seen 6 Nov on #6). `demo_trust.py` now waits 60 s between real runs
+  (`--gap-s`). Run one item at a time with `--only 6`.
 - Open these tabs: web client http://localhost:8080 · API docs http://localhost:8000/docs · Jaeger
   http://localhost:16686 · Grafana http://localhost:3000 (dashboards: FSSAI · Service overview, FSSAI · Agents, Quality and trust, Cost).
 

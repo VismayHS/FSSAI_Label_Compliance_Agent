@@ -257,7 +257,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
   flagged or neutralised and that a clean label passes. Output filter tests: forced downgrade when
   verdict != accept; "approved for print" wording blocked.
   ```
-- [ ] **M3.2 Compare two prompt variants (L2).** Create two researcher variants, e.g. `v1` (plain) and `v2` (with an explicit "look for modifying provisions in the other regulation" checklist).
+- [x] **M3.2 Compare two prompt variants (L2).** Create two researcher variants, e.g. `v1` (plain) and `v2` (with an explicit "look for modifying provisions in the other regulation" checklist).
   - Run both on Vihaan's eval set (`PROMPT_RESEARCHER_VERSION=...`, same scenarios).
   - Report which was better, on which metric, and by how much, in `docs/decisions/1xx-namith-prompt-comparison.md`.
   - If the runner isn't ready yet, compare route accuracy on the scenarios with your own script, then redo it with the full metrics later.
@@ -272,8 +272,12 @@ Each package README lists its files and commands. `conformance.sample_request()`
 
 ## Phase 4: hardening, extras, report
 
-- [ ] **M4.1 Rehearse demo items 2 and 7.** For #2, show a valid request whose citations resolve in the trace. For #7, show an injection in `front_of_pack_text` with the guardrail report visible in the result and the trace.
-- [ ] **M4.2 Write your report section** in `docs/report/agent-design.md`.
+- [x] **M4.1 Rehearse demo items 2 and 7.** For #2, show a valid request whose citations resolve in the trace. For #7, show an injection in `front_of_pack_text` with the guardrail report visible in the result and the trace.
+  - *Done 2026-11-06 (Vismay):*
+    - #7 on the full stack (all 6 checks).
+    - #2 on real Groq with the grounding fix deployed: 10 of 10 citations resolve against the 30 passages
+      in the trace, and the claim label cites both regulations (run `e037da7b…`).
+- [x] **M4.2 Write your report section** in `docs/report/agent-design.md`.
 - [x] **M4.3 Write at least one incident entry** in `docs/incidents/`.
 - [ ] **Extras:**
   - [ ] LangGraph checkpointing (Postgres or Redis saver) so a run interrupted mid-graph can resume, and add this to the A2 failure doc
@@ -306,3 +310,18 @@ output-authorisation guardrails."*
 - 2026-10-27: extras: red-team set grown from 29 to 44 attacks (new rules for authority role-play, "no review needed", tool names and tool JSON, data exfiltration) with 16 clean label texts; CI prints the block rate (`packages/guardrails/tests/conftest.py`) and a test fails below 100 % blocked or with any false positive. Structured output: `fssai_agents.structured.ask_structured` validates a model's JSON reply, repairs once (budget permitting) and counts `fssai_structured_output_total{agent,step,outcome}`; the researcher's draft step uses it (the act step counts but does not repair, because it has a fallback), dashboard panel added. Not done: LangGraph checkpointing (see below).
 - 2026-10-27: M3.2 tooling ready, not run: `python -m fssai_agents.compare run` (both variants, resumable, `--pause-s` for Groq) then `report --write` fills the table in `docs/report/agent-design.md` and writes decision 103. M4.1 tooling ready, not run on the real stack: `python -m fssai_agents.demo --api http://localhost:8000` (demos 2 and 7; `--in-process` for a dry run). Both need the Groq key and the real index.
 - Checkpointing (extra) is open on purpose: `RunState` carries the live `RunContext` (budget, step trace, event log), which a LangGraph checkpointer cannot serialise as it stands. A resumable run needs the context rebuilt from the stored steps and the graph state reduced to plain data first; do that before adding a Postgres or Redis saver.
+- 2026-11-06 (Vismay, finishing this workstream before the review): **M3.2 measured** on real Groq, 8 of 30
+  scenarios per variant (one key's daily budget), with the new `compare run --scenarios` option: no route or safety
+  difference, 1.0.0 slightly better on finding accuracy (0.46 vs 0.38) and tool calls, so 1.0.0 stays the default
+  (decision 103, which lists the limits: subset, BM25-only on the host, offline judge). **M4.2**: the TODO table in
+  `docs/report/agent-design.md` is filled. **Next steps 2 and 3 fixed:** grounding now keeps a quote shortened with
+  "..." when every part occurs in order (each part stored as its own verbatim citation), and ignores whitespace so
+  quotes of words the PDF text split ("dis played") resolve to the passage's own text. Those two were why every
+  clear/revise scenario escalated with R1 (incident `2026-11-06-vismay-grounding-dropped-real-quotes`). The 90 s
+  question was settled by decision 306 (180 s on the real provider). Still open: M4.1 rehearsal on the real stack,
+  and the checkpointing extra (reason above).
+- 2026-11-06 (Vismay): **demo #7 rehearsed on the full Compose stack** (`python -m fssai_agents.demo --api
+  http://localhost:8000 --only 7`): flagged `prompt_injection:label.front_of_pack_text`, the report names the field
+  without echoing the attack, a `screen_input` step is in the trace, no LLM or tool step ran, routed
+  `regulatory-review`. All six checks OK. Demo #2 still needs one real-Groq run (`--only 2`) with a key that has
+  budget left; mine hit the daily cap on 6 Nov. M4.1 stays open until #2 is shown.

@@ -9,11 +9,16 @@
     all visible in the trace. Against the stack it prints the verifier's steps of a run; --in-process makes it
     deterministic with a researcher whose first attempt paraphrases its quote.
 Exit code 1 if any expected evidence is missing. Uses only the standard library against the API.
+
+Real runs are spaced --gap-s apart (default 60): the provider's free tier allows 8,000 tokens a minute, and runs
+fired back to back hit 429s, back off and can reach the run deadline before the verifier (seen 2026-11-06).
+If the API has keys on (API_KEYS), set FSSAI_API_KEY to a reviewer key: #4 reads the quarantine.
 """
 from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.error
@@ -23,6 +28,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[3]
 CLIENT = "demo-vihaan"
 FAILED: list[str] = []
+GAP_S = 60.0
+_last_real_run: list[float] = []
+
+
+def pace() -> None:
+    """Wait until GAP_S has passed since the previous real run was submitted."""
+    if _last_real_run and (left := GAP_S - (time.monotonic() - _last_real_run[-1])) > 0:
+        say(f"   (waiting {left:.0f} s between real runs: the provider allows 8,000 tokens a minute)")
+        time.sleep(left)
+    _last_real_run.append(time.monotonic())
 
 
 def say(text: str = "") -> None:
@@ -38,7 +53,7 @@ def check(ok: bool, what: str) -> None:
 def call(api: str, method: str, path: str, body=None, headers=None) -> tuple[int, dict | str]:
     data = None if body is None else (body if isinstance(body, bytes) else json.dumps(body).encode())
     req = urllib.request.Request(api.rstrip("/") + path, data=data, method=method,
-                                 headers={"Content-Type": "application/json", "X-Client-Id": CLIENT, **(headers or {})})
+                                 headers={"Content-Type": "application/json", "X-Client-Id": CLIENT, **auth(), **(headers or {})})
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             raw = r.read().decode()
@@ -49,6 +64,11 @@ def call(api: str, method: str, path: str, body=None, headers=None) -> tuple[int
         return status, json.loads(raw)
     except ValueError:
         return status, raw
+
+
+def auth() -> dict[str, str]:
+    key = os.environ.get("FSSAI_API_KEY", "").strip()
+    return {"X-API-Key": key} if key else {}
 
 
 def scenario(sid: str) -> dict:
@@ -118,6 +138,7 @@ def demo_4(api: str) -> None:
 def demo_5(api: str) -> None:
     say("\n#5  Unanswerable cases: escalation, not fabrication")
     for sid in ("out-of-scope-supplement", "claim-without-condition", "s41-protein-clearly-above"):
+        pace()
         status, accepted = call(api, "POST", "/v1/runs", scenario(sid))
         if status != 202:
             check(False, f"{sid}: accepted for a run (got {status})")
@@ -160,6 +181,7 @@ def print_verifier_steps(steps: list[dict]) -> int:
 
 def demo_6_api(api: str) -> None:
     say("\n#6  Self-verification in a real run's trace (the verifier's steps)")
+    pace()
     status, accepted = call(api, "POST", "/v1/runs", scenario("small-pack-with-claim"))
     if status != 202:
         check(False, f"run accepted (got {status})")
@@ -215,13 +237,17 @@ def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description="Rehearse demo items 4, 5 and 6.")
     ap.add_argument("--api", help="base URL of the running API, e.g. http://localhost:8000")
     ap.add_argument("--in-process", action="store_true", help="demo #6 without a stack or an LLM")
+    ap.add_argument("--only", choices=("4", "5", "6"), action="append", help="run only these items (repeatable)")
+    ap.add_argument("--gap-s", type=float, default=GAP_S, help="seconds between real runs (default 60)")
     args = ap.parse_args(argv)
+    globals()["GAP_S"] = args.gap_s
+    only = set(args.only or ("4", "5", "6"))
     if not args.api and not args.in_process:
         ap.error("give --api URL and/or --in-process")
     if args.api:
-        demo_4(args.api)
-        demo_5(args.api)
-        demo_6_api(args.api)
+        for item, demo in (("4", demo_4), ("5", demo_5), ("6", demo_6_api)):
+            if item in only:
+                demo(args.api)
     if args.in_process:
         demo_6_in_process()
     say("\nall evidence present" if not FAILED else f"\nMISSING: {len(FAILED)} item(s)")

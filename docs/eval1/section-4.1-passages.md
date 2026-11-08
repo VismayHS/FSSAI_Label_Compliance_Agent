@@ -59,7 +59,7 @@ Passage id `FSS-AC-2018:5(3)~substituted` (substituted text, in force from the s
 *Why it matters:* this makes P1 binding for the claim. It also brings in Schedule II synonyms (P3), so
 "Provides protein" and "Contains protein" are the same claim.
 
-### P3: synonyms · FSS-AC-2018 Schedule II · p. 15
+### P3: synonyms · FSS-AC-2018 Schedule II · p. 16 (heading on p. 15)
 
 Passage id `FSS-AC-2018:Schedule II~substituted`.
 
