@@ -5,7 +5,7 @@
     gate        --baseline <tag> --candidate <tag> exit 1 if the candidate regressed (CI regression gate)
     live        --sample 10 [--every 300]          score recent runs into quality_scores (L6)
     candidates  [--days 7] [--feedback-file f]     unsatisfactory feedback -> draft scenarios (packages/eval/candidates.jsonl)
-    calibrate   template|score                     LLM-judge agreement with hand labels (Cohen's kappa)
+    calibrate   template [--from-api URL]|label|score   LLM-judge agreement with hand labels (Cohen's kappa)
 
 The `run` options are the agreed interface (Namith's prompt comparison and Nishkal's chunking change call it).
 """
@@ -77,11 +77,15 @@ def parser() -> argparse.ArgumentParser:
     cand.add_argument("--out", type=Path, default=Path("packages/eval/candidates.jsonl"))
 
     cal = sub.add_parser("calibrate", help="LLM-judge agreement with hand labels")
-    cal.add_argument("action", choices=["template", "score"])
+    cal.add_argument("action", choices=["template", "label", "score"])
     cal.add_argument("--labels", type=Path, default=Path("packages/eval/calibration/support-labels.jsonl"))
     cal.add_argument("--scenarios", default="packages/eval/scenarios.jsonl")
     cal.add_argument("--limit", type=int, default=20)
     cal.add_argument("--judge", default="llm")
+    cal.add_argument("--from-api", default="", metavar="URL",
+                     help="template from runs the service already finished (no LLM cost); key from FSSAI_API_KEY")
+    cal.add_argument("--relabel", action="store_true", help="label: ask again for items that already have a label")
+    cal.add_argument("--out", type=Path, default=None, help="score: also write the report here as JSON")
     return p
 
 
@@ -148,17 +152,29 @@ def main(argv: list[str] | None = None) -> int:
         print(f"{len(new)} candidate scenario(s) appended to {args.out}; review each before moving it into the eval set")
         return 0
     if args.command == "calibrate":
-        from .loop import calibration_score, calibration_template
+        import os
+        from .loop import calibration_from_results, calibration_score, calibration_template, label_items, results_from_api
         from .judges import make_judge
         from .runner import load_scenarios
         if args.action == "template":
-            items = calibration_template(load_scenarios(args.scenarios), args.limit)
+            if args.from_api:
+                items = calibration_from_results(
+                    results_from_api(args.from_api, os.environ.get("FSSAI_API_KEY", "")), args.limit)
+            else:
+                items = calibration_template(load_scenarios(args.scenarios), args.limit)
             args.labels.parent.mkdir(parents=True, exist_ok=True)
             args.labels.write_text("".join(json.dumps(i) + "\n" for i in items), encoding="utf-8")
-            print(f"wrote {len(items)} items to {args.labels}: set each human_label to supported or unsupported")
+            print(f"wrote {len(items)} items to {args.labels}; label them with: python -m fssai_eval calibrate label")
+            return 0
+        if args.action == "label":
+            print(json.dumps(label_items(args.labels, relabel=args.relabel)))
             return 0
         items = [json.loads(x) for x in args.labels.read_text(encoding="utf-8").splitlines() if x.strip()]
-        print(json.dumps(calibration_score(items, make_judge(args.judge)), indent=2))
+        report = calibration_score(items, make_judge(args.judge))
+        print(json.dumps(report, indent=2))
+        if args.out:
+            args.out.parent.mkdir(parents=True, exist_ok=True)
+            args.out.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
         return 0
     return 2
 

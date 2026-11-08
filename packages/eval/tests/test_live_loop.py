@@ -1,4 +1,6 @@
 """Live scoring, feedback -> candidate scenarios, and judge calibration (Cohen's kappa)."""
+import json
+
 from fssai_contracts.context import RunContext
 from fssai_contracts.conformance import sample_request
 from fssai_contracts.fakes import InMemoryRunStore
@@ -6,7 +8,9 @@ from fssai_contracts.pipeline import ReferencePipeline
 from fssai_contracts.schemas import RunState, RunStatus, utcnow
 from fssai_eval.judges import ReferenceJudge
 from fssai_eval.live import PrintScores, pick, score_once
-from fssai_eval.loop import calibration_score, candidates, cohens_kappa
+from fssai_eval.loop import (
+    calibration_from_results, calibration_item, calibration_score, candidates, cohens_kappa, label_items,
+)
 
 
 def stored_run(store, state=RunState.COMPLETED, protein=12.0):
@@ -67,3 +71,38 @@ def test_calibration_score_counts_only_labelled_items():
              {"item_id": "4", "statement": "yes", "source": "s", "human_label": None}]
     out = calibration_score(items, Judge())
     assert out["labelled"] == 3 and out["agreement"] == round(2 / 3, 4) and out["confusion"]["judge_only_supported"] == 1
+
+
+def finished(protein=12.0):
+    return ReferencePipeline.from_registry().run(sample_request(protein_g=protein), RunContext.new())
+
+
+def test_calibration_items_carry_the_statement_and_the_text_it_cites():
+    items = calibration_item("run1", finished())
+    assert items, "the fake pipeline's findings cite retrieved passages"
+    item = items[0]
+    assert item["item_id"].startswith("run1:") and item["human_label"] is None
+    assert item["statement"] and item["source"].startswith("[")
+
+
+def test_items_from_finished_runs_alternate_between_runs():
+    a, b = finished(), finished(3.0)
+    per_run = min(len(calibration_item("a", a)), len(calibration_item("b", b)))
+    items = calibration_from_results([("a", a), ("b", b)], limit=2 * per_run)
+    assert [i["item_id"].split(":")[0] for i in items] == ["a", "b"] * per_run
+
+
+def test_labelling_saves_each_answer_and_can_stop(tmp_path):
+    path = tmp_path / "labels.jsonl"
+    rows = [{"item_id": str(n), "statement": "s", "source": "x", "human_label": None} for n in range(3)]
+    path.write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+
+    def labels():
+        return [json.loads(x)["human_label"] for x in path.read_text(encoding="utf-8").splitlines()]
+
+    answers = iter(["s", "maybe", "u", "q"])
+    out = label_items(path, ask=lambda _: next(answers), say=lambda *_: None)
+    assert labels() == ["supported", "unsupported", None] and out == {"items": 3, "labelled": 2}
+    answers = iter(["s"])
+    label_items(path, ask=lambda _: next(answers), say=lambda *_: None)  # asks only for the unlabelled item
+    assert labels() == ["supported", "unsupported", "supported"]
