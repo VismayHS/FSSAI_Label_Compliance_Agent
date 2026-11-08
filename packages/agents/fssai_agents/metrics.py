@@ -11,6 +11,7 @@ which already serves /metrics on WORKER_METRICS_PORT), so Nishkal's Prometheus s
   fssai_agent_retries_total{agent}           research retries asked for by the verifier
   fssai_pipeline_run_seconds                 end-to-end latency of a pipeline run (sum of step latencies' wall clock)
   fssai_pipeline_runs_total{outcome,route}   complete runs by route; outcome = complete | incomplete
+  fssai_pipeline_resumes_total{at}           runs resumed from a checkpoint, by the node they continued at
 """
 from __future__ import annotations
 
@@ -32,10 +33,15 @@ AGENT_RETRIES = Counter("fssai_agent_retries_total", "Retries an agent was asked
 PIPELINE_SECONDS = Histogram("fssai_pipeline_run_seconds", "End-to-end latency of a pipeline run",
                              buckets=(0.5, 1, 2, 5, 10, 20, 30, 45, 60, 90, 120, 180))
 PIPELINE_RUNS = Counter("fssai_pipeline_runs_total", "Pipeline runs", ["outcome", "route"])
+RESUMES = Counter("fssai_pipeline_resumes_total", "Runs resumed from a checkpoint", ["at"])
 
 
 def record_retry(agent: str = "researcher") -> None:
     AGENT_RETRIES.labels(agent=agent).inc()
+
+
+def record_resume(at: str) -> None:
+    RESUMES.labels(at=at).inc()
 
 
 def observe_run(result: RunResult, ctx: RunContext) -> None:

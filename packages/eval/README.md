@@ -17,7 +17,9 @@ choice: [decision 204](../../docs/decisions/204-vihaan-eval-judges.md) and
 
 <venv-python> -m fssai_eval live --sample 10 [--every 300]    # score recent runs into quality_scores (L6)
 <venv-python> -m fssai_eval candidates --days 7               # unsatisfactory feedback -> packages/eval/candidates.jsonl
-<venv-python> -m fssai_eval calibrate template|score          # judge vs hand labels: agreement, Cohen's kappa
+<venv-python> -m fssai_eval calibrate template --from-api http://localhost:8000   # 20 items from finished runs (no LLM cost; FSSAI_API_KEY)
+<venv-python> -m fssai_eval calibrate label                   # a person labels each item supported/unsupported in the terminal
+<venv-python> -m fssai_eval calibrate score --out packages/eval/calibration/report-llm.json   # judge vs labels: agreement, Cohen's kappa
 
 <venv-python> packages/eval/tools/check_scenarios.py --index <INDEX_DIR>   # every quote verbatim in the corpus, every request valid
 <venv-python> packages/eval/tools/export_schema.py [--check]                # docs/data-contract.schema.json

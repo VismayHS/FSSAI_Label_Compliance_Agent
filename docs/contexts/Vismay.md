@@ -436,3 +436,12 @@ the web client."*
     it's protected);
   - an API-key box that appears only after a 401, with the key kept in `sessionStorage`.
 - **Groq budget used today on the new key:** 8 real runs (about half the daily cap).
+- 2026-11-08: **PR #17 merged into `main`** (298fad5). The review moved to Thu 12 / Fri 13 Nov.
+  - Finished Namith's checkpointing extra (decision 308, incident `2026-11-08-vismay-resume-rebuilt-context-as-dict`).
+  - On my side, for it:
+    - the job is enqueued with `Retry(max=1)` plus a `worker_lost` callback;
+    - `WORKER_MAINTENANCE_S` (60 s), with `worker_ttl` matched to it, because RQ checks only between 405 s queue reads;
+    - Compose's worker sets `PIPELINE_CHECKPOINTS=postgres`.
+  - Judge calibration (Vihaan's extra): `calibrate template --from-api` builds the items from finished runs at no
+    LLM cost, and `calibrate label` asks a person for each label. 20 items written, from 7 real runs.
+

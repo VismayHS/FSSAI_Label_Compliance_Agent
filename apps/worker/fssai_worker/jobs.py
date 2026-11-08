@@ -98,3 +98,23 @@ def _execute(payload: dict, deps: Deps) -> str:
         WEBHOOKS.labels("delivered" if delivered else "failed").inc()
         ctx.event("webhook_delivered" if delivered else "webhook_failed")
     return final.state.value
+
+
+def worker_lost(job, connection, exc_type=None, exc_value=None, tb=None) -> None:
+    """RQ failure callback (dispatch.QueueDispatcher.submit). execute_run never raises, so RQ calls this only when a
+    live worker's maintenance pass finds a job whose worker died (AbandonedJobError). With a retry left, RQ re-queues
+    the job right after this returns, and the run resumes from its checkpoint. Without one, the run is marked failed,
+    so a client polling it sees an honest error instead of `running` for ever. Never raises."""
+    try:
+        if exc_type is None or exc_type.__name__ != "AbandonedJobError" or job.retries_left:
+            return
+        store = default_deps().run_store
+        status = store.get(job.id)
+        if status is not None and status.state in (RunState.QUEUED, RunState.RUNNING):
+            store.save(status.model_copy(update={
+                "state": RunState.FAILED, "updated_at": utcnow(),
+                "error": "the worker running this check stopped, and so did the retry; no result"}))
+            RUNS_FINISHED.labels(RunState.FAILED.value, "none", "false").inc()
+        log.warning('{"event": "run_abandoned", "run_id": "%s"}', job.id)
+    except Exception:  # noqa: BLE001 - a callback error must not break RQ's registry cleanup
+        log.exception("could not mark abandoned run %s as failed", getattr(job, "id", "?"))

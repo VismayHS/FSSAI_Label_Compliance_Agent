@@ -226,7 +226,9 @@ class LangGraphResearcher:
         g.add_edge("run_tool", "act")
         g.add_edge("coverage", "draft")
         g.add_edge("draft", END)
-        return g.compile()
+        # Never checkpointed, even inside a checkpointed pipeline: this state holds the live RunContext, and an
+        # interrupted research attempt is redone from its start (fssai_agents.graph, PIPELINE_CHECKPOINTS).
+        return g.compile(checkpointer=False)
 
     # ---- budget
 
