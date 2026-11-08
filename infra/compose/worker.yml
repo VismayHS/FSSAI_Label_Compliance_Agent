@@ -15,6 +15,9 @@ services:
       REDIS_URL: redis://redis:6379/0
       DATABASE_URL: postgresql://${POSTGRES_USER:-fssai}:${POSTGRES_PASSWORD:-change-me-locally}@postgres:5432/${POSTGRES_DB:-fssai}
       BREAKER_STORE: redis              # one circuit breaker shared by every replica (A5)
+      # LangGraph checkpoints in Postgres: a run whose worker dies resumes at its last node on the re-queued job
+      # (fssai_agents.checkpoints). Set PIPELINE_CHECKPOINTS=off in .env to turn them off.
+      PIPELINE_CHECKPOINTS: ${PIPELINE_CHECKPOINTS:-postgres}
       WORKER_METRICS_PORT: "9100"
       INDEX_DIR: /data/index            # written by the indexer (infra/compose/indexer.yml)
       HF_HOME: /data/hf-cache
