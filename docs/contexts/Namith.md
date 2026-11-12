@@ -3,43 +3,14 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 6 November (written by Vismay, 2026-10-27)
+## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
 
-**Deadline moved (2026-10-29): the review is on Fri 6 November, not 30 October.** The steps below are unchanged; use the extra week to finish them properly, not to start late.
-
-**Where you are (27 Oct evening).** PR #12 (the researcher sweep, decision 102) is on `main`, and Vismay checked it
-on the full Compose stack with all 11 parts real and Groq: `smoke.py` passes. On your branch, CI green, not on
-`main` yet: the 44-attack red team, `ask_structured`, the `compare` and `demo` tools, and the dashboard panel.
-
-Do next, in this order:
-1. **Open the PR `main ← namith`** for that work now; its CI is green.
-2. **Quotes shortened with "..." lose their citations (demo #2).** Smoke run `247f11fb07eb46e7963bf7decf500a08`
-   (27 Oct, real Groq): the draft quoted `FSS-LD-2020:5(3)(b)` as "Nutritional Information per 100g or 100ml ...
-   shall be given on the label containing the following:", which is not one verbatim span, so grounding dropped it.
-   LBL-NUTRITION, LBL-FSSAI-LICENCE and LBL-MANUFACTURER became `cannot_determine` and the run went to
-   `regulatory-review` (R1), even though the model had cited the right clause. Either accept a quote whose
-   "..."-separated parts each occur, in order, in the cited passage (and store those parts), or tell
-   `researcher_draft` never to shorten a quote. Add a test with this quote. Measured over 8 paced eval scenarios on
-   real Groq (27 Oct): 5 runs escalated with R1 for this reason alone. 15 findings lost every citation, 14 of the 42
-   drafted quotes contained "...", and the verifier marked nothing unsupported. Expected routes were
-   clear-for-print (fibre-source-pass, fat-low-pass, all-declarations-no-claims) and revise-and-recheck (sugar-low-fail,
-   missing-allergen). The rest of the dropped quotes were not verbatim either, so check the repair on those too.
-3. **The 90 s check is now measured, and it fails.** In the same batch, `s41-protein-clearly-above` and
-   `small-pack-exemption` stopped at the 90 s wall-clock limit (`complete=false`, 11-12 steps) while waiting on a 429
-   for Groq's tokens per minute; the runs that finished took 36-78 s. Numbers in
-   `docs/report/platform-and-integration.md` (cost section). Decide in decision 102 or a new record:
-   smaller draft context (`RESEARCHER_DRAFT_CHARS`), a higher `RUN_MAX_WALL_S` for the real provider, or both.
-   Say which and why.
-4. **M3.2 prompt comparison (L2).** `python -m fssai_agents.compare run --pause-s 60`, then `report --write`. Agree
-   on a time slot with Vihaan: there is one key, one run at a time, at least half an hour per variant, and the same
-   pair is his V3.3 before/after. Don't run it while anyone else uses the key.
-5. **M4.1** `python -m fssai_agents.demo --api http://localhost:8000` on the real stack (demos #2 and #7).
-6. **M4.2** fill the TODO table in `docs/report/agent-design.md` from step 4; `build_report.py --strict` now fails
-   while it has `TODO`. Then tick M4.2.
-7. Checkpointing (extra) can stay open: your note says why, and that is a fine "what was not done" line in the report.
-
-**If this does not happen:** demo #2 only ever shows escalations, L2 has no comparison, and Vihaan's L3 and
-Vismay's cost per 100 runs on the eval set have no numbers.
+All your tasks and all three extras are on `main`. Vismay finished M3.2 and M4.2 (decision 103) and the
+checkpointing extra (decision 308); see the notes at the bottom. What is left:
+1. **Rehearse demos #2 and #7 twice with the team** (`docs/demo-script.md`):
+   `python -m fssai_agents.demo --api http://localhost:8000 --only 2`, then `--only 7`.
+2. **Viva:** read decisions 103 (prompt comparison) and 308 (checkpointing) and incident
+   `2026-11-08-vismay-resume-rebuilt-context-as-dict`. They are your requirement and extra, so expect questions on them.
 
 ## Your mission
 You build the **thinking part**: the classifier and the research agent, and the LangGraph graph
@@ -279,7 +250,7 @@ Each package README lists its files and commands. `conformance.sample_request()`
       in the trace, and the claim label cites both regulations (run `e037da7b…`).
 - [x] **M4.2 Write your report section** in `docs/report/agent-design.md`.
 - [x] **M4.3 Write at least one incident entry** in `docs/incidents/`.
-- [ ] **Extras:**
+- [x] **Extras:**
   - [x] LangGraph checkpointing (Postgres or Redis saver) so a run interrupted mid-graph can resume, and add this to the A2 failure doc
     - *Done 2026-11-08 (Vismay):*
       - Postgres saver, keyed by run id (decision 308); the A2 failure table is updated.
