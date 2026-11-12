@@ -3,39 +3,23 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 6 November (written by Vismay, 2026-10-27)
+## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
 
-**Deadline moved (2026-10-29): the review is on Fri 6 November, not 30 October.** The steps below are unchanged; use the extra week to finish them properly, not to start late.
-
-**Bring your branch up to date first.** Your branch is still on the old folder layout
-([decision 305](../decisions/305-vismay-repository-layout.md)): run `git config merge.directoryRenames true`,
-`git fetch origin && git merge origin/main`, then `python tools/scripts/setup_dev.py vihaan` once (your editable
-installs still point at the old folders).
-
-**Where you are (27 Oct evening).** Your gate, verifier, router, feedback, quarantine and eval runner are on `main`
-and switched on for everyone; Vismay checked them on the full stack with real Groq on 27 Oct (`smoke.py` passes:
-422 + quarantine, no run started). No commits since `d28a05e` (26 Oct, eval pacing and resume).
-
-Do next, in this order:
-1. **The Windows test reads are still unfixed** (CI on Linux passes): `read_text()` without `encoding="utf-8"` in
-   `packages/eval/tests/test_tools.py:48`, `test_postgres.py:99`, `test_runner.py:35`, and `write_text` on
-   `test_runner.py:76`. `test_tools.py::test_checker_flags_a_fabricated_quote` fails on Windows today.
-2. **V3.3 before/after (L3), with Namith.** His `python -m fssai_agents.compare run` runs your
-   `python -m fssai_eval run` once per researcher variant (1.0.0 and 1.1.0), so one pair of runs gives his L2 and
-   your L3. Agree on the time slot with him (one key, one run at a time, `--pause-s 60`, at least half an hour per
-   variant), mark decision 205 Accepted, then fill the **TODO(LLM)** tables in
-   `docs/report/verification-and-evaluation.md` with all four metrics and their deltas. `build_report.py --strict`
-   now fails while they say `TODO`.
-3. **Redo demos #5 and #6 with the real LLM**, and add the 429 step to demo #4 (D7 live). Note for #6: in the 27 Oct
-   real runs (8 eval scenarios) 5 escalations came from grounding dropping quotes that were not verbatim (Namith's
-   step 2) and your verifier marked nothing unsupported, so check that #6 shows the verifier itself catching an
-   unsupported answer.
-4. **Settle the RDA question with Nishkal** and write the outcome into your test values doc. It decides whether
-   demo #10 can ever be `met`/`unmet`.
-5. Extras left: RAGAS cross-check with judge calibration, and the eval regression gate in CI.
-
-**If this does not happen:** L3 has no before/after numbers (and Namith's L2 has no comparison), and demos #5, #6
-and #10 are shown only on the fake LLM.
+Everything except one extra is on `main`. Vismay finished V3.3 (decision 205) and the CI eval gate; see the notes
+at the bottom. What is left:
+1. **Judge calibration (your last extra, about 30 min).** After `git fetch origin && git merge origin/main`, from the
+   repo root:
+   - `python -m fssai_eval calibrate label`: mark each of the 20 findings in
+     `packages/eval/calibration/support-labels.jsonl` (taken from 7 real runs) as supported (`s`) or unsupported (`u`)
+     against the text it cites. It saves after every answer; `q` stops.
+   - `python -m fssai_eval calibrate score --judge llm --out packages/eval/calibration/report-llm.json` (about 20 Groq
+     calls).
+   - Put the agreement and Cohen's kappa in `docs/report/verification-and-evaluation.md`, tick the extra below, and
+     open a PR.
+2. **Settle the RDA question with Nishkal** and write the outcome into `docs/eval1/section-4.1-test-values.md`.
+3. **Rehearse demos #4, #5 and #6 twice with the team** (`docs/demo-script.md`). #6 live needs a minute with nobody
+   else on the Groq key; `--in-process` is the fallback.
+4. **Viva:** read decision 205 (before/after) and the eval gate in `.github/workflows/`.
 
 ## Your mission
 You make the system **trustworthy at both ends**:

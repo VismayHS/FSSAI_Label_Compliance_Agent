@@ -1,6 +1,6 @@
 # Demo script: the 10 items, in order
 
-Owner: Vismay (S4.3). For the review on **Fri 6 Nov 2026** and the two rehearsals before it. Every command runs from the
+Owner: Vismay (S4.3). For the review on **Thu 12 / Fri 13 Nov 2026** and the two rehearsals before it. Every command runs from the
 repo root on the host, with the stack up (`docker compose up -d --build`). `<py>` is the venv's Python
 (`.venv/Scripts/python` on Windows, `.venv/bin/python` on macOS).
 

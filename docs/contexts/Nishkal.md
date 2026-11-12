@@ -3,42 +3,16 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to 6 November (written by Vismay, 2026-10-27)
+## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
 
-**Deadline moved (2026-10-29): the review is on Fri 6 November, not 30 October.** The steps below are unchanged; use the extra week to finish them properly, not to start late.
-
-**Where you are (27 Oct evening).** Built and checked: corpus, index, retriever, cache, observability stack, SLO
-(committed before any measurement) and all four extras. On your branch but not on `main` yet: the five stub
-fixtures, the P3 page fix and the load-test status line. Two boxes to tick: N0.1 (your first PR merged long ago)
-and the *Extras* parent box (all four are done). What is left is measurement, and only you can produce it: demo #9
-and the numbers for D6, A7 and D7.
-
-Do next, in this order:
-1. **Make your branch's CI green, then open the PR.** CI run 40523049609 fails one test:
-   `apps/stub_llm/tests/test_with_gateway.py:59` still expects the default `"stub response"`, but the prompt it sends
-   carries the `[prompt:classifier@...]` tag, which your new `classifier.json` fixture now answers. Send an untagged
-   prompt in that test, or assert on the fixture's reply. Then open the PR `main ← nishkal`, so the load test runs
-   against fixtures that are on `main`.
-2. **N3.5 Locust (demo #9; D6, A7).** Docker Desktop with 8 GB, stub LLM on (step 1 of
-   `infra/loadtest/results/README.md`), then
-   `python infra/loadtest/run_matrix.py --host http://localhost:8000 --compose --scales 1 3`. Commit the results
-   folder, fill in the tables, and name the concurrency at which p95 passes 60 s and the component responsible
-   (`GET /v1/runs/{id}/trace` gives per-step latency and the queue wait).
-3. **N3.6 caching effect (D7).** The same matrix with `CACHE_ENABLED=0` and `CACHE_ENABLED=1`: the change in p95 and
-   in cost per run.
-4. **Real stub replies.** Your fixtures are hand-written. Any run on the real stack with the Groq key has the real
-   reply for each prompt in its trace: each `llm` step's `output.text`, named by `prompt_name`. Copy one per prompt
-   (Vismay's 27 Oct runs have real `classifier`, `researcher` and `researcher_draft` replies; `guardrail_judge` and
-   `verifier_support` were not called in that configuration, so take those two from Namith and Vihaan).
-5. **N4.1 §4.1 rehearsal (demo #10)**, and settle the RDA question with Vihaan. Today the reference answer is
-   `cannot_determine`, routed to `regulatory-review`. On 27 Oct the real §4.1 run also hit the 90 s wall-clock
-   limit while drafting (Groq's token-per-minute wait), so rehearse it with nothing else using the key in the
-   minute before.
-6. **Report section.** `build_report.py --strict` now fails on `TODO`/`pending`; yours are lines 92 and 114 of
-   `docs/report/retrieval-and-performance.md`, filled from steps 2 and 3.
-
-**If this does not happen:** demo #9 and the measured half of your report section have no numbers, and nobody else
-can produce them.
+All your tasks and all four extras are done and on `main` (N3.5/N3.6 measured on 6 Nov; see the notes at the
+bottom). What is left:
+1. **Settle the RDA question with Vihaan.** Neither regulation states a protein RDA
+   (`docs/eval1/section-4.1-passages.md`, P5), so today the §4.1 answer is `cannot_determine`, routed to
+   `regulatory-review`. Either agree that this is the answer you present, or name an official source and record it there.
+2. **Rehearse demos #9 and #10 twice with the team** (`docs/demo-script.md`). #9 is the committed matrix in
+   `infra/loadtest/results/` against `infra/loadtest/SLO.md`. #10 is the web client's built-in example.
+3. **Viva:** be ready to explain chunking, retrieval, the cache, the SLO and the bottleneck (the queue wait).
 
 ## Your mission
 You own **what the system knows** and **how fast it runs**:

@@ -3,19 +3,15 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file** (and `LLM_Context.md`). Tick
 > boxes as you go, and add notes at the bottom.
 
-## Next steps to 6 November (2026-10-27; the review moved from 30 Oct to Fri 6 Nov on 2026-10-29)
+## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
 
-What is left of my part:
-1. **Two rehearsals of all 10 demos with the team (S4.3).** Run `python tools/scripts/clean_clone_test.py` before
-   each. Mine: #1 clean clone, #3 trace, #8 breaker. Rehearse with nobody else using the Groq key in the minute
-   before a real run (the §4.1 run hit the 90 s limit on 27 Oct waiting for the per-minute token budget).
-2. **The final report build.** `python tools/scripts/build_report.py --strict` now also fails on `TODO`/*pending*
-   numbers. My section has none left; the others' gaps are listed in LLM_Context §9 and in each person's *Next steps*.
-   Run it again once Namith, Vihaan and Nishkal have their numbers, and commit `docs/report/REPORT.md`.
-3. **Cost on the whole eval set (optional).** When Namith and Vihaan run the prompt-comparison pair, add its mean cost
-   per run to the cost section (`compare report` prints it). The 27 Oct measurement already answers L5.
-4. **Merge teammates' PRs** as they arrive: Namith's (red team, structured output, compare and demo tools, CI green)
-   and Nishkal's (stub fixtures, after his one failing test).
+All my tasks and extras are on `main`, and so is everything I finished for the others (PRs #17, #18). Left:
+1. **Two rehearsals of all 10 demos with the team (S4.3).** Run `python tools/scripts/clean_clone_test.py --remote`
+   the evening before. Mine: #1 clean clone, #3 trace, #8 breaker.
+2. **Groq budget at the review:** a full pass uses about 8 real runs (half a key's day), so bring a teammate's key with
+   budget left.
+3. **After Vihaan's calibration PR:** merge it, rebuild the report (`build_report.py --strict`), commit `REPORT.md`,
+   and run the clean-clone test again.
 
 ## Your mission
 You make it **a production service, not a notebook**:
