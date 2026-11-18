@@ -375,3 +375,23 @@ The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `
     decision with Vihaan. Use a fresh Groq key; mine reached its daily token cap on 6 Nov.
   - Real stub replies (step 4) not done: the fixtures are still hand-written. The load numbers measure latency and
     throughput, which do not depend on reply wording.
+
+### 2026-11-17 · Local demo rehearsal
+
+- Ran the browser-facing Vite server, API, RQ worker, Redis, Postgres, real FAISS + BM25
+  retrieval with the repo's hashing embeddings, and stub provider as native processes on Linux.
+  The index built 425 passages. Smoke verified readiness, async completion, a reconstructable
+  trace, and quarantine of an invalid request before enqueue.
+- #9: One worker, five Locust users, 30 s warm-up and 60 s of load followed by draining in-flight
+  runs. Locust's final console summary recorded 20 completed runs, 0 failures, 19 s p50 and 23 s
+  p95 against 60 s and 1%. The periodic CSV missed the last drained sample and has the same p95.
+  Use the committed 5-minute matrix for the scaling and failure-concurrency comparison.
+- #10: Submitted the exact web example through the Vite proxy twice using a scripted LLM
+  fixture. Both runs returned `cannot_determine` and `regulatory-review`. Both quotes matched
+  passages retrieved in the run, from FSS-AC-2018 Schedule I item 11 and FSS-LD-2020 5(3)(b)(ii).
+  The fixture explicitly requested the protein declaration clause after the sweep. Run IDs
+  `363e5979028c4cdd89a4b69e7d7ee295` and `e1b92e9d47f1491b981e8340a056b926`.
+  The live browser click, provider-backed run and Compose deployment remain team rehearsal steps.
+- Proposed keeping that route with Vihaan. The official ICMR–NIN protein reference and the
+  December 2022 Schedule I amendment are linked in [the §4.1 notes](../eval1/section-4.1-passages.md).
+  The demo corpus uses the indexed 2021 Claims compendium, which predates that amendment.

@@ -18,6 +18,24 @@ That way a citation the system makes can be checked against this page character 
 numbers are the PDF page. "Passage id" is the id the retriever returns, so traces can be matched to this
 page.
 
+## Demo decision proposed for Vihaan · 17 November 2026
+
+Keep `cannot_determine` → `regulatory-review` for the built-in breakfast cereal case (8 g protein per
+100 g). The demo shows the protein declaration in FSS-LD-2020 5(3)(b) and the percentage-of-RDA threshold
+in FSS-AC-2018 Schedule I, item 11, as retrieved from the two indexed PDFs. The comparison needs an
+applicable protein RDA, and the index has no such reference value.
+
+The official source named by the Claims regulation is ICMR–National Institute of Nutrition. Its 2020
+report summary, Table 2a, gives adult protein RDA as 0.83 g/kg/day and provides daily values for separate
+reference groups. Choosing a reference group for a product claim requires regulatory review before the
+system can turn this into a fixed gram threshold. [ICMR–NIN 2020 report summary, Table 2a](https://www.nin.res.in/rdabook/brief_note.pdf)
+
+The indexed Claims compendium is Version II (2021). The 13 December 2022 amendment to Schedule I,
+item 11, also provides a per-serving basis for the claim at 10% of RDA. When presenting the retrieved
+passage, identify its corpus version. Updating the corpus and selecting the applicable reference group
+are prerequisites for a numeric determination under the amended rule.
+[FSSAI Gazette amendment, Schedule I item 11](https://www.fssai.gov.in/upload/notifications/2022/12/63998e33c2ad6Gazette_Notification_Amendment_14_12_2022.pdf)
+
 ## The answer in one paragraph
 
 A "source of protein" claim is a **nutrient content claim** (FSS-AC-2018 2(1)(l)(i)). By the substituted
@@ -28,13 +46,13 @@ in the nutritional information (FSS-LD-2020 5(3)(b)). It never mentions Schedule
 The only pointer from Labelling to Claims is about brand names (5(1)(c)). Neither regulation states an RDA
 value for protein. Both define RDA by reference to ICMR's *Nutrient Requirements and Recommended Dietary
 Allowances for Indians*. The comparison therefore needs a reference value from **outside the corpus**
-(see "Open question" below).
+(see "Options for adopting an external RDA reference" below).
 
 ## The passages
 
 ### P1: the claim condition (decisive) · FSS-AC-2018 Schedule I, item 11 · pp. 13–14
 
-Passage id `FSS-AC-2018:Schedule I, item 11~substituted`. This is the *substituted* Schedule I, in force.
+Passage id `FSS-AC-2018:Schedule I, item 11~substituted`. This is the *substituted* Schedule I in the indexed 2021 compendium.
 It was operationalised w.e.f. 26 Oct 2021, and food business operators had to comply by 1 Jul 2022.
 
 > "11. Protein Source 10% of RDA per 100 g for solids 5% of RDA per 100 ml for liquids or 5% of RDA per 100 kcal Rich / High 20% of RDA per 100 g for solids 10% of RDA per 100 ml for liquids or 10% of RDA per 100 kcal"
@@ -164,7 +182,7 @@ to claim conditions. Its one cross-reference is about names, not nutrition claim
 Measured retrieval for three phrasings of this question is in `docs/report/retrieval-and-performance.md`.
 Dense search alone misses P1 for two of the three; hybrid search finds it in the top 5 for all three.
 
-## Open question for the team (decide before the test values are final)
+## Options for adopting an external RDA reference
 
 **Where does the protein RDA come from?** P1 is expressed in % of RDA, and P5 sends us to ICMR, which is
 not in the corpus. Options:
@@ -177,9 +195,8 @@ not in the corpus. Options:
 3. **Both:** compare with the configured value, but escalate when the declared value is within ±20 % of
    the threshold (P9 makes values near the line uncertain anyway).
 
-The recommendation is option 3. Whatever is chosen, the numeric RDA must come from the ICMR document read
-by a person, and is **TO VERIFY**: it is not in this corpus and must not be "recalled" by an LLM
-(AGENTS.md rule 4).
+The demo uses option 2. Before enabling either numeric option, confirm the applicability of the
+reference group with regulatory review and revalidate the test values against the amended claim rule.
 
 **For the test values (Vihaan, V1.3).** Choose declared protein values far enough from the threshold that
 the outcome is the same for any defensible RDA figure. One clearly below (the `protein-claim-low` load
