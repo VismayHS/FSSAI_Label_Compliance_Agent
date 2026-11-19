@@ -106,3 +106,10 @@ def test_labelling_saves_each_answer_and_can_stop(tmp_path):
     answers = iter(["s"])
     label_items(path, ask=lambda _: next(answers), say=lambda *_: None)  # asks only for the unlabelled item
     assert labels() == ["supported", "unsupported", "supported"]
+
+
+def test_kappa_is_undefined_when_both_raters_never_vary():
+    """All-'supported' from both sides is 0/0, not perfect agreement: report it as undefined (None), never 1.0."""
+    assert cohens_kappa([True] * 20, [True] * 20) is None
+    assert cohens_kappa([False] * 5, [False] * 5) is None
+    assert cohens_kappa([True] * 20, [True] * 18 + [False] * 2) == 0.0
