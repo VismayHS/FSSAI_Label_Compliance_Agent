@@ -33,7 +33,8 @@ from the nutrition panel that FSS-LD-2020 5(3)(b) requires, and the Labelling te
 
 **Open question for the team:** neither regulation states an RDA value for protein; both refer to ICMR.
 The reference answer needs a team decision on how the system treats that (the options are in the passages
-file) before the test values are final.
+file) before the test values are final. *(Settled 19 Nov 2026: no value is adopted; the claim escalates,
+decision 309.)*
 
 Test values: *pending* (Vihaan, `section-4.1-test-values.md`, V1.3).
 

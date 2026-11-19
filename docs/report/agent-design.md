@@ -94,4 +94,4 @@ Demo rehearsal: `python -m fssai_agents.demo --api http://localhost:8000` runs d
 
 - A real LLM stopped after two searches and drafted 11 findings, nine of them "no passage was provided"; `coverage` only covered claims, so every label ended in review. Fixed by a deterministic `sweep` that searches every claim condition and labelling requirement first, and by limiting findings to searched requirements (decision 102). One query per requirement did not fit the shared tool-call limit once the verifier ran in every run, so the searches are grouped.
 - Giving the model a checklist (prompt 1.1.0) did not make it search more; moving coverage into code did.
-- The RDA reference value is not in either regulation, so the 4.1 finding is `cannot_determine` unless the team supplies it (open team question).
+- The RDA reference value is not in either regulation, so the 4.1 finding is `cannot_determine` and the run escalates; the team adopted no external value (decision 309).

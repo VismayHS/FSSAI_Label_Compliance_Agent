@@ -159,6 +159,6 @@ worker CPU it saves and for repeat searches inside a run, not as a latency or co
   the official URLs, with provenance recorded (incident `2026-10-25-nishkal-fssai-site-unreachable`).
 - **The model download failed TLS verification** behind antivirus HTTPS interception, while curl worked.
   Fixed locally without weakening verification in code (incident `2026-10-25-nishkal-model-download-tls`).
-- **Open: the protein RDA is not in the corpus.** The Schedule I condition is in % of RDA, and both
-  regulations defer the RDA to ICMR. Comparing a declared value needs an external, cited reference value
-  or an escalation (`docs/eval1/section-4.1-passages.md`).
+- **The protein RDA is not in the corpus.** The Schedule I condition is in % of RDA, and both regulations
+  defer the RDA to ICMR. The team adopted no external value and escalates instead (decision 309): the §4.1
+  finding is `cannot_determine` and the route `regulatory-review` (`docs/eval1/section-4.1-passages.md`).

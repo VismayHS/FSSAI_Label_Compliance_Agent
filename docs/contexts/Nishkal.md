@@ -3,16 +3,17 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
+## Next steps to the submission (Fri 20 Nov 2026; updated by Vismay, 2026-11-19)
 
-All your tasks and all four extras are done and on `main` (N3.5/N3.6 measured on 6 Nov; see the notes at the
-bottom). What is left:
-1. **Settle the RDA question with Vihaan.** Neither regulation states a protein RDA
-   (`docs/eval1/section-4.1-passages.md`, P5), so today the §4.1 answer is `cannot_determine`, routed to
-   `regulatory-review`. Either agree that this is the answer you present, or name an official source and record it there.
-2. **Rehearse demos #9 and #10 twice with the team** (`docs/demo-script.md`). #9 is the committed matrix in
-   `infra/loadtest/results/` against `infra/loadtest/SLO.md`. #10 is the web client's built-in example.
-3. **Viva:** be ready to explain chunking, retrieval, the cache, the SLO and the bottleneck (the queue wait).
+All your tasks and all four extras are on `main`. **The RDA question is settled:** the team adopted your proposal
+from PR #20 (option 2, [decision 309](../decisions/309-vismay-protein-rda.md)). No protein RDA is adopted, so the §4.1
+answer is `cannot_determine` → `regulatory-review`, citing both regulations; the passages page and your report
+section say so. What is left:
+1. **Rehearse demos #9 and #10** (`docs/demo-script.md`). #9 is the committed matrix in `infra/loadtest/results/`
+   against `infra/loadtest/SLO.md`. #10 is the web client's built-in example; present the escalation as the correct
+   answer (decision 309), not as a gap.
+2. **Viva:** chunking, hybrid retrieval and RRF, the cache, the SLO and the bottleneck (the queue wait), and why no
+   RDA is adopted.
 
 ## Your mission
 You own **what the system knows** and **how fast it runs**:
@@ -395,3 +396,6 @@ The model is cached in `data/hf-cache`. Use `HF_HOME=<repo>/data/hf-cache` and `
 - Proposed keeping that route with Vihaan. The official ICMR–NIN protein reference and the
   December 2022 Schedule I amendment are linked in [the §4.1 notes](../eval1/section-4.1-passages.md).
   The demo corpus uses the indexed 2021 Claims compendium, which predates that amendment.
+- 2026-11-19 (Vismay, before the submission): your demo proposal from PR #20 is adopted as **decision 309**
+  (no protein RDA; §4.1 escalates). The passages page, `docs/report/retrieval-and-performance.md` and the demo
+  script now say so instead of "open". Only rehearsal and viva prep are left.

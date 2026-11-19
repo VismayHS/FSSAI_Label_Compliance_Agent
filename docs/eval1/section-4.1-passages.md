@@ -18,7 +18,7 @@ That way a citation the system makes can be checked against this page character 
 numbers are the PDF page. "Passage id" is the id the retriever returns, so traces can be matched to this
 page.
 
-## Demo decision proposed for Vihaan · 17 November 2026
+## Demo decision · proposed 17 November 2026, adopted 19 November 2026 ([decision 309](../decisions/309-vismay-protein-rda.md))
 
 Keep `cannot_determine` → `regulatory-review` for the built-in breakfast cereal case (8 g protein per
 100 g). The demo shows the protein declaration in FSS-LD-2020 5(3)(b) and the percentage-of-RDA threshold
@@ -175,8 +175,8 @@ to claim conditions. Its one cross-reference is about names, not nutrition claim
 2. Reflect: "the label makes a *claim*; does another regulation set a condition for it?"
 3. `corpus_search("source of protein claim condition", regulation=FSS-AC-2018)` returns P1 (and P2, P4).
    Then `clause_lookup(FSS-AC-2018, "5(3)")` retrieves P2.
-4. Compare `nutrition.protein_g` (per 100 g) with P1. The comparison needs the protein RDA (open
-   question below). Cite both regulations: P1 and P6, with P2.
+4. Compare `nutrition.protein_g` (per 100 g) with P1. The comparison needs the protein RDA, which
+   the team does not adopt (decision 309): the finding is `cannot_determine`. Cite both regulations: P1 and P6, with P2.
 5. Verify: every quote is a substring of the cited passage (A3).
 
 Measured retrieval for three phrasings of this question is in `docs/report/retrieval-and-performance.md`.
@@ -195,14 +195,14 @@ not in the corpus. Options:
 3. **Both:** compare with the configured value, but escalate when the declared value is within ±20 % of
    the threshold (P9 makes values near the line uncertain anyway).
 
-The demo uses option 2. Before enabling either numeric option, confirm the applicability of the
+**The team adopted option 2** ([decision 309](../decisions/309-vismay-protein-rda.md), 19 Nov 2026). Before enabling either numeric option, confirm the applicability of the
 reference group with regulatory review and revalidate the test values against the amended claim rule.
 
 **For the test values (Vihaan, V1.3).** Choose declared protein values far enough from the threshold that
 the outcome is the same for any defensible RDA figure. One clearly below (the `protein-claim-low` load
 payload uses 2.5 g/100 g) and one clearly above (14 g/100 g). Add one case that must escalate: a
 borderline value, a pack ≤ 100 cm² (P8), or a health supplement (P11). Express the threshold once,
-symbolically, as `0.10 × RDA_protein g per 100 g` for solids, until the team fixes the RDA source.
+symbolically, as `0.10 × RDA_protein g per 100 g` for solids (no RDA is adopted, decision 309).
 
 ## Interpretation notes (for review, not asserted as law)
 

@@ -3,23 +3,16 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
+## Next steps to the submission (Fri 20 Nov 2026; updated by Vismay, 2026-11-19)
 
-Everything except one extra is on `main`. Vismay finished V3.3 (decision 205) and the CI eval gate; see the notes
-at the bottom. What is left:
-1. **Judge calibration (your last extra, about 30 min).** After `git fetch origin && git merge origin/main`, from the
-   repo root:
-   - `python -m fssai_eval calibrate label`: mark each of the 20 findings in
-     `packages/eval/calibration/support-labels.jsonl` (taken from 7 real runs) as supported (`s`) or unsupported (`u`)
-     against the text it cites. It saves after every answer; `q` stops.
-   - `python -m fssai_eval calibrate score --judge llm --out packages/eval/calibration/report-llm.json` (about 20 Groq
-     calls).
-   - Put the agreement and Cohen's kappa in `docs/report/verification-and-evaluation.md`, tick the extra below, and
-     open a PR.
-2. **Settle the RDA question with Nishkal** and write the outcome into `docs/eval1/section-4.1-test-values.md`.
-3. **Rehearse demos #4, #5 and #6 twice with the team** (`docs/demo-script.md`). #6 live needs a minute with nobody
-   else on the Groq key; `--in-process` is the fallback.
-4. **Viva:** read decision 205 (before/after) and the eval gate in `.github/workflows/`.
+All your tasks and all extras are on `main`: the judge calibration merged in PR #21 (agreement 0.80, kappa 0.38).
+**The RDA question is settled** ([decision 309](../decisions/309-vismay-protein-rda.md)): no RDA is adopted, and
+`docs/eval1/section-4.1-test-values.md` now gives `cannot_determine` → `regulatory-review` as the answer, not a
+placeholder. What is left:
+1. **Rehearse demos #4, #5 and #6** (`docs/demo-script.md`). #6 live needs a minute with nobody else on the Groq key;
+   `--in-process` is the fallback.
+2. **Viva:** decision 205 (before/after), decision 202 with your kappa result (why the LLM support check stays
+   advisory), and the eval gate in `.github/workflows/`.
 
 ## Your mission
 You make the system **trustworthy at both ends**:
@@ -310,6 +303,7 @@ experiments and live quality monitoring from user feedback."*
   - **Namith:** agree on researcher prompt 1.0.0 vs 1.1.0 as the V3.3 change (decision 205); the eval matches finding
     ids with a fuzzy match, but canonical ids help (packages/eval/README.md).
   - **Team:** the protein RDA decision. Until then the §4.1 cases are `regulatory-review` (test values doc).
+    *Settled 19 Nov: decision 309, no RDA adopted.*
   - **Me:** an LLM key in `.env` for V3.3 and real eval numbers; Docker for the Postgres tests and the full-stack
     rehearsal (V4.1); hand-label ~20 items (`fssai_eval calibrate template`) for the kappa extra.
 - 2026-10-26 (Vihaan): pre-push review.
@@ -358,4 +352,6 @@ experiments and live quality monitoring from user feedback."*
   correct-conclusion-wrong-clause citations. Report §5 has the table and its consequences
   (`packages/eval/calibration/report-llm.json`). Also fixed `cohens_kappa`, which returned 1.0 when neither rater
   varies; it is undefined (None) there.
-
+- 2026-11-19 (Vismay, before the submission): PR #21 merged into `main`. **RDA decision recorded** as decision 309
+  (Nishkal's option 2: no RDA adopted; §4.1 is `cannot_determine` → `regulatory-review`). The test values page now
+  states it as the answer. Only rehearsal and viva prep are left.
