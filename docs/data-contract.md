@@ -99,6 +99,8 @@ content.
 | `trans_fat_g` | number | g | no | 0–100 | XF-06. |
 | `sodium_mg` | number | mg | no | 0–40 000 | Sodium is about 39 % of salt by mass (a chemistry fact), so even 100 g of salt stays under 40 000 mg. |
 | `other` | object of number | per key | no (default `{}`) | each ≥ 0; ≤ 100 for `_g`, 100 000 for `_mg`, 10⁸ for `_mcg`, 900 for `_kcal` | Further nutrients. Each key is `snake_case` and **ends in its unit**: `dietary_fibre_g`, `cholesterol_mg`, `iron_mg`, `vitamin_d_mcg`. Fibre claims are checked against `dietary_fibre_g`. |
+| `servings_per_pack` | number | servings | no | > 0, ≤ 10 000 | As printed. FSS-LD-2020 5(3)(b)(iv) requires "the number of servings in the package" (decision 311). |
+| `rda_percent_per_serve` | object of number | % | no (default `{}`) | keys `energy`, `total_fat`, `saturated_fat`, `trans_fat`, `added_sugars`, `sodium`; each 0–1 000 | As printed. FSS-LD-2020 5(3)(b) requires the per-serve percentage contribution to RDA for these nutrients; without it the nutrition finding cannot be confirmed (decision 311). |
 
 ## 3. Categories: supported and unsupported
 

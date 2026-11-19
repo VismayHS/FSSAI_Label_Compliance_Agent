@@ -218,3 +218,25 @@ def test_numeric_strings_are_not_coerced():
 
 def test_integers_are_fine_for_number_fields():
     assert codes(with_("nutrition.protein_g", 10)) == set()
+
+
+# ---------------------------------------------------------------- per-serve values (decision 311)
+
+def test_servings_and_per_serve_rda_percent_are_accepted():
+    raw = valid()
+    raw["nutrition"]["servings_per_pack"] = 16.7
+    raw["nutrition"]["rda_percent_per_serve"] = {"energy": 5.5, "total_fat": 2.7, "saturated_fat": 1.6,
+                                                 "trans_fat": 0, "added_sugars": 3.0, "sodium": 3.0}
+    request, errors = validate(raw)
+    assert errors == [] and request.nutrition.rda_percent_per_serve["energy"] == 5.5
+    assert request.nutrition.servings_per_pack == 16.7
+
+
+def test_per_serve_rda_percent_keys_and_ranges_are_checked():
+    raw = valid()
+    raw["nutrition"]["servings_per_pack"] = 0
+    raw["nutrition"]["rda_percent_per_serve"] = {"protein": 10, "energy": -1, "sodium": 5000}
+    assert codes(raw) == {("nutrition.servings_per_pack", "range"),
+                          ("nutrition.rda_percent_per_serve.protein", "format"),
+                          ("nutrition.rda_percent_per_serve.energy", "range"),
+                          ("nutrition.rda_percent_per_serve.sodium", "range")}
