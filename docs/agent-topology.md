@@ -88,9 +88,9 @@ All bounds are enforced by `RunContext.check_budget()` and configured in `.env` 
 
 | Bound | Default | Env | Where checked |
 |---|---|---|---|
-| Steps per run (all agents) | 25 | `RUN_MAX_STEPS` | before every step |
-| Tool calls per run | 15 | `RUN_MAX_TOOL_CALLS` | before every tool call |
-| Wall clock per run | 90 s | `RUN_MAX_WALL_S` | before every step, and the LLM client caps each call by `remaining_s()` |
+| Steps per run (all agents) | 30 (decision 310) | `RUN_MAX_STEPS` | before every step |
+| Tool calls per run | 18 (decision 310) | `RUN_MAX_TOOL_CALLS` | before every tool call |
+| Wall clock per run | 180 s (90 s in load tests, decision 306) | `RUN_MAX_WALL_S` | before every step, and the LLM client caps each call by `remaining_s()` |
 | Research attempts (Researcher ⇄ Verifier) | 3 | `RUN_MAX_RESEARCH_ATTEMPTS` | the retry edge |
 | LangGraph `recursion_limit` | set from `RUN_MAX_STEPS` | derived | graph invocation |
 

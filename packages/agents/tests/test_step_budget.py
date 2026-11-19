@@ -1,5 +1,5 @@
 """A full run (guardrails, classifier, researcher with the sweep, the REAL verifier and router) stays inside
-RUN_MAX_STEPS=25, RUN_MAX_TOOL_CALLS=15 even when the verifier sends the researcher back twice.
+RUN_MAX_STEPS=30, RUN_MAX_TOOL_CALLS=18 (decision 310) even when the verifier sends the researcher back twice.
 
 The LLM is scripted by step name, so this measures step and tool-call counts, not model quality or wall time
 (the sweep adds no LLM calls, so it adds retrieval time only). Run with -s to print the numbers."""
@@ -33,6 +33,12 @@ class StubClassifier:
                                                     nutrient="protein")])
 
 
+class ClauseRetriever(FakeRetriever):
+    """Answers the real clause ids the sweep looks up with the placeholder nutrition passage."""
+    def get_clause(self, regulation, clause_id, ctx):
+        return LD if regulation == LD.regulation else super().get_clause(regulation, clause_id, ctx)
+
+
 class ScriptedLLM:
     def __init__(self, support, busy=False):
         self.support, self.busy, self.n, self.ids = support, busy, 0, []
@@ -59,13 +65,13 @@ class ScriptedLLM:
 
 
 def pipeline(support, busy=False):
-    llm, prompts, retr = ScriptedLLM(support, busy), FilePromptStore(), FakeRetriever()
+    llm, prompts, retr = ScriptedLLM(support, busy), FilePromptStore(), ClauseRetriever()
     return LangGraphPipeline(guardrails=Guardrails(), classifier=StubClassifier(),
                              researcher=LangGraphResearcher(retr, llm, prompts),
                              verifier=AgentVerifier(retr, llm, prompts), router=RuleRouter())
 
 
-LIMITS = dict(max_steps=25, max_tool_calls=15, max_wall_s=90, max_research_attempts=3)
+LIMITS = dict(max_steps=30, max_tool_calls=18, max_wall_s=90, max_research_attempts=3)
 
 
 def run_full(support, busy=False, **req):
@@ -76,11 +82,11 @@ def run_full(support, busy=False, **req):
     return result, ctx
 
 
-def test_a_verified_run_clears_in_about_fifteen_steps():
+def test_a_verified_run_clears_in_about_twenty_steps():
     """Demo #2 shape: every researched requirement has a cited finding, the verifier accepts, the label clears."""
     result, ctx = run_full("supported")
     assert result.complete and result.routing.route.value == "clear-for-print"
-    assert len(ctx.steps) <= 16 and ctx.tool_calls <= 8
+    assert len(ctx.steps) <= 18 and ctx.tool_calls <= 9  # 8 clause lookups + the claim search (decision 310)
 
 
 @pytest.mark.parametrize("busy", [False, True])
@@ -88,7 +94,7 @@ def test_worst_case_three_attempts_still_completes_inside_the_limits(busy):
     """The verifier rejects every attempt; the researcher runs three times (the last two narrower)."""
     result, ctx = run_full("unsupported", busy=busy)
     assert result.complete, result.routing.escalation_reason
-    assert len(ctx.steps) <= 25 and ctx.tool_calls <= 15
+    assert len(ctx.steps) <= LIMITS["max_steps"] and ctx.tool_calls <= LIMITS["max_tool_calls"]
     assert sum(s.name == "draft" for s in ctx.steps) == 3
 
 
@@ -96,4 +102,4 @@ def test_small_pack_adds_one_search_and_still_fits():
     result, ctx = run_full("unsupported", busy=True, package={"net_quantity": 50, "net_quantity_unit": "g",
                                                               "principal_display_panel_cm2": 40,
                                                               "total_surface_area_cm2": 120})
-    assert result.complete and len(ctx.steps) <= 25 and ctx.tool_calls <= 15
+    assert result.complete and len(ctx.steps) <= LIMITS["max_steps"] and ctx.tool_calls <= LIMITS["max_tool_calls"]

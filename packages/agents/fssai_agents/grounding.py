@@ -82,6 +82,13 @@ def exact_spans(quote: str, passage: Passage) -> list[str] | None:
     return spans or None
 
 
+def _variants(pid: str, passages: dict[str, Passage]) -> list[Passage]:
+    """Retrieved passages that are a part or whole of the clause `pid` names: the index stores a long clause both
+    as `<id>#all` and in parts (`<id>#p1`), and the model often cites the id without the suffix. The quote must
+    still be verbatim in one of them; only passages retrieved in this run are candidates."""
+    return [p for k, p in passages.items() if k.startswith(pid + "#")] if pid else []
+
+
 def ground_citations(raw: list[dict], passages: dict[str, Passage]) -> tuple[list[Citation], list[str]]:
     """Turn the model's citation dicts into Citations that resolve; return notes about what was dropped."""
     kept, dropped = [], []
@@ -90,14 +97,16 @@ def ground_citations(raw: list[dict], passages: dict[str, Passage]) -> tuple[lis
         if not isinstance(item, dict):
             continue
         pid, quote = str(item.get("passage_id", "")).strip(), str(item.get("quote", ""))
-        passage = passages.get(pid)
-        if passage is None:
+        candidates = [passages[pid]] if pid in passages else _variants(pid, passages)
+        if not candidates:
             dropped.append(f"citation to unretrieved passage '{pid}'")
             continue
-        spans = exact_spans(quote, passage)
+        passage, spans = next(((p, sp) for p in candidates if (sp := exact_spans(quote, p)) is not None),
+                              (candidates[0], None))
         if spans is None:
             dropped.append(f"quote not found verbatim in {pid}")
             continue
+        pid = passage.passage_id
         for span in spans:
             if (pid, span) in seen:
                 continue
