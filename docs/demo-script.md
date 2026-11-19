@@ -1,6 +1,6 @@
 # Demo script: the 10 items, in order
 
-Owner: Vismay (S4.3). For the review on **Thu 12 / Fri 13 Nov 2026** and the two rehearsals before it. Every command runs from the
+Owner: Vismay (S4.3). For the submission on **Fri 20 Nov 2026** and the rehearsals before it. Every command runs from the
 repo root on the host, with the stack up (`docker compose up -d --build`). `<py>` is the venv's Python
 (`.venv/Scripts/python` on Windows, `.venv/bin/python` on macOS).
 
@@ -37,7 +37,7 @@ repo root on the host, with the stack up (`docker compose up -d --build`). `<py>
 | 7 | Namith | `<py> -m fssai_agents.demo --api http://localhost:8000 --only 7` | The injection in `front_of_pack_text` is flagged; the guardrail report names the field; no LLM or tool step ran | 0 |
 | 8 | Vismay | `docker compose exec worker python -m fssai_llm_gateway.demo` (or `make demo-breaker`) | Stub down: retries, then the breaker opens and calls fail fast with no HTTP; stub up: half-open, then closed. Grafana breaker gauge | 0 (stub) |
 | 9 | Nishkal | The committed matrix in `infra/loadtest/results/` against `infra/loadtest/SLO.md`; live, one short step: `<py> infra/loadtest/run_matrix.py --users 5 --duration 60s` with the stub `.env` | p95 against the declared SLO, the concurrency where it breaks, what `--scale worker=3` changes, and the bottleneck | 0 (stub) |
-| 10 | Nishkal (+ Namith, Vihaan) | Web client: the built-in example (breakfast cereal, "Source of protein", 8 g per 100 g) | The researcher finds the Claims condition (FSS-AC-2018 Schedule I) and the labelling requirements (FSS-LD-2020); the condition is a % of the RDA, which neither regulation states, so the finding is `cannot_determine` and the route is `regulatory-review` with that reason (until the team settles the RDA question in `docs/eval1/section-4.1-passages.md`) | 1 |
+| 10 | Nishkal (+ Namith, Vihaan) | Web client: the built-in example (breakfast cereal, "Source of protein", 8 g per 100 g) | The researcher finds the Claims condition (FSS-AC-2018 Schedule I) and the labelling requirements (FSS-LD-2020); the condition is a % of the RDA, which neither regulation states, so the finding is `cannot_determine` and the route is `regulatory-review` with that reason (decision 309: no RDA is adopted, so this is the correct answer) | 1 |
 
 Item 8 drives the gateway straight at the `stub-llm` service, so it needs no `.env` change. Item 9 needs the stub
 `.env` from `infra/loadtest/results/README.md`; switch back to the real provider and run

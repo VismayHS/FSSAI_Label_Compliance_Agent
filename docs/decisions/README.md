@@ -28,3 +28,4 @@ The report's "design decisions and what was rejected" section is written from th
 | [306](306-vismay-run-wall-clock.md) | Run wall clock: 180 s on the real free-tier provider, 90 s for load tests | Vismay | Accepted |
 | [307](307-vismay-api-keys.md) | API authentication: hashed API keys bound to a client id, analyst and reviewer roles | Vismay | Accepted |
 | [308](308-vismay-run-checkpoints.md) | Run checkpoints: LangGraph Postgres saver by run id, resumed by RQ's retry of an abandoned job | Vismay | Accepted |
+| [309](309-vismay-protein-rda.md) | Protein RDA: adopt no value; a claim stated in % of RDA escalates to regulatory review (for Nishkal and Vihaan) | Vismay | Accepted |

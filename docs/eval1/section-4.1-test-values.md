@@ -21,15 +21,15 @@ indicated in schedule -I, itshall be made in accordance with the conditions spec
 value comes from the Labelling regulation, FSS-LD-2020 5(3)(b)(ii) (P6): *"(ii) the amounts of (A) Protein (g);"*.
 
 The condition is a share of the **RDA**, and **no protein RDA value is in the corpus**: both regulations defer to
-ICMR (P5). Until the team adopts one (Nishkal's open question; the options are in the passages page), the threshold
-is written symbolically:
+ICMR (P5). The team adopts none ([decision 309](../decisions/309-vismay-protein-rda.md), 19 Nov 2026; the options are in
+the passages page), so the threshold is written symbolically:
 
     breakfast cereals are solids  →  condition: protein_g ≥ 0.10 × RDA        (per 100 g)
                                      or         protein per 100 kcal ≥ 0.05 × RDA
 
 So each case below gives two expected answers:
 
-1. **Now (no RDA adopted; the reference answer for the eval set):** the finding is `cannot_determine` and the route
+1. **The answer (no RDA adopted, decision 309; the reference answer for the eval set and demo #10):** the finding is `cannot_determine` and the route
    is `regulatory-review`. The researcher's RDA guard (`RESEARCHER_RDA_GUARD=1`) produces that, and if a finding
    says `met` or `unmet` against this condition anyway, the verifier escalates it ("the condition is a share of the
    RDA, and the RDA value is not in the cited text"). This is the system knowing when *not* to answer (F7).
@@ -233,7 +233,9 @@ Scenario `s41-protein-basis-differs`. 9 g protein per 100 g, but an energy-dense
 | `out-of-scope-supplement` | A protein powder: claims for health supplements are governed elsewhere (Schedule I, Note 1; P11) | `regulatory-review` |
 | `small-pack-with-claim` | A ≤ 100 cm² pack (8(1), P8) carrying a claim (5(3)(c) proviso, P7) | `regulatory-review` |
 
-## What changes when the team adopts an RDA
+## What would change if the team adopted an RDA
+
+Not planned: decision 309 adopts none. Kept so the step is clear if a reviewer asks.
 
 1. A decision record states the ICMR edition, table and value R, and is marked as an external reference, not FSSAI
    text.
