@@ -177,6 +177,37 @@ inside the noise of 8 scenarios.
   That was fixed straight after (incident `2026-11-06-vismay-grounding-dropped-real-quotes`); the 4 expected
   escalations were all right. Rerun on the whole set after the fix to see the prompts' real effect on routes.
 
+**LLM-judge calibration** (the RAGAS-style cross-check; `packages/eval/calibration/`). Vihaan labelled 20 findings
+from 7 real runs by hand as supported or unsupported by the text they cite. The judge's labels were not visible
+during labelling. The LLM judge (`judge_support@1.0.0`, Groq) then scored the same 20 with
+`python -m fssai_eval calibrate score --judge llm`, where a score ≥ 0.5 counts as supported.
+
+| | Judge: supported | Judge: unsupported |
+|---|---|---|
+| **Human: supported** (15) | 14 | 1 |
+| **Human: unsupported** (5) | 3 | 2 |
+
+**Agreement 0.80, Cohen's kappa 0.38**, "fair" on the usual scale (0.21–0.40). Kappa is low because most
+findings are supported: agreeing on those is easy, and kappa discounts it.
+
+**What it shows.** The judge is **lenient**: it passed 3 of the 5 findings the human rejected, and all three have
+the same flaw, a true conclusion cited to the wrong clause:
+- a nutrient-quantity finding cited to a Claims-regulation clause, FSS-AC-2018 7(1)(c);
+- a net-quantity finding cited to the drained-net-weight clause, FSS-LD-2020 5(2)(g)(iii);
+- an ingredient-list finding cited to the compound-ingredients clause, FSS-LD-2020 5(2)(e).
+
+The judge reads "the conclusion is true" as "the citation supports it". The single opposite disagreement is a
+borderline item, a veg-logo size finding citing the size table: the human passed it, the judge did not.
+
+**Consequences for the design.**
+- The verifier's LLM support check stays advisory (decision 202). Citation resolution and the numeric re-derivation
+  are deterministic and stay the checks that can fail a finding on their own. A wrong-clause citation is exactly
+  what the LLM check misses.
+- Groundedness measured with `--judge llm` or `trulens` is an upper bound: such judges over-credit support.
+- Next step, not done: a `judge_support@1.1.0` that first asks whether the cited clause itself states the
+  requirement (rather than a neighbouring one), re-scored on the same 20 labels to see whether kappa rises.
+- 20 items is a small sample: one changed label moves kappa by about 0.1.
+
 ## 6. Feedback and live quality (L6)
 
 - `POST /v1/runs/{id}/feedback {satisfactory, reason}` stores feedback with the run's route at that moment, in

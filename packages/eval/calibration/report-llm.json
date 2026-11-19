@@ -1,0 +1,115 @@
+{
+  "judge": "llm",
+  "labelled": 20,
+  "judged": 20,
+  "agreement": 0.8,
+  "cohens_kappa": 0.3846,
+  "confusion": {
+    "both_supported": 14,
+    "both_unsupported": 2,
+    "judge_only_supported": 3,
+    "human_only_supported": 1
+  },
+  "items": [
+    {
+      "item_id": "de30e15a:LBL-DATE",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "cc40f44b:LBL-BATCH",
+      "human": "supported",
+      "judge_score": 0.667
+    },
+    {
+      "item_id": "a957d84f:CLM-PROTEIN-SOURCE",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "2d331f00:LBL-NUTRITION",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "e037da7b:LBL-NUTRITION",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "b3884616:LBL-NUTRITION",
+      "human": "unsupported",
+      "judge_score": 0.0
+    },
+    {
+      "item_id": "6b50d2fd:LBL-NUTRITION",
+      "human": "supported",
+      "judge_score": 0.667
+    },
+    {
+      "item_id": "de30e15a:LBL-BATCH",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "cc40f44b:LBL-VEG-MARK",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "a957d84f:LBL-NUTRITION",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "2d331f00:LBL-QUANTITY",
+      "human": "unsupported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "e037da7b:LBL-VEG-MARK",
+      "human": "supported",
+      "judge_score": 0.667
+    },
+    {
+      "item_id": "b3884616:LBL-VEG-MARK",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "6b50d2fd:LBL-INGREDIENTS",
+      "human": "unsupported",
+      "judge_score": 0.0
+    },
+    {
+      "item_id": "de30e15a:LBL-VEG-MARK",
+      "human": "supported",
+      "judge_score": 0.0
+    },
+    {
+      "item_id": "cc40f44b:LBL-NUTRITION",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "a957d84f:LBL-VEG-MARK",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "2d331f00:LBL-DATE",
+      "human": "supported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "e037da7b:LBL-NET-QUANTITY",
+      "human": "unsupported",
+      "judge_score": 1.0
+    },
+    {
+      "item_id": "b3884616:LBL-INGREDIENTS",
+      "human": "unsupported",
+      "judge_score": 0.667
+    }
+  ]
+}
