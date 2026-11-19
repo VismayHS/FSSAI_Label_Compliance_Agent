@@ -16,6 +16,7 @@ import argparse
 import json
 import os
 import platform
+import shutil
 import subprocess
 import sys
 import time
@@ -24,7 +25,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-ROOT = HERE.parent
+ROOT = HERE.parents[1]
 
 
 def sh(*args: str, check: bool = True) -> str:
@@ -51,7 +52,10 @@ def machine_info() -> dict:
     info = {"os": f"{platform.system()} {platform.release()}", "machine": platform.machine(),
             "cpu": platform.processor() or platform.machine(), "cpu_count": os.cpu_count(),
             "python": platform.python_version()}
-    docker = subprocess.run(["docker", "info", "--format", "{{.MemTotal}} {{.NCPU}} {{.ServerVersion}}"],
+    docker_cli = shutil.which("docker")
+    if docker_cli is None:
+        return info
+    docker = subprocess.run([docker_cli, "info", "--format", "{{.MemTotal}} {{.NCPU}} {{.ServerVersion}}"],
                             text=True, capture_output=True)
     if docker.returncode == 0 and docker.stdout.strip():
         mem, ncpu, version = docker.stdout.split()
@@ -79,8 +83,11 @@ def main(argv: list[str] | None = None) -> int:
     p.add_argument("--out", default=str(HERE / "results"))
     args = p.parse_args(argv)
 
+    if args.compose and shutil.which("docker") is None:
+        p.error("--compose requires Docker. Omit --compose to test an already running stack.")
+
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    out = Path(args.out) / (stamp + (f"-{args.label}" if args.label else ""))
+    out = Path(args.out).resolve() / (stamp + (f"-{args.label}" if args.label else ""))
     out.mkdir(parents=True, exist_ok=True)
     meta = {"started_at": stamp, "host": args.host, "users": args.users, "duration": args.duration,
             "warmup": args.warmup, "scales": args.scales, "label": args.label,
