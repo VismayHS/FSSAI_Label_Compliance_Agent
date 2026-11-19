@@ -469,7 +469,7 @@ We develop on both. Everything runs in Linux containers, so most differences dis
 
 ## 9. Phases and milestones
 
-**Deadline: everything is due by the review on Thu 12 / Fri 13 November 2026** (moved from 30 Oct on 2026-10-29, and from 6 Nov on 2026-11-08). The team decided on
+**Deadline: submission on Fri 20 November 2026** (moved from 30 Oct on 2026-10-29, from 6 Nov on 2026-11-08, and from the review on Thu 12 / Fri 13 Nov). The team decided on
 2026-10-26 to finish the **whole project** by then: every task in every personal file, all 22 requirements, all 10 demo
 items, the report sections and the rehearsals. There are no intermediate deadlines. Finish as fast as you can; finishing
 early is better. The phases below are only the order of work, because each one builds on the one before.
@@ -481,14 +481,14 @@ early is better. The phases below are only the order of work, because each one b
 | **2. Real end-to-end** | Real index, retriever, LangGraph researcher, verifier, router and LLM gateway switched in with `IMPL_*`. The §4.1 case runs on the real stack. |
 | **3. All 22 requirements** | Guardrails, eval + before/after, prompt comparison, caching, rate limits, breaker, cost, observability, Locust + scaling, feedback, runbook. |
 | **4. Hardening + extras** | Clean-clone test, report sections, two rehearsals of all 10 demo items, and the extras (§11). |
-| **5. Freeze** | Review day, Thu 12 / Fri 13 Nov. Only bug fixes, no new features. `main` must boot from a clean clone. |
+| **5. Freeze** | Submission, Fri 20 Nov. Only bug fixes, no new features. `main` must boot from a clean clone. |
 
 What this means in practice:
 - **Merge often.** Open a PR into `main` whenever you have finished work. There is no daily limit, so don't sit on finished work.
 - **Switch on as you go.** Tell Vismay the moment a seam's conformance test passes without its `xfail`, and he flips its `IMPL_*` in `.env.example`.
 - **Phase 2 first.** The researcher (Namith) and the verifier and router (Vihaan) block demo items 2, 5, 6 and 10.
 
-**Critical path (checked 2026-11-12).** Each person's file starts with *Next steps to the review*. What blocks the most:
+**Critical path (checked 2026-11-19).** Each person's file starts with *Next steps to the submission*. What blocks the most:
 
 | Waiting on | What is blocked until then |
 |---|---|
@@ -497,9 +497,9 @@ What this means in practice:
 | ~~Namith: quotes shortened with "..." dropped by grounding; the §4.1 run hitting the time limit~~ Fixed 6 Nov (incident `2026-11-06-vismay-grounding-dropped-real-quotes`, decision 306) | (Was: demo #2 clearing a label, demo #10 completing) |
 | ~~One eval run pair with the Groq key~~ Done 6 Nov (decisions 103, 205) | (Was: L2 comparison, L3 before/after) |
 | ~~Nishkal's Locust runs~~ Done 6 Nov (`infra/loadtest/results/`) | (Was: demo #9, the D6, A7 and D7 numbers) |
-| The team's RDA decision (Nishkal + Vihaan) | Whether §4.1 (demo #10) can ever be `met`/`unmet`; until then the correct answer is `cannot_determine` |
-| Vihaan's judge calibration: 20 findings labelled by a person | Only his last extra; no required item |
-| Two rehearsals of all 10 demos (everyone, Vismay leads) | The review on Thu 12 / Fri 13 Nov |
+| ~~The team's RDA decision (Nishkal + Vihaan)~~ Settled 19 Nov (decision 309): no RDA adopted | (Was: whether §4.1 can be `met`/`unmet`; the answer is `cannot_determine` → `regulatory-review`) |
+| ~~Vihaan's judge calibration~~ Done 19 Nov (PR #21): agreement 0.80, kappa 0.38 | (Was: his last extra) |
+| Rehearsals of all 10 demos (everyone, Vismay leads) | The submission on Fri 20 Nov |
 
 `python tools/scripts/build_report.py --strict` lists every `TODO` and *pending* number still left in the report sections.
 

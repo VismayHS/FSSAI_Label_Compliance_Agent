@@ -3,14 +3,15 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file.** Tick boxes as you go, and add
 > notes at the bottom. Read `docs/contexts/LLM_Context.md` first.
 
-## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
+## Next steps to the submission (Fri 20 Nov 2026; updated by Vismay, 2026-11-19)
 
 All your tasks and all three extras are on `main`. Vismay finished M3.2 and M4.2 (decision 103) and the
 checkpointing extra (decision 308); see the notes at the bottom. What is left:
-1. **Rehearse demos #2 and #7 twice with the team** (`docs/demo-script.md`):
+1. **Rehearse demos #2 and #7** (`docs/demo-script.md`):
    `python -m fssai_agents.demo --api http://localhost:8000 --only 2`, then `--only 7`.
 2. **Viva:** read decisions 103 (prompt comparison) and 308 (checkpointing) and incident
-   `2026-11-08-vismay-resume-rebuilt-context-as-dict`. They are your requirement and extra, so expect questions on them.
+   `2026-11-08-vismay-resume-rebuilt-context-as-dict`. Also decision 309: why the §4.1 run escalates (the researcher's
+   RDA guard is yours).
 
 ## Your mission
 You build the **thinking part**: the classifier and the research agent, and the LangGraph graph
