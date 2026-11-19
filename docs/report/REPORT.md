@@ -270,7 +270,7 @@ Demo rehearsal: `python -m fssai_agents.demo --api http://localhost:8000` runs d
 
 - A real LLM stopped after two searches and drafted 11 findings, nine of them "no passage was provided"; `coverage` only covered claims, so every label ended in review. Fixed by a deterministic `sweep` that searches every claim condition and labelling requirement first, and by limiting findings to searched requirements (decision 102). One query per requirement did not fit the shared tool-call limit once the verifier ran in every run, so the searches are grouped.
 - Giving the model a checklist (prompt 1.1.0) did not make it search more; moving coverage into code did.
-- The RDA reference value is not in either regulation, so the 4.1 finding is `cannot_determine` unless the team supplies it (open team question).
+- The RDA reference value is not in either regulation, so the 4.1 finding is `cannot_determine` and the run escalates; the team adopted no external value (decision 309).
 
 ## 3. Retrieval and performance
 
@@ -433,9 +433,9 @@ worker CPU it saves and for repeat searches inside a run, not as a latency or co
   the official URLs, with provenance recorded (incident `2026-10-25-nishkal-fssai-site-unreachable`).
 - **The model download failed TLS verification** behind antivirus HTTPS interception, while curl worked.
   Fixed locally without weakening verification in code (incident `2026-10-25-nishkal-model-download-tls`).
-- **Open: the protein RDA is not in the corpus.** The Schedule I condition is in % of RDA, and both
-  regulations defer the RDA to ICMR. Comparing a declared value needs an external, cited reference value
-  or an escalation (`docs/eval1/section-4.1-passages.md`).
+- **The protein RDA is not in the corpus.** The Schedule I condition is in % of RDA, and both regulations
+  defer the RDA to ICMR. The team adopted no external value and escalates instead (decision 309): the §4.1
+  finding is `cannot_determine` and the route `regulatory-review` (`docs/eval1/section-4.1-passages.md`).
 
 ## 4. Verification and evaluation
 
@@ -616,6 +616,37 @@ inside the noise of 8 scenarios.
   That was fixed straight after (incident `2026-11-06-vismay-grounding-dropped-real-quotes`); the 4 expected
   escalations were all right. Rerun on the whole set after the fix to see the prompts' real effect on routes.
 
+**LLM-judge calibration** (the RAGAS-style cross-check; `packages/eval/calibration/`). Vihaan labelled 20 findings
+from 7 real runs by hand as supported or unsupported by the text they cite. The judge's labels were not visible
+during labelling. The LLM judge (`judge_support@1.0.0`, Groq) then scored the same 20 with
+`python -m fssai_eval calibrate score --judge llm`, where a score ≥ 0.5 counts as supported.
+
+| | Judge: supported | Judge: unsupported |
+|---|---|---|
+| **Human: supported** (15) | 14 | 1 |
+| **Human: unsupported** (5) | 3 | 2 |
+
+**Agreement 0.80, Cohen's kappa 0.38**, "fair" on the usual scale (0.21–0.40). Kappa is low because most
+findings are supported: agreeing on those is easy, and kappa discounts it.
+
+**What it shows.** The judge is **lenient**: it passed 3 of the 5 findings the human rejected, and all three have
+the same flaw, a true conclusion cited to the wrong clause:
+- a nutrient-quantity finding cited to a Claims-regulation clause, FSS-AC-2018 7(1)(c);
+- a net-quantity finding cited to the drained-net-weight clause, FSS-LD-2020 5(2)(g)(iii);
+- an ingredient-list finding cited to the compound-ingredients clause, FSS-LD-2020 5(2)(e).
+
+The judge reads "the conclusion is true" as "the citation supports it". The single opposite disagreement is a
+borderline item, a veg-logo size finding citing the size table: the human passed it, the judge did not.
+
+**Consequences for the design.**
+- The verifier's LLM support check stays advisory (decision 202). Citation resolution and the numeric re-derivation
+  are deterministic and stay the checks that can fail a finding on their own. A wrong-clause citation is exactly
+  what the LLM check misses.
+- Groundedness measured with `--judge llm` or `trulens` is an upper bound: such judges over-credit support.
+- Next step, not done: a `judge_support@1.1.0` that first asks whether the cited clause itself states the
+  requirement (rather than a neighbouring one), re-scored on the same 20 labels to see whether kappa rises.
+- 20 items is a small sample: one changed label moves kappa by about 0.1.
+
 ### 6. Feedback and live quality (L6)
 
 - `POST /v1/runs/{id}/feedback {satisfactory, reason}` stores feedback with the run's route at that moment, in
@@ -669,6 +700,7 @@ Each record gives the context, the options considered, the decision and its cons
 | 306 | [Run wall clock: 180 s on the real free-tier provider, 90 s for load tests](../decisions/306-vismay-run-wall-clock.md) | Accepted | Vismay |
 | 307 | [API authentication with hashed API keys and two roles (Vismay)](../decisions/307-vismay-api-keys.md) | Accepted | Vismay |
 | 308 | [Run checkpoints: LangGraph's Postgres saver, keyed by run id, resumed by RQ's retry of an abandoned job (Vismay)](../decisions/308-vismay-run-checkpoints.md) | Accepted | Vismay |
+| 309 | [Protein RDA: adopt no value; a claim stated in % of RDA escalates to regulatory review](../decisions/309-vismay-protein-rda.md) | Accepted | Vismay |
 
 ## 6. What did not work
 
