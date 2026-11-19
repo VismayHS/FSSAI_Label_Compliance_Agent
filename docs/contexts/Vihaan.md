@@ -256,8 +256,8 @@ Each package README lists its files and commands. `conformance.sample_request()`
   - **#6:** a researcher answer with a bad citation → the verifier retries with a hint → re-search or escalate, all visible in the trace.
 - [x] **V4.2 Write your report section** in `docs/report/verification-and-evaluation.md`.
 - [x] **V4.3 Write at least one incident entry** in `docs/incidents/`.
-- [ ] **Extras:**
-  - [ ] RAGAS cross-check, and calibrate the LLM judge against ~20 hand-labelled findings (report an agreement score such as Cohen's kappa)
+- [x] **Extras:**
+  - [x] RAGAS cross-check, and calibrate the LLM judge against ~20 hand-labelled findings (report an agreement score such as Cohen's kappa)
   - [x] an eval regression gate in CI (fails if hallucination rate rises)
   - [x] a feedback → candidate-scenario pipeline
   - [x] property-based tests for the gate (`hypothesis`)
@@ -353,3 +353,9 @@ experiments and live quality monitoring from user feedback."*
   (`routing_reason`). **Next step 1 fixed:** the four eval test files read and write UTF-8, so they pass on Windows.
   Still open: demos #5/#6 redone on the real LLM (the Groq key hit its daily cap on 6 Nov), the RDA decision, and the
   RAGAS/judge-calibration extra (it needs ~20 findings labelled by a person; not done rather than labelled by a model).
+- 2026-11-19 (Vihaan): judge calibration done (last extra). Hand-labelled the 20 findings myself: 15 supported, 5
+  unsupported. LLM judge: agreement 0.80, Cohen's kappa 0.38 (fair). It passed 3 of my 5 rejects, all
+  correct-conclusion-wrong-clause citations. Report §5 has the table and its consequences
+  (`packages/eval/calibration/report-llm.json`). Also fixed `cohens_kappa`, which returned 1.0 when neither rater
+  varies; it is undefined (None) there.
+

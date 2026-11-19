@@ -68,7 +68,7 @@ def cohens_kappa(a: list[bool], b: list[bool]) -> float | None:
     po = sum(x == y for x, y in zip(a, b)) / n
     pa, pb = sum(a) / n, sum(b) / n
     pe = pa * pb + (1 - pa) * (1 - pb)
-    return 1.0 if pe == 1 else round((po - pe) / (1 - pe), 4)
+    return None if pe == 1 else round((po - pe) / (1 - pe), 4)  # pe == 1: neither rater varies, kappa is 0/0
 
 
 def calibration_item(label: str, result) -> list[dict]:
