@@ -544,3 +544,68 @@ def test_facts_say_which_veg_mark_is_printed():
     for status, printed in [("veg", "vegetarian mark"), ("non_veg", "non-vegetarian mark"), ("not_declared", "none")]:
         r = req.model_copy(update={"label": req.label.model_copy(update={"veg_status": status})})
         assert request_facts(r)["veg_or_non_veg_mark_printed_on_pack"] == printed
+
+
+# ---------------------------------------------------------------- quotes trimmed to their verbatim opening (decision 311)
+
+_NUTRITION = ("(b) Nutritional Information per 100g or 100ml shall be given on the label containing the following: "
+              "(i) energy value (kcal); (ii) the amounts of (A) Protein (g); (C) Total fat (g), saturated fat (g), "
+              "trans fat (other than naturally occurring trans fat)(g)and cholesterol (mg);")
+
+
+def _passage(text):
+    return LD_PASSAGE.model_copy(update={"passage_id": "FSS-LD-2020:5(3)(b)#all", "clause_id": "5(3)(b)", "text": text})
+
+
+def test_a_quote_that_skips_words_keeps_only_its_verbatim_opening():
+    """Seen live: the model dropped "(other than naturally occurring trans fat)" from the middle of a quote."""
+    from fssai_agents.grounding import ground_citations
+    p = _passage(_NUTRITION)
+    quote = ("Nutritional Information per 100g ... shall be given on the label containing the following: (i) energy "
+             "value (kcal); (ii) the amounts of (A) Protein (g); (C) Total fat (g), saturated fat (g), trans fat (g)and "
+             "cholesterol (mg)")
+    kept, notes = ground_citations([{"passage_id": p.passage_id, "quote": quote}], {p.passage_id: p})
+    quotes = [c.quote for c in kept]
+    assert quotes[0] == "Nutritional Information per 100g"
+    assert quotes[1].endswith("(A) Protein (g);") and "trans fat" not in quotes[1]
+    assert all(q in p.text for q in quotes) and any("trimmed" in n for n in notes)
+
+
+def test_a_quote_that_drops_a_not_is_still_rejected():
+    from fssai_agents.grounding import ground_citations
+    p = _passage("Added water shall not be declared in the list of ingredients where it forms part of a brine.")
+    kept, _ = ground_citations([{"passage_id": p.passage_id, "quote": "Added water shall be declared in the list of "
+                                 "ingredients where it forms part of a brine."}], {p.passage_id: p})
+    assert kept == []
+
+
+def test_a_paraphrase_is_still_rejected():
+    from fssai_agents.grounding import ground_citations
+    p = _passage(_NUTRITION)
+    kept, _ = ground_citations([{"passage_id": p.passage_id, "quote": "Labels must show nutrition facts; energy "
+                                 "and protein are mandatory."}], {p.passage_id: p})
+    assert kept == []
+
+
+def test_a_last_part_joining_two_distant_pieces_keeps_its_verbatim_opening():
+    """Seen live: "... and cholesterol (mg); (D) Sodium (mg)" joins text that is not contiguous in 5(3)(b)."""
+    from fssai_agents.grounding import ground_citations
+    p = _passage(_NUTRITION + " Provided that the content may be declared as not more than. (D) Sodium (mg);")
+    quote = "Nutritional Information per 100g ... (i) energy value (kcal); ... and cholesterol (mg); (D) Sodium (mg)"
+    kept, _ = ground_citations([{"passage_id": p.passage_id, "quote": quote}], {p.passage_id: p})
+    assert [c.quote for c in kept] == ["Nutritional Information per 100g", "(i) energy value (kcal);",
+                                       "and cholesterol (mg);"]
+
+
+def test_a_citation_without_the_amendment_suffix_resolves_to_the_in_force_wording_only():
+    """Seen live: the model cited `Schedule I, item 14` for the retrieved `Schedule I, item 14~substituted`."""
+    from fssai_agents.grounding import ground_citations
+    quote = LD_PASSAGE.text[40:100]
+    sub = LD_PASSAGE.model_copy(update={"passage_id": "FSS-AC-2018:Schedule I, item 14~substituted"})
+    old = LD_PASSAGE.model_copy(update={"passage_id": "FSS-AC-2018:Schedule I, item 14~superseded"})
+    kept, _ = ground_citations([{"passage_id": "FSS-AC-2018:Schedule I, item 14", "quote": quote}],
+                               {sub.passage_id: sub})
+    assert [c.passage_id for c in kept] == ["FSS-AC-2018:Schedule I, item 14~substituted"]
+    kept, _ = ground_citations([{"passage_id": "FSS-AC-2018:Schedule I, item 14", "quote": quote}],
+                               {old.passage_id: old})
+    assert kept == []

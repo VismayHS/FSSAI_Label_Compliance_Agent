@@ -30,3 +30,4 @@ The report's "design decisions and what was rejected" section is written from th
 | [308](308-vismay-run-checkpoints.md) | Run checkpoints: LangGraph Postgres saver by run id, resumed by RQ's retry of an abandoned job | Vismay | Accepted |
 | [309](309-vismay-protein-rda.md) | Protein RDA: adopt no value; a claim stated in % of RDA escalates to regulatory review (for Nishkal and Vihaan) | Vismay | Accepted |
 | [310](310-vismay-mandatory-clauses-by-id.md) | Mandatory declarations read by clause id; citations resolve to the whole-clause passage; bounds 30 steps / 18 tool calls; prompt pair 1.1.0 | Vismay | Accepted |
+| [311](311-vismay-nutrition-per-serve-and-quote-trimming.md) | Per-serve nutrition fields (servings, % of RDA); quotes trimmed to their verbatim opening; first live clear and revise | Vismay | Accepted |
