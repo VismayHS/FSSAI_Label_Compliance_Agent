@@ -3,15 +3,15 @@
 > Your plan, checklist and LLM prompts. **Only you edit this file** (and `LLM_Context.md`). Tick
 > boxes as you go, and add notes at the bottom.
 
-## Next steps to the review (Thu 12 / Fri 13 Nov; updated by Vismay, 2026-11-12)
+## Next steps to the submission (Fri 20 Nov 2026; updated 2026-11-19)
 
-All my tasks and extras are on `main`, and so is everything I finished for the others (PRs #17, #18). Left:
-1. **Two rehearsals of all 10 demos with the team (S4.3).** Run `python tools/scripts/clean_clone_test.py --remote`
-   the evening before. Mine: #1 clean clone, #3 trace, #8 breaker.
-2. **Groq budget at the review:** a full pass uses about 8 real runs (half a key's day), so bring a teammate's key with
-   budget left.
-3. **After Vihaan's calibration PR:** merge it, rebuild the report (`build_report.py --strict`), commit `REPORT.md`,
-   and run the clean-clone test again.
+All my tasks and extras are on `main`, and so is everything finished for the others (PRs #17, #18, #22). Done on
+19 Nov: Vihaan's calibration PR #21 merged, the RDA decision recorded for Nishkal and Vihaan (decision 309),
+`REPORT.md` rebuilt (`build_report.py --strict` passes), and **`clean_clone_test.py --remote` passed on `main`
+(6d44b36) in 4.0 min**: ready, one run completed, one malformed request rejected (422, quarantined) with no run.
+Left:
+1. **Rehearse all 10 demos with the team** (`docs/demo-script.md`). Mine: #1 clean clone, #3 trace, #8 breaker.
+2. **Groq budget:** a full pass uses about 8 real runs (half a key's day), so bring a teammate's key with budget left.
 
 ## Your mission
 You make it **a production service, not a notebook**:
@@ -440,4 +440,5 @@ the web client."*
     - Compose's worker sets `PIPELINE_CHECKPOINTS=postgres`.
   - Judge calibration (Vihaan's extra): `calibrate template --from-api` builds the items from finished runs at no
     LLM cost, and `calibrate label` asks a person for each label. 20 items written, from 7 real runs.
-
+- 2026-11-19: before the submission. Merged PR #21 (Vihaan's judge calibration) and PR #22 (decision 309 on the
+  protein RDA, report rebuilt, dates moved to Fri 20 Nov). Clean-clone test on `main` 6d44b36 passed in 4.0 min.
