@@ -442,3 +442,7 @@ the web client."*
     LLM cost, and `calibrate label` asks a person for each label. 20 items written, from 7 real runs.
 - 2026-11-19: before the submission. Merged PR #21 (Vihaan's judge calibration) and PR #22 (decision 309 on the
   protein RDA, report rebuilt, dates moved to Fri 20 Nov). Clean-clone test on `main` 6d44b36 passed in 4.0 min.
+- 2026-11-20: decision 310. No live run had ever cleared or been sent for revision; three causes in the researcher
+  (four clauses never retrieved, `#all` citations dropped, drafted ids not matched). Fixed; the fibre label went from 5
+  to 8 of 9 findings `met` with quotes, and a missing licence is now `unmet`. Nutrition stays `cannot_determine`:
+  the request has no field for the per-serve % of RDA that 5(3)(b) requires (next: an additive contract field).

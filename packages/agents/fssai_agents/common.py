@@ -23,6 +23,9 @@ def request_facts(request: LabelCheckRequest) -> dict:
         "package": request.package.model_dump(mode="json", exclude_none=True),
         "nutrition_panel": request.nutrition.model_dump(mode="json", exclude_none=True),
         "veg_status": label.veg_status,
+        # the data contract defines veg_status as the mark printed on the pack (FSS-LD-2020 5(4))
+        "veg_or_non_veg_mark_printed_on_pack": {"veg": "vegetarian mark", "non_veg": "non-vegetarian mark"}.get(
+            label.veg_status, "none"),
         "has_allergen_statement": bool(label.allergen_statement),
         "has_ingredient_list": bool(label.ingredients.strip()),
         "has_fssai_licence_number": bool(label.fssai_licence_number),

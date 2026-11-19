@@ -53,8 +53,17 @@ def classification(claims=("Source of protein",)):
                           claims=[DetectedClaim(text=c, claim_type="nutrient_content", nutrient="protein") for c in claims])
 
 
+class ClauseRetriever(FakeRetriever):
+    """FakeRetriever that also answers the real clause ids the sweep looks up (decision 310) with the
+    placeholder passages: 5(3)(b) is the nutrition placeholder, 5(14) the allergen one."""
+    REAL = {"5(3)(b)": "FAKE-LD-NUTRITION", "5(14)": "FAKE-LD-ALLERGEN"}
+
+    def get_clause(self, regulation, clause_id, ctx):
+        return super().get_clause(regulation, self.REAL.get(clause_id, clause_id), ctx)
+
+
 def researcher(llm, retriever=None):
-    return LangGraphResearcher(retriever or FakeRetriever(), llm, FilePromptStore())
+    return LangGraphResearcher(retriever or ClauseRetriever(), llm, FilePromptStore())
 
 
 def run(r, ctx=None, request=None, cls=None, **kw):
@@ -403,10 +412,50 @@ def test_sweep_searches_every_labelling_requirement_even_if_the_model_finishes_a
     from fssai_agents.researcher import required_topics
     llm = ScriptedLLM(acts=[{"reflection": "done", "action": {"tool": "finish", "args": {}}}], drafts=[draft()])
     _, ctx = run(researcher(llm))
-    searched = {(s.input["query"], s.input["regulation"]) for s in tool_steps(ctx)}
+    called = {(s.name, json.dumps(s.input, sort_keys=True)) for s in tool_steps(ctx)}
     for t in required_topics(sample_request()):
-        assert (t["args"]["query"], t["args"]["regulation"]) in searched, t["id"]
-    assert any(reg == "FSS-AC-2018" for _, reg in searched)  # and the claim condition
+        assert (t["tool"], json.dumps(t["args"], sort_keys=True)) in called, t["ids"]
+    assert any(s.name == "corpus_search" and s.input["regulation"] == "FSS-AC-2018" for s in tool_steps(ctx))
+
+
+def test_mandatory_declarations_are_read_by_clause_id():
+    """Decision 310: broad searches never returned 5(14), 5(2) or 5(6), so no label could clear."""
+    from fssai_agents.researcher import required_topics
+    req = sample_request()
+    by_id = {i: t for t in required_topics(req) for i in t["ids"]}
+    expected = {"LBL-NUTRITION": "5(3)(b)", "LBL-ALLERGEN": "5(14)", "LBL-INGREDIENTS": "5(2)",
+                "LBL-DATE-MARKING": "5(10)(a)", "LBL-BATCH": "5(9)", "LBL-FSSAI-LICENCE": "5(7)",
+                "LBL-MANUFACTURER": "5(6)"}
+    for rid, clause in expected.items():
+        assert by_id[rid]["tool"] == "clause_lookup"
+        assert by_id[rid]["args"] == {"regulation": "FSS-LD-2020", "clause_id": clause}
+    assert "LBL-NET-QUANTITY" not in by_id  # 5(8) defers to the Legal Metrology Act, not in the corpus
+    veg = req.model_copy(update={"label": req.label.model_copy(update={"veg_status": "veg"})})
+    non_veg = req.model_copy(update={"label": req.label.model_copy(update={"veg_status": "non_veg"})})
+    assert {i: t for t in required_topics(veg) for i in t["ids"]}["LBL-VEG-MARK"]["args"]["clause_id"] == "5(4)(b)"
+    assert {i: t for t in required_topics(non_veg) for i in t["ids"]}["LBL-VEG-MARK"]["args"]["clause_id"] == "5(4)(a)"
+
+
+def test_drafted_ids_map_onto_the_researched_id_they_name():
+    from fssai_agents.researcher import canonical_requirement_id as canon
+    known = ["LBL-NUTRITION", "LBL-VEG-MARK", "LBL-BATCH", "LBL-FSSAI-LICENCE", "LBL-MANUFACTURER", "LBL-DATE-MARKING"]
+    assert canon("LBL-BATCH-LOT", known) == "LBL-BATCH"
+    assert canon("LBL-NUTRITION-PANEL", known) == "LBL-NUTRITION"
+    assert canon("LBL-NON-VEG-LOGO", known) == "LBL-VEG-MARK"
+    assert canon("LBL-LICENSE", known) == "LBL-FSSAI-LICENCE"
+    assert canon("LBL-MANUFACTURER-INFO", known) == "LBL-MANUFACTURER"
+    assert canon("LBL-DATE", known) == "LBL-DATE-MARKING"
+    assert canon("LBL-INGREDIENT", ["LBL-INGREDIENTS", "LBL-NUTRITION"]) == "LBL-INGREDIENTS"
+    assert canon("LBL-NETQTY", ["LBL-NET-QUANTITY", "LBL-NUTRITION"]) == "LBL-NET-QUANTITY"
+    assert canon("CLM-FIBRE-SOURCE", known) == "CLM-FIBRE-SOURCE"  # other prefix: unchanged
+    assert canon("LBL-CLAIM-WORDING", known) == "LBL-CLAIM-WORDING"  # no overlap: unchanged
+
+
+def test_a_finding_under_its_own_name_still_covers_the_researched_requirement():
+    llm = ScriptedLLM(drafts=[draft(protein_finding(), lbl("LBL-BATCH-LOT"))])
+    d, _ = run(researcher(llm))
+    assert "LBL-BATCH" in {f.requirement_id for f in d.findings}
+    assert not any(s.startswith("LBL-BATCH:") for s in d.escalation_signals)
 
 
 def test_sweep_needs_no_llm_step():
@@ -472,3 +521,26 @@ def test_passage_text_in_the_draft_prompt_is_capped_as_passages_grow():
     assert _per_passage_chars(5, 18000, 2000, 450) == 2000      # few passages: full length
     assert _per_passage_chars(30, 18000, 2000, 450) == 600      # many: shared out
     assert _per_passage_chars(100, 18000, 2000, 450) == 450     # never so short a clause is unreadable
+
+
+def test_a_citation_without_the_index_suffix_resolves_to_the_retrieved_whole_clause():
+    """The index keeps a long clause as `<id>#all`; the model cites `<id>`. Seen live: correct allergen and
+    nutrition quotes were dropped, so no label could clear (decision 310). The quote must still be verbatim."""
+    from fssai_agents.grounding import ground_citations
+    whole = LD_PASSAGE.model_copy(update={"passage_id": "FSS-LD-2020:5(14)#all", "clause_id": "5(14)"})
+    quote = LD_PASSAGE.text[40:100]
+    kept, dropped = ground_citations([{"passage_id": "FSS-LD-2020:5(14)", "quote": quote}], {whole.passage_id: whole})
+    assert [(c.passage_id, c.quote) for c in kept] == [("FSS-LD-2020:5(14)#all", quote)] and not dropped
+    kept, dropped = ground_citations([{"passage_id": "FSS-LD-2020:5(14)", "quote": "words the clause never says"}],
+                                     {whole.passage_id: whole})
+    assert not kept and dropped
+    kept, _ = ground_citations([{"passage_id": "FSS-LD-2020:5(1)", "quote": quote}], {whole.passage_id: whole})
+    assert not kept  # 5(1) is not 5(14): only the same id with a suffix counts
+
+
+def test_facts_say_which_veg_mark_is_printed():
+    from fssai_agents.common import request_facts
+    req = sample_request()
+    for status, printed in [("veg", "vegetarian mark"), ("non_veg", "non-vegetarian mark"), ("not_declared", "none")]:
+        r = req.model_copy(update={"label": req.label.model_copy(update={"veg_status": status})})
+        assert request_facts(r)["veg_or_non_veg_mark_printed_on_pack"] == printed

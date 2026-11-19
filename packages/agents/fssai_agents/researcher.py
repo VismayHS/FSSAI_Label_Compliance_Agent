@@ -140,16 +140,26 @@ def _claim_query(claim: DetectedClaim) -> str:
     return f"{base} claim conditions"
 
 
-# Labelling requirements the researcher may report on, grouped into a few broad searches so a full run
-# stays inside the step and tool-call limits (the verifier needs tool calls and steps of its own).
-# A finding for an LBL-* id is kept only if the search that covers it ran in this run, so "no passage was
-# provided" findings for requirements nobody searched for cannot appear. Order = priority when budget is short.
+# Labelling requirements the researcher reports on. Each mandatory declaration is read by its FSS-LD-2020
+# clause id (clause_lookup), not searched for: broad searches never returned the allergen (5(14)), ingredient
+# list (5(2)) or name and address (5(6)) clauses, so those findings could never be quoted and no label could
+# clear (decision 310). Net quantity is not researched: 5(8) defers its declaration to the Legal Metrology Act,
+# which is not in the corpus, and the data contract already requires a positive net_quantity at the gate.
+# The small-pack exemption is still searched for, because which clause applies is the question. A finding for an LBL-* id is kept only if the call that covers it ran in this
+# run. Order = priority when budget is short.
+def _veg_clause(req: LabelCheckRequest) -> str:
+    return "5(4)(a)" if getattr(req.label.veg_status, "value", req.label.veg_status) == "non_veg" else "5(4)(b)"
+
+
 REQUIREMENT_GROUPS: list[dict] = [
-    {"ids": ["LBL-NUTRITION"], "query": "nutritional information per 100 g declaration"},
-    {"ids": ["LBL-ALLERGEN", "LBL-VEG-MARK"], "query": "allergen declaration and vegetarian non-vegetarian logo on the label"},
-    {"ids": ["LBL-INGREDIENTS", "LBL-NET-QUANTITY"], "query": "list of ingredients and net quantity declaration"},
-    {"ids": ["LBL-DATE-MARKING", "LBL-BATCH"], "query": "date marking best before and batch number"},
-    {"ids": ["LBL-FSSAI-LICENCE", "LBL-MANUFACTURER"], "query": "FSSAI logo licence number and name and address of manufacturer"},
+    {"ids": ["LBL-NUTRITION"], "clause": "5(3)(b)"},
+    {"ids": ["LBL-ALLERGEN"], "clause": "5(14)"},
+    {"ids": ["LBL-VEG-MARK"], "clause": _veg_clause},
+    {"ids": ["LBL-INGREDIENTS"], "clause": "5(2)"},
+    {"ids": ["LBL-DATE-MARKING"], "clause": "5(10)(a)"},
+    {"ids": ["LBL-BATCH"], "clause": "5(9)"},
+    {"ids": ["LBL-FSSAI-LICENCE"], "clause": "5(7)"},
+    {"ids": ["LBL-MANUFACTURER"], "clause": "5(6)"},
     {"ids": ["LBL-SMALL-PACK"], "query": "exemption small package surface area",
      "when": lambda req: req.package.total_surface_area_cm2 is not None
      and req.package.total_surface_area_cm2 <= SMALL_PACK_LOOKUP_CM2},
@@ -157,9 +167,49 @@ REQUIREMENT_GROUPS: list[dict] = [
 
 
 def required_topics(request: LabelCheckRequest) -> list[dict]:
-    """The labelling searches that apply to this request: {"ids": [requirement ids covered], "tool", "args"}."""
-    return [{"ids": list(g["ids"]), "tool": "corpus_search", "args": {"query": g["query"], "regulation": LD}}
-            for g in REQUIREMENT_GROUPS if "when" not in g or g["when"](request)]
+    """The labelling calls that apply to this request: {"ids": [requirement ids covered], "tool", "args"}."""
+    out = []
+    for g in REQUIREMENT_GROUPS:
+        if "when" in g and not g["when"](request):
+            continue
+        if "clause" in g:
+            clause = g["clause"](request) if callable(g["clause"]) else g["clause"]
+            out.append({"ids": list(g["ids"]), "tool": "clause_lookup", "args": {"regulation": LD, "clause_id": clause}})
+        else:
+            out.append({"ids": list(g["ids"]), "tool": "corpus_search", "args": {"query": g["query"], "regulation": LD}})
+    return out
+
+
+_ID_SYNONYMS = {"LICENSE": "LICENCE", "LOGO": "MARK", "SYMBOL": "MARK", "LOT": "BATCH"}
+
+
+def _id_tokens(rid: str) -> tuple[str, set[str]]:
+    prefix, _, rest = rid.partition("-")
+    toks = {_ID_SYNONYMS.get(t, t) for t in rest.split("-") if t}
+    return prefix, {t[:-1] if len(t) > 3 and t.endswith("S") else t for t in toks}  # INGREDIENTS ~ INGREDIENT
+
+
+def canonical_requirement_id(rid: str, known: list[str]) -> str:
+    """Map a drafted id onto the researched id it names (`LBL-BATCH-LOT` -> `LBL-BATCH`), so a requirement the
+    model wrote up under its own name is not also reported as "searched, but no finding was drafted". Same rule as
+    the eval's matcher: same prefix and token overlap >= 0.5 of the shorter id; ties and no match keep the id."""
+    if rid in known:
+        return rid
+    compact = {k.replace("-", "").replace("QTY", "QUANTITY"): k for k in known}
+    if (c := rid.replace("-", "").replace("QTY", "QUANTITY")) in compact:  # LBL-NETQTY ~ LBL-NET-QUANTITY
+        return compact[c]
+    prefix, toks = _id_tokens(rid)
+    best, best_score, tied = rid, 0.0, False
+    for k in known:
+        kp, kt = _id_tokens(k)
+        if kp != prefix or not toks or not kt:
+            continue
+        score = len(toks & kt) / min(len(toks), len(kt))
+        if score > best_score:
+            best, best_score, tied = k, score, False
+        elif score == best_score and score > 0:
+            tied = True
+    return best if best_score >= 0.5 and not tied else rid
 
 
 def _env_k() -> int:
@@ -405,7 +455,7 @@ class LangGraphResearcher:
         if not data or not isinstance(data.get("findings"), list):
             signals.append("findings could not be drafted from the retrieved passages")
             return {"findings": [], "signals": signals}
-        findings, notes = self._ground(data["findings"], passages)
+        findings, notes = self._ground(data["findings"], passages, known=researched)
         findings, scope_signals, scope_log = self._only_researched(findings, researched, skipped, bool(state["claims"]))
         for line in [*scope_log, *getattr(self, "_last_log", [])]:
             ctx.event("researcher_note", detail=line)
@@ -455,7 +505,8 @@ class LangGraphResearcher:
 
     # ---- grounding the draft
 
-    def _ground(self, raw_findings: list, passages: dict[str, Passage]) -> tuple[list[Finding], list[str]]:
+    def _ground(self, raw_findings: list, passages: dict[str, Passage],
+                known: list[str] = ()) -> tuple[list[Finding], list[str]]:
         findings: list[Finding] = []
         notes: list[str] = []
         log: list[str] = []
@@ -464,6 +515,7 @@ class LangGraphResearcher:
             if not isinstance(item, dict):
                 continue
             rid = re.sub(r"[^A-Z0-9]+", "-", str(item.get("requirement_id", "")).upper()).strip("-")
+            rid = canonical_requirement_id(rid, list(known)) if rid else rid
             if not rid or rid in seen:
                 continue
             seen.add(rid)

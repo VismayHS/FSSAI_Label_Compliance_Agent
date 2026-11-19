@@ -214,7 +214,9 @@ detected claim to FSS-AC-2018. The `coverage` node is a safety net: every detect
 search that reached the Claims regulation. On a Verifier `retry` the Researcher keeps its earlier
 passages and must change strategy (clause lookup instead of search, the other regulation, narrower queries).
 
-Bounds (A1): 25 steps, 15 tool calls, 90 s wall clock per run, 3 research attempts, all from `.env`.
+Bounds (A1): 30 steps, 18 tool calls, 180 s wall clock per run (90 s in load tests), 3 research attempts, all from
+`.env`. The sweep reads each mandatory declaration's clause by id (8 lookups), which is why the bounds rose from 25 and
+15 (decision 310).
 Tool arguments are checked against an allowlist before a call is made.
 
 Structured output: every reply that must be JSON goes through `ask_structured`: parse, check the shape, and if it is unusable show the model its own reply and what was wrong, once, only if the step budget allows. Outcomes are counted (`valid`, `repaired`, `failed`, `skipped`) and drawn on the agents dashboard. The draft step repairs; the act step does not, because an unusable act reply already falls back to the next suggested search.
@@ -701,6 +703,7 @@ Each record gives the context, the options considered, the decision and its cons
 | 307 | [API authentication with hashed API keys and two roles (Vismay)](../decisions/307-vismay-api-keys.md) | Accepted | Vismay |
 | 308 | [Run checkpoints: LangGraph's Postgres saver, keyed by run id, resumed by RQ's retry of an abandoned job (Vismay)](../decisions/308-vismay-run-checkpoints.md) | Accepted | Vismay |
 | 309 | [Protein RDA: adopt no value; a claim stated in % of RDA escalates to regulatory review](../decisions/309-vismay-protein-rda.md) | Accepted | Vismay |
+| 310 | [Mandatory declarations: read their clauses by id, and resolve citations the way the index stores them](../decisions/310-vismay-mandatory-clauses-by-id.md) | Accepted | Vismay |
 
 ## 6. What did not work
 
