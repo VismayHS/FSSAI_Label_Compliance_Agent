@@ -704,6 +704,7 @@ Each record gives the context, the options considered, the decision and its cons
 | 308 | [Run checkpoints: LangGraph's Postgres saver, keyed by run id, resumed by RQ's retry of an abandoned job (Vismay)](../decisions/308-vismay-run-checkpoints.md) | Accepted | Vismay |
 | 309 | [Protein RDA: adopt no value; a claim stated in % of RDA escalates to regulatory review](../decisions/309-vismay-protein-rda.md) | Accepted | Vismay |
 | 310 | [Mandatory declarations: read their clauses by id, and resolve citations the way the index stores them](../decisions/310-vismay-mandatory-clauses-by-id.md) | Accepted | Vismay |
+| 311 | [Per-serve nutrition fields, and quotes trimmed to their verbatim opening](../decisions/311-vismay-nutrition-per-serve-and-quote-trimming.md) | Accepted | Vismay |
 
 ## 6. What did not work
 

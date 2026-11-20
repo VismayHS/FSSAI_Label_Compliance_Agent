@@ -279,6 +279,27 @@
             "pattern": "^[a-z][a-z0-9_]{0,47}_(g|mg|mcg|kcal)$"
           },
           "description": "Further nutrients; each key ends in its unit, e.g. dietary_fibre_g, iron_mg."
+        },
+        "servings_per_pack": {
+          "anyOf": [
+            {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "maximum": 10000
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Servings Per Pack"
+        },
+        "rda_percent_per_serve": {
+          "additionalProperties": {
+            "type": "number"
+          },
+          "title": "Rda Percent Per Serve",
+          "type": "object"
         }
       },
       "required": [

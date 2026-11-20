@@ -82,11 +82,53 @@ def exact_spans(quote: str, passage: Passage) -> list[str] | None:
     return spans or None
 
 
+_BOUNDARY = re.compile(r"[;.:]")
+_MIN_TRIMMED_CHARS = 30
+
+
+def verbatim_prefix_spans(quote: str, passage: Passage) -> list[str] | None:
+    """Fallback when a quote is not verbatim as a whole (decision 311): keep its parts, in order, up to the first
+    one that is not in the passage, and of that part only the longest opening that is verbatim and ends at a
+    clause boundary (; . :). The rest is dropped. Every kept span is the passage's own contiguous text ending at a
+    boundary, so a dropped word in the middle of a quote (a "not", a qualifier) never survives: the text after it
+    is cut, and the verifier then judges whether what is left supports the finding. A part with no verbatim opening
+    (invented, or out of order) still rejects the whole quote."""
+    parts = [x.strip().strip("\"'“”") for x in _ELLIPSIS.split(quote.strip())]
+    parts = [x for x in parts if x.strip(" .")]
+    hay, index = _squash(passage.text)
+    spans, cursor = [], 0
+    for part in parts:
+        found = _find(_squash(part)[0], hay, index, passage.text, cursor)
+        if found is not None:
+            spans.append(found[0])
+            cursor = found[1]
+            continue
+        trimmed = None
+        for end in reversed([m.end() for m in _BOUNDARY.finditer(part)]):
+            needle = _squash(part[:end])[0]
+            if len(needle) < _MIN_QUOTE_CHARS:
+                break
+            hit = hay.find(needle, cursor)
+            if hit >= 0:
+                trimmed = passage.text[index[hit]:index[hit + len(needle) - 1] + 1]
+                break
+        if trimmed is None:
+            return None  # an invented or out-of-order part still rejects the whole quote
+        spans.append(trimmed)
+        break  # nothing after the first part that is not verbatim is kept
+    spans = [x for x in spans if len(_squash(x)[0]) >= _MIN_QUOTE_CHARS]
+    return spans if sum(len(_squash(x)[0]) for x in spans) >= _MIN_TRIMMED_CHARS else None
+
+
 def _variants(pid: str, passages: dict[str, Passage]) -> list[Passage]:
-    """Retrieved passages that are a part or whole of the clause `pid` names: the index stores a long clause both
-    as `<id>#all` and in parts (`<id>#p1`), and the model often cites the id without the suffix. The quote must
-    still be verbatim in one of them; only passages retrieved in this run are candidates."""
-    return [p for k, p in passages.items() if k.startswith(pid + "#")] if pid else []
+    """Retrieved passages that are a part, the whole or the in-force wording of the clause `pid` names: the index
+    stores a long clause both as `<id>#all` and in parts (`<id>#p1`), and an amended one as `<id>~substituted`; the
+    model often cites the id without the suffix. Superseded wording never matches. The quote must still be verbatim
+    in one of them; only passages retrieved in this run are candidates."""
+    if not pid:
+        return []
+    return [p for k, p in passages.items()
+            if (k.startswith(pid + "#") or k.startswith(pid + "~")) and "superseded" not in k]
 
 
 def ground_citations(raw: list[dict], passages: dict[str, Passage]) -> tuple[list[Citation], list[str]]:
@@ -103,6 +145,11 @@ def ground_citations(raw: list[dict], passages: dict[str, Passage]) -> tuple[lis
             continue
         passage, spans = next(((p, sp) for p in candidates if (sp := exact_spans(quote, p)) is not None),
                               (candidates[0], None))
+        if spans is None:
+            passage, spans = next(((p, sp) for p in candidates if (sp := verbatim_prefix_spans(quote, p))),
+                                  (candidates[0], None))
+            if spans is not None:
+                dropped.append(f"quote in {pid} trimmed to its verbatim opening")
         if spans is None:
             dropped.append(f"quote not found verbatim in {pid}")
             continue

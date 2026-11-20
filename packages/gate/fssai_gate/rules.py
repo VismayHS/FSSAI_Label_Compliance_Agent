@@ -51,7 +51,12 @@ RANGES: dict[str, tuple[float, float, bool]] = {
     "nutrition.saturated_fat_g": (0, 100, False),
     "nutrition.trans_fat_g": (0, 100, False),
     "nutrition.sodium_mg": (0, 40_000, False),
+    "nutrition.servings_per_pack": (0, 10_000, True),
 }
+# Nutrients 5(3)(b) states an RDA reference for (2000 kcal energy, 67 g total fat, 22 g saturated fat, 2 g trans fat,
+# 50 g added sugar, 2000 mg sodium): the keys nutrition.rda_percent_per_serve accepts (decision 311).
+RDA_PERCENT_KEYS = ("energy", "total_fat", "saturated_fat", "trans_fat", "added_sugars", "sodium")
+RDA_PERCENT_MAX = 1_000
 NET_QUANTITY_MAX = {"g": 100_000, "ml": 100_000, "kg": 100, "l": 100}
 OTHER_MAX = {"g": 100, "mg": 100_000, "mcg": 100_000_000, "kcal": 900}
 
@@ -181,6 +186,17 @@ def range_errors(raw: dict) -> list[FieldError]:
             if v is not None and not 0 <= v <= OTHER_MAX[m.group(1)]:
                 errors.append(_err(f"nutrition.other.{key}", f"Must be between 0 and {OTHER_MAX[m.group(1)]:g} "
                                    f"(got {v:g}).", "range"))
+    rda = _get(raw, "nutrition.rda_percent_per_serve")
+    if isinstance(rda, dict):
+        for key, value in rda.items():
+            if key not in RDA_PERCENT_KEYS:
+                errors.append(_err(f"nutrition.rda_percent_per_serve.{key}", "Keys are the nutrients FSS-LD-2020 "
+                                   f"5(3)(b) gives an RDA for: {', '.join(RDA_PERCENT_KEYS)}.", "format"))
+                continue
+            v = _num(value)
+            if v is not None and not 0 <= v <= RDA_PERCENT_MAX:
+                errors.append(_err(f"nutrition.rda_percent_per_serve.{key}", f"Must be between 0 and "
+                                   f"{RDA_PERCENT_MAX} (got {v:g}).", "range"))
     return errors
 
 

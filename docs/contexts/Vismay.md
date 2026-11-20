@@ -446,3 +446,6 @@ the web client."*
   (four clauses never retrieved, `#all` citations dropped, drafted ids not matched). Fixed; the fibre label went from 5
   to 8 of 9 findings `met` with quotes, and a missing licence is now `unmet`. Nutrition stays `cannot_determine`:
   the request has no field for the per-serve % of RDA that 5(3)(b) requires (next: an additive contract field).
+- 2026-11-20: decision 311. Added `servings_per_pack` and `rda_percent_per_serve` to the nutrition panel; quotes are
+  trimmed to their verbatim opening; `~substituted` citations resolve; the verifier knows which veg mark is printed.
+  First live clear-for-print (run 2fc8f6dd192d45e4ae051ae175d24335) and revise-and-recheck (run 4265812b17874886a5454bcaff8c9c67).

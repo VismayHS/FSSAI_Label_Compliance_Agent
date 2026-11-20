@@ -177,3 +177,13 @@ def test_no_llm_call_when_the_run_escalates_anyway():
     llm = ScriptedLLM({"LBL-ALLERGEN": "supported"})
     v = verifier(llm).verify(request(), dossier(allergen_met(), signals=("possible exemption",)), RunContext.new())
     assert v.action == VerifyAction.ESCALATE and not llm.calls
+
+
+def test_facts_say_which_veg_mark_is_printed():
+    """Seen live: the judge read veg_status 'veg' as a product property and called a met veg-mark finding
+    unsupported. The data contract defines it as the mark printed on the pack (decision 311)."""
+    from fssai_verification.verifier import request_facts
+    for status, printed in [("veg", "vegetarian mark"), ("non_veg", "non-vegetarian mark"), ("not_declared", "none")]:
+        req = request()
+        req = req.model_copy(update={"label": req.label.model_copy(update={"veg_status": status})})
+        assert request_facts(req)["veg_or_non_veg_mark_printed_on_pack"] == printed

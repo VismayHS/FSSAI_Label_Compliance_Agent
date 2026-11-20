@@ -83,6 +83,10 @@ class NutritionPanel(BaseModel):
     trans_fat_g: float | None = None
     sodium_mg: float | None = None
     other: dict[str, float] = Field(default_factory=dict)
+    # As printed. FSS-LD-2020 5(3)(b) requires the per-serve % contribution to RDA and 5(3)(b)(iv) the number of
+    # servings in the package; without them a nutrition panel cannot be confirmed (decision 311).
+    servings_per_pack: float | None = None
+    rda_percent_per_serve: dict[str, float] = Field(default_factory=dict)  # energy, total_fat, saturated_fat, ...
 
 
 class LabelText(BaseModel):
